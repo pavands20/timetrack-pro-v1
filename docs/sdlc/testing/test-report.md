@@ -4,7 +4,7 @@
 
 <!-- sdlc:auto:start e2e -->
 **Status:** running
-**Target:** —
+**Target:** sandbox
 **Date:** 2026-11-08
 
 Passed: — · Failed: — · Skipped: — · Flaky: — · Total: —

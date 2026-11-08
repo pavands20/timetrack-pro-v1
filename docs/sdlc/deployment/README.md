@@ -3,50 +3,49 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### DEP-d87a3273a648 · draft · source: deployment:d87a3273a648
+### DEP-e6355dec8dde · draft · source: deployment:e6355dec8dde
 
-TimeTrack Pro V1 version d87a3273a648 is reported as live. It is served from separate frontend and backend endpoints.
+TimeTrack Pro V1 is reported live at version e6355dec8dde. The release has one frontend endpoint and one backend endpoint. No date, approver, or release notes were supplied with the deployment record.
 
-Provided in input:
-- Deployment status: live
-- Version: d87a3273a648
+Deployment record (as provided):
+- Status: live
+- Version: e6355dec8dde
 - Frontend URL: https://p856624deec93.d3j61xaup4zgrx.amplifyapp.com
 - Backend URL: https://44-240-155-47.sslip.io/apps/856624deec93/
 
-Not provided in input (left blank, not inferred):
-- Deployment date and time
-- Who deployed or approved the release
-- Environment name (e.g. production or staging)
-- Which requirements (US-001 to US-019) are in this build
-- Release notes or changelog
-- Smoke tests, health checks, or monitoring results
-- Rollback procedure
+Not provided in the input (left blank, not inferred):
+- Deployment date/time
+- Environment name (e.g. production vs. staging)
+- Who deployed it and who approved the release
+- Release notes or the list of requirements (US-001..US-019) included in this version
+- Smoke-test or post-deploy verification results
+- Rollback plan or previous version
 
-Traceability note:
-- No requirement IDs are linked, because the input does not say which features this version contains.
+Status is marked 'draft' because no release approval was recorded. 'Live' describes runtime state only and is not treated as sign-off.
 
-**Related:** DEP-d87a3273a648-FE, DEP-d87a3273a648-BE
+**Related:** DEP-e6355dec8dde-FE, DEP-e6355dec8dde-BE
 
-### DEP-d87a3273a648-FE · draft · source: deployment:d87a3273a648
+### DEP-e6355dec8dde-FE · draft · source: deployment:e6355dec8dde
 
-This is the frontend endpoint for version d87a3273a648. The hostname indicates AWS Amplify hosting.
+This is the frontend web application endpoint for version e6355dec8dde. It is the URL users open in a browser to reach TimeTrack Pro V1.
 
 - URL: https://p856624deec93.d3j61xaup4zgrx.amplifyapp.com
-- Host: the amplifyapp.com domain indicates AWS Amplify; no other hosting details were provided
-- Status: live, as reported for the overall deployment
-- Custom domain, CDN, and TLS configuration: not provided
+- Version: e6355dec8dde
+- Reported status: live
+- The host is under the amplifyapp.com domain. Beyond that, the input gives no hosting configuration, custom domain, or CDN details.
+- The identifier '856624deec93' appears in both the frontend and backend URLs. This suggests both belong to the same app instance, but the input does not state the link explicitly.
 
-**Related:** DEP-d87a3273a648
+**Related:** DEP-e6355dec8dde
 
-### DEP-d87a3273a648-BE · draft · source: deployment:d87a3273a648
+### DEP-e6355dec8dde-BE · draft · source: deployment:e6355dec8dde
 
-This is the backend endpoint for version d87a3273a648. It is served under an app-specific path on an sslip.io hostname.
+This is the backend service endpoint for version e6355dec8dde. The frontend uses it for application data and logic.
 
 - URL: https://44-240-155-47.sslip.io/apps/856624deec93/
-- Hostname format: sslip.io wildcard DNS for IP address 44.240.155.47
-- App path segment: /apps/856624deec93/, which matches the identifier in the frontend hostname (p856624deec93)
-- Status: live, as reported for the overall deployment
-- Database, runtime, scaling, and backup details: not provided
+- Version: e6355dec8dde
+- Reported status: live
+- The hostname uses sslip.io, a wildcard DNS service that resolves to the IP embedded in the name (44.240.155.47). The input gives no stable custom domain.
+- Not provided: database/storage details, scaling or availability setup, health-check endpoint, monitoring/alerting, backup policy, or how the audit trail data (timesheet change/approval history) is persisted in this environment.
 
-**Related:** DEP-d87a3273a648
+**Related:** DEP-e6355dec8dde
 <!-- sdlc:auto:end narrative -->
