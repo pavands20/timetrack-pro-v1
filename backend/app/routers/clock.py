@@ -69,6 +69,8 @@ def local(value: datetime, user: User) -> datetime:
 
 
 def _seconds(start: datetime, end: datetime) -> float:
+    start = start if start.tzinfo else start.replace(tzinfo=UTC)
+    end = end if end.tzinfo else end.replace(tzinfo=UTC)
     return (end - start).total_seconds()
 
 
@@ -113,8 +115,7 @@ def _already(entry: TimeEntry, user: User) -> HTTPException:
     at = local(entry.start_at, user).strftime("%H:%M")
     return HTTPException(
         status_code=409,
-        detail=f"You are already clocked in since {at}. "
-        "Clock out before starting a new entry.",
+        detail=f"You are already clocked in since {at}. Clock out before starting a new entry.",
     )
 
 

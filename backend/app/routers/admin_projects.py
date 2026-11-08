@@ -231,6 +231,22 @@ def create_project(body: ProjectCreate, _: Admin, db: Db) -> ProjectOut:
     return _project_out(project, [])
 
 
+class TaskUpdate(BaseModel):
+    is_archived: bool | None = None
+
+
+@router.patch("/tasks/{task_id}", response_model=TaskOut)
+def update_task(task_id: int, body: TaskUpdate, _: Admin, db: Db) -> Task:
+    task = db.get(Task, task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found.")
+    if body.is_archived is None:
+        raise _invalid("is_archived", REQUIRED)
+    task.is_archived = body.is_archived
+    db.commit()
+    return task
+
+
 @router.patch("/projects/{project_id}", response_model=ProjectOut)
 def update_project(project_id: int, body: ProjectUpdate, _: Admin, db: Db) -> ProjectOut:
     project = db.get(Project, project_id)
