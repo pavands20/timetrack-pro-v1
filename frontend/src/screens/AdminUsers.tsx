@@ -5,10 +5,12 @@ import React from "react";
 import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
+import { useNavigate } from "react-router-dom";
+import { ApiError, apiFetch } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { Button, Input, Label, Select, Table, THead, TBody, TR, TH, TD, Avatar } = UI;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const { Check, User, Users, Edit } = Icons;
 
 const ROLES = ["Employee", "Manager", "Payroll Admin", "System Admin"];
@@ -22,110 +24,69 @@ const TIME_ZONES = [
   "Europe/Lisbon",
 ];
 
-const SEED_USERS = [
-  {
-    id: 101,
-    fullName: "Margaret Oyelaran",
-    email: "margaret.oyelaran@harbourline.co",
-    role: "System Admin",
-    timeZone: "Europe/London",
-    managerId: null,
-    isActive: true,
-  },
-  {
-    id: 102,
-    fullName: "Daniel Whitcombe",
-    email: "daniel.whitcombe@harbourline.co",
-    role: "Payroll Admin",
-    timeZone: "Europe/London",
-    managerId: null,
-    isActive: true,
-  },
-  {
-    id: 103,
-    fullName: "Priya Ramanathan",
-    email: "priya.ramanathan@harbourline.co",
-    role: "Manager",
-    timeZone: "Europe/London",
-    managerId: null,
-    isActive: true,
-  },
-  {
-    id: 104,
-    fullName: "Tomasz Kowalczyk",
-    email: "tomasz.kowalczyk@harbourline.co",
-    role: "Manager",
-    timeZone: "Europe/Berlin",
-    managerId: null,
-    isActive: true,
-  },
-  {
-    id: 105,
-    fullName: "Sinead Gallagher",
-    email: "sinead.gallagher@harbourline.co",
-    role: "Employee",
-    timeZone: "Europe/Dublin",
-    managerId: 103,
-    isActive: true,
-  },
-  {
-    id: 106,
-    fullName: "Oliver Bennett",
-    email: "oliver.bennett@harbourline.co",
-    role: "Employee",
-    timeZone: "Europe/London",
-    managerId: 103,
-    isActive: true,
-  },
-  {
-    id: 107,
-    fullName: "Amara Nwosu",
-    email: "amara.nwosu@harbourline.co",
-    role: "Employee",
-    timeZone: "Europe/London",
-    managerId: 104,
-    isActive: true,
-  },
-  {
-    id: 108,
-    fullName: "Lukas Brandt",
-    email: "lukas.brandt@harbourline.co",
-    role: "Employee",
-    timeZone: "Europe/Berlin",
-    managerId: 104,
-    isActive: true,
-  },
-  {
-    id: 109,
-    fullName: "Hannah Fitzgerald",
-    email: "hannah.fitzgerald@harbourline.co",
-    role: "Employee",
-    timeZone: "Europe/London",
-    managerId: 103,
-    isActive: false,
-  },
-  {
-    id: 110,
-    fullName: "Rhys Pritchard",
-    email: "rhys.pritchard@harbourline.co",
-    role: "Manager",
-    timeZone: "Europe/London",
-    managerId: null,
-    isActive: false,
-  },
-];
+const fromApi = (u) => ({
+  id: u.id,
+  fullName: u.full_name,
+  email: u.email,
+  role: u.role,
+  timeZone: u.time_zone,
+  managerId: u.manager_id,
+  isActive: u.is_active,
+});
+const toApi = (p) => ({
+  full_name: p.fullName,
+  email: p.email,
+  role: p.role,
+  time_zone: p.timeZone,
+  manager_id: p.managerId,
+});
+const FIELD_KEYS = {
+  full_name: "fullName",
+  email: "email",
+  role: "role",
+  time_zone: "timeZone",
+  manager_id: "managerId",
+};
 
-const CURRENT_ADMIN_ID = 101;
 const EMPTY_FORM = { fullName: "", email: "", role: "Employee", timeZone: "", managerId: "" };
 
 export default function Screen() {
-  const [users, setUsers] = React.useState(SEED_USERS);
+  const navigate = useNavigate();
+  const { user: me } = useAuth();
+  const [users, setUsers] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [loadError, setLoadError] = React.useState(false);
+  const [denied, setDenied] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState(null);
   const [form, setForm] = React.useState(EMPTY_FORM);
   const [errors, setErrors] = React.useState({});
   const [banner, setBanner] = React.useState(null);
   const [confirming, setConfirming] = React.useState(false);
   const [freshId, setFreshId] = React.useState(null);
+
+  const guard = (err) => {
+    if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+      setDenied(true);
+      if (err.status === 401) navigate("/sign-in");
+      return true;
+    }
+    return false;
+  };
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  const load = React.useCallback(() => {
+    setLoading(true);
+    setLoadError(false);
+    apiFetch("/api/admin/users")
+      .then((list) => setUsers(list.map(fromApi)))
+      .catch((err) => {
+        if (!guard(err)) setLoadError(true);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+  React.useEffect(() => {
+    load();
+  }, [load]);
 
   const formRef = React.useRef(null);
   const nameRef = React.useRef(null);
@@ -199,10 +160,7 @@ export default function Screen() {
   const activeCount = users.filter((u) => u.isActive).length;
 
   const managerOptions = users.filter(
-    (u) =>
-      u.role === "Manager" &&
-      u.id !== selectedId &&
-      (u.isActive || (selected && selected.managerId === u.id)),
+    (u) => u.role === "Manager" && u.id !== selectedId && u.isActive,
   );
 
   const focusForm = () => {
@@ -250,24 +208,8 @@ export default function Screen() {
     if (!email) er.email = "Email is required.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       er.email = "Enter an email address like name@company.com.";
-    else if (users.some((u) => u.id !== selectedId && u.email.toLowerCase() === email))
-      er.email =
-        "An account with this email already exists. Use a different address, or edit the existing account.";
     if (!form.role) er.role = "Choose a role.";
     if (!form.timeZone) er.timeZone = "Choose a time zone.";
-    if (form.managerId) {
-      const m = byId(Number(form.managerId));
-      const unchanged = selected && selected.managerId === Number(form.managerId);
-      if (!m || m.role !== "Manager")
-        er.managerId = `${m ? m.fullName : "That person"} is not a Manager, so they can’t be assigned as one.`;
-      else if (!m.isActive && !unchanged)
-        er.managerId = `${m.fullName} is deactivated and can’t be selected as a new manager.`;
-    }
-    if (selected && selected.role === "Manager" && form.role !== "Manager") {
-      const reports = users.filter((u) => u.managerId === selected.id);
-      if (reports.length > 0)
-        er.role = `${selected.fullName} manages ${reports.length} ${reports.length === 1 ? "person" : "people"}. Reassign them before changing this role.`;
-    }
     return er;
   };
 
@@ -279,7 +221,7 @@ export default function Screen() {
     managerId: "Manager",
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const er = validate();
     setConfirming(false);
@@ -301,31 +243,78 @@ export default function Screen() {
       managerId: form.managerId ? Number(form.managerId) : null,
     };
     setErrors({});
-    if (selected) {
-      setUsers((list) => list.map((u) => (u.id === selected.id ? { ...u, ...payload } : u)));
-      setBanner({
-        type: "success",
-        text: `Saved. Changes to ${payload.fullName} apply from their next request.`,
-      });
-    } else {
-      const id = Math.max(...users.map((u) => u.id)) + 1;
-      setUsers((list) => [...list, { id, ...payload, isActive: true }]);
-      setSelectedId(id);
-      setFreshId(id);
-      setBanner({
-        type: "success",
-        text: `Account created for ${payload.fullName}. They set their own password the first time they sign in.`,
-      });
+    try {
+      if (selected) {
+        const saved = fromApi(
+          await apiFetch(`/api/admin/users/${selected.id}`, {
+            method: "PATCH",
+            body: JSON.stringify(toApi(payload)),
+          }),
+        );
+        setUsers((list) => list.map((u) => (u.id === saved.id ? saved : u)));
+        setBanner({
+          type: "success",
+          text: `Saved. Changes to ${saved.fullName} apply from their next request.`,
+        });
+      } else {
+        const saved = fromApi(
+          await apiFetch("/api/admin/users", {
+            method: "POST",
+            body: JSON.stringify(toApi(payload)),
+          }),
+        );
+        setUsers((list) => [...list, saved]);
+        setSelectedId(saved.id);
+        setFreshId(saved.id);
+        setBanner({
+          type: "success",
+          text: `Account created for ${saved.fullName}. A link to set their password has been emailed to ${saved.email}.`,
+        });
+      }
+    } catch (err) {
+      if (guard(err)) return;
+      if (err instanceof ApiError && err.status === 409) {
+        const msg = err.body?.detail || "An account with this email already exists.";
+        setErrors({ email: msg });
+        setBanner({ type: "error", text: `Not saved. ${msg}` });
+      } else if (err instanceof ApiError && err.status === 422 && Array.isArray(err.body?.detail)) {
+        const er = {};
+        for (const d of err.body.detail) {
+          const key = FIELD_KEYS[d.loc?.[d.loc.length - 1]];
+          if (key && !er[key]) er[key] = d.msg;
+        }
+        setErrors(er);
+        setBanner({
+          type: "error",
+          text: `Not saved. Check ${Object.keys(er)
+            .map((k) => fieldNames[k])
+            .join(", ")} and try again. Nothing you typed has been lost.`,
+        });
+      } else {
+        setBanner({ type: "error", text: "Not saved. Something went wrong. Try again." });
+      }
     }
   };
 
-  const deactivate = () => {
-    setUsers((list) => list.map((u) => (u.id === selectedId ? { ...u, isActive: false } : u)));
+  const deactivate = async () => {
     setConfirming(false);
-    setBanner({
-      type: "success",
-      text: `${selected.fullName} is deactivated. They can no longer sign in, and their time entries are kept.`,
-    });
+    try {
+      const saved = fromApi(
+        await apiFetch(`/api/admin/users/${selectedId}/deactivate`, { method: "POST" }),
+      );
+      setUsers((list) => list.map((u) => (u.id === saved.id ? saved : u)));
+      setBanner({
+        type: "success",
+        text: `${saved.fullName} is deactivated. They can no longer sign in, and their time entries are kept.`,
+      });
+    } catch (err) {
+      if (guard(err)) return;
+      const d = err instanceof ApiError ? err.body?.detail : null;
+      setBanner({
+        type: "error",
+        text: typeof d === "string" ? d : "Could not deactivate. Try again.",
+      });
+    }
   };
 
   // First press of Deactivate asks for confirmation; a second press confirms.
@@ -337,7 +326,7 @@ export default function Screen() {
     }
   };
 
-  const isSelf = selectedId === CURRENT_ADMIN_ID;
+  const isSelf = !!me && selectedId === me.id;
   const canDeactivate = !!selected && selected.isActive && !isSelf;
 
   const fieldBlock = (id, text, control, error, help) => (
@@ -370,6 +359,33 @@ export default function Screen() {
         className="shrink-0"
         style={{ width: 16, height: 16, marginTop: 2 }}
       />
+    );
+  }
+
+  if (denied || loading || loadError) {
+    return (
+      <div
+        style={{
+          color: ink,
+          fontFamily: brand.fontBody,
+          backgroundColor: canvas,
+          minHeight: "100%",
+        }}
+        className="px-4 py-8 md:px-8 md:py-12"
+      >
+        {denied ? (
+          <p role="alert">Access denied. You do not have access to this resource.</p>
+        ) : loading ? (
+          <p role="status">Loading users…</p>
+        ) : (
+          <div role="alert">
+            <p>Could not load users.</p>
+            <Button type="button" onClick={load} style={quietBtn}>
+              Try again
+            </Button>
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -627,8 +643,7 @@ export default function Screen() {
                   </>
                 ) : (
                   <>
-                    Creating a new account. The new user sets their own password the first time they
-                    sign in.
+                    Creating a new account. A link to set their password is emailed to the new user.
                   </>
                 )}
               </p>
