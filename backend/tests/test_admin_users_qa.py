@@ -186,7 +186,13 @@ def test_ac006_list_and_patch_persist(client, db_session, admin):
     names = [x["full_name"] for x in r.json()]
     assert names == sorted(names)
     assert set(r.json()[0]) == {
-        "id", "full_name", "email", "role", "time_zone", "manager_id", "is_active"
+        "id",
+        "full_name",
+        "email",
+        "role",
+        "time_zone",
+        "manager_id",
+        "is_active",
     }
     r = client.patch(
         f"/api/admin/users/{u.id}",
@@ -301,9 +307,7 @@ def test_ac014_invalid_manager_refused(client, db_session, admin, kind):
     assert r.status_code == 422 and ["body", "manager_id"] in fields(r)
     db_session.refresh(e)
     assert e.manager_id is None
-    r = client.post(
-        "/api/admin/users", json=new_body(manager_id=bad.id), headers={**c, **H}
-    )
+    r = client.post("/api/admin/users", json=new_body(manager_id=bad.id), headers={**c, **H})
     assert r.status_code == 422 and ["body", "manager_id"] in fields(r)
     assert db_session.query(User).filter_by(email="new@example.com").count() == 0
 
