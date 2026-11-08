@@ -48,6 +48,10 @@ Passed: 9 · Failed: 0 · Skipped: 15 · Flaky: 0 · Total: 24
 <!-- sdlc:auto:end unit -->
 
 <!-- sdlc:auto:start dev-checks -->
+### Sprint 2
+
+_No test steps recorded._
+
 ### Sprint 1
 
 | Step | Status | Ticket | Finished |
