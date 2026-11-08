@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { ApiError, apiFetch } from "@/lib/api";
+import { ApiError, apiFetch, setSessionToken } from "@/lib/api";
 
 export type Role = "Employee" | "Manager" | "Payroll Admin" | "System Admin";
 
@@ -48,10 +48,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = React.useCallback(async (email: string, password: string) => {
-    const u = await apiFetch<User>("/api/auth/login", {
+    const { token, ...u } = await apiFetch<User & { token: string }>("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
+    setSessionToken(token);
     setUser(u);
     setLoading(false);
     return u;
@@ -61,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await apiFetch<void>("/api/auth/logout", { method: "POST" });
     } finally {
+      setSessionToken(null);
       setUser(null);
     }
   }, []);

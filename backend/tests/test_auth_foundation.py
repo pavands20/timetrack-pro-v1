@@ -40,21 +40,20 @@ def login(client: TestClient, email="a@example.com", password=PW):
 
 
 def cookie_of(resp) -> dict:
-    return {"Cookie": "session=" + resp.cookies["session"]}
+    return {"Authorization": "Bearer " + resp.json()["token"]}
 
 
-def test_ac001_login_sets_strict_httponly_cookie(client, db_session):
+def test_ac001_login_returns_token_not_cookie(client, db_session):
     make_user(db_session, "admin@example.com", "System Admin")
     make_user(db_session, "emp@example.com", "Employee")
     r = login(client, "Admin@Example.com")
     assert r.status_code == 200
     assert r.json()["home_path"] == "/admin-users"
-    flags = r.headers["set-cookie"].lower()
-    assert "httponly" in flags and "secure" in flags and "samesite=strict" in flags
+    assert "set-cookie" not in r.headers
     assert login(client, "emp@example.com").json()["home_path"] == "/home"
     stored = db_session.query(UserSession).all()
     assert all(len(s.token_hash) == 64 for s in stored)
-    assert r.cookies["session"] not in [s.token_hash for s in stored]
+    assert r.json()["token"] not in [s.token_hash for s in stored]
 
 
 def test_ac002_all_failures_identical(client, db_session):
@@ -87,7 +86,6 @@ def test_ac003_logout_revokes_session(client, db_session):
     assert client.get("/api/auth/me", headers=c).status_code == 200
     r = client.post("/api/auth/logout", headers={**c, **H})
     assert r.status_code == 204
-    assert "session=" in r.headers["set-cookie"]
     r = client.get("/api/auth/me", headers=c)
     assert r.status_code == 401
     assert r.json() == {"detail": "Not signed in"}
@@ -108,7 +106,7 @@ def test_me_returns_user_and_401_without_session(client, db_session):
 def test_nfr001_expired_or_deactivated_session_is_401(client, db_session):
     user = make_user(db_session)
     c = cookie_of(login(client))
-    digest = token_digest(c["Cookie"].split("=", 1)[1])
+    digest = token_digest(c["Authorization"].split(" ", 1)[1])
     sess = db_session.query(UserSession).filter_by(token_hash=digest).one()
     user.is_active = False
     db_session.commit()

@@ -33,7 +33,10 @@ async function fillReset(password: string) {
   await userEvent.click(screen.getByRole("button", { name: "Send reset link" }));
 }
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  localStorage.clear();
+});
 
 describe("SignIn", () => {
   it("[AC-001] signs in and navigates to home_path", async () => {
@@ -46,6 +49,7 @@ describe("SignIn", () => {
           role: "Manager",
           time_zone: "UTC",
           home_path: "/somewhere",
+          token: "tok-123",
         }),
     });
     await userEvent.type(screen.getByLabelText("Email"), "a@b.co");
@@ -56,6 +60,8 @@ describe("SignIn", () => {
     expect((call[1] as RequestInit).headers).toMatchObject({
       "X-Requested-With": "XMLHttpRequest",
     });
+    // Cross-origin: the session travels as a bearer token, not a cookie.
+    expect(localStorage.getItem("session_token")).toBe("tok-123");
   });
 
   it("[AC-002] a 401 shows the generic message in an alert", async () => {

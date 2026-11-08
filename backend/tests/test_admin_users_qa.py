@@ -78,7 +78,7 @@ def mk(db, email, role="Employee", name=None, **kw):
 def sign_in(client, email):
     r = client.post("/api/auth/login", json={"email": email, "password": PW}, headers=H)
     assert r.status_code == 200
-    return {"Cookie": "session=" + r.cookies["session"]}
+    return {"Authorization": "Bearer " + r.json()["token"]}
 
 
 @pytest.fixture

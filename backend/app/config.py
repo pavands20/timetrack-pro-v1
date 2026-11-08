@@ -43,10 +43,6 @@ class Settings:
     # Where emailed links point; defaults to the first allowed origin (the SPA).
     app_url: str = field(default_factory=lambda: os.getenv("APP_URL", ""))
     environment: str = field(default_factory=lambda: os.getenv("ENVIRONMENT", "development"))
-    # Secure cookies only; switch off for plain-http local development.
-    cookie_secure: bool = field(
-        default_factory=lambda: os.getenv("COOKIE_SECURE", "true").lower() != "false"
-    )
     session_ttl_hours: int = field(default_factory=lambda: int(os.getenv("SESSION_TTL_HOURS", "8")))
     bootstrap_admin_email: str = field(
         default_factory=lambda: os.getenv("BOOTSTRAP_ADMIN_EMAIL", "")

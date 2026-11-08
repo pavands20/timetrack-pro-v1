@@ -4,7 +4,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import Cookie, Depends, HTTPException
+from fastapi import Depends, Header, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -12,7 +12,14 @@ from app.database import get_db
 from app.models import User, UserSession
 from app.security import token_digest
 
-SESSION_COOKIE = "session"
+
+def bearer_token(authorization: Annotated[str | None, Header()] = None) -> str | None:
+    """The session token from `Authorization: Bearer <token>`. A header, not a cookie:
+    the deployed SPA and API are on different origins, and browsers drop cross-site cookies."""
+    scheme, _, token = (authorization or "").partition(" ")
+    if scheme.lower() != "bearer":
+        return None
+    return token.strip() or None
 
 
 def _aware(value: datetime) -> datetime:
@@ -20,7 +27,7 @@ def _aware(value: datetime) -> datetime:
 
 
 def find_session(db: Session, token: str | None) -> tuple[UserSession, User] | None:
-    """The live session and its user for a cookie value: one indexed query."""
+    """The live session and its user for a session token: one indexed query."""
     if not token:
         return None
     row = db.execute(
@@ -40,9 +47,9 @@ def find_session(db: Session, token: str | None) -> tuple[UserSession, User] | N
 
 def get_current_user(
     db: Annotated[Session, Depends(get_db)],
-    session: Annotated[str | None, Cookie()] = None,
+    token: Annotated[str | None, Depends(bearer_token)],
 ) -> User:
-    found = find_session(db, session)
+    found = find_session(db, token)
     if found is None:
         raise HTTPException(status_code=401, detail="Not signed in")
     return found[1]

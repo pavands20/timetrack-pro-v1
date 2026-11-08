@@ -55,7 +55,7 @@ describe("App", () => {
     expect(await screen.findByText("Sign in to TimeTrack Pro")).toBeInTheDocument();
     expect(fn).toHaveBeenCalledWith(
       "/api/auth/logout",
-      expect.objectContaining({ method: "POST", credentials: "include" }),
+      expect.objectContaining({ method: "POST" }),
     );
   });
 

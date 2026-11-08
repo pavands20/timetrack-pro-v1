@@ -167,7 +167,7 @@ const DOC_SECTIONS = [
       "Frontend: React 19 and TypeScript, responsive in the browser. No native mobile app.",
       "Backend: Node.js REST API.",
       "Database: PostgreSQL. Times are stored in UTC and shown in each user’s time zone; the week starts on Monday.",
-      "Authentication: hashed passwords, session cookies and password reset by email. SSO is not included.",
+      "Authentication: hashed passwords, session tokens and password reset by email. SSO is not included.",
     ],
   },
   {
@@ -192,7 +192,7 @@ const CONFIG_ROWS = [
   },
   {
     key: "SESSION_SECRET",
-    purpose: "Signs session cookies. Sessions are stored as hashed tokens.",
+    purpose: "Signs sessions. Sessions are stored as hashed tokens.",
     status: "Required",
   },
   {

@@ -45,7 +45,7 @@ def login(client, email="a@example.com", password=PW):
 
 
 def ck(r):
-    return {"Cookie": "session=" + r.cookies["session"]}
+    return {"Authorization": "Bearer " + r.json()["token"]}
 
 
 # ---------- AC-001 / AC-002 / AC-003 ----------
@@ -57,9 +57,8 @@ def test_ac001_login_body_cookie_and_no_hash_leak(client, db_session):
     assert r.status_code == 200
     body = r.json()
     assert body["home_path"] == "/home" and body["email"] == "a@example.com"
-    assert set(body) == {"id", "email", "full_name", "role", "time_zone", "home_path"}
-    flags = r.headers["set-cookie"].lower()
-    assert "httponly" in flags and "samesite=strict" in flags and "secure" in flags
+    assert set(body) == {"id", "email", "full_name", "role", "time_zone", "home_path", "token"}
+    assert "set-cookie" not in r.headers
     blob = r.text + str(dict(r.headers))
     assert u.password_hash not in blob and "$argon2" not in blob and "password_hash" not in blob
 

@@ -3,12 +3,12 @@
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.auth_deps import SESSION_COOKIE, find_session, get_current_user
+from app.auth_deps import bearer_token, find_session, get_current_user
 from app.config import settings
 from app.database import get_db
 from app.mailer import SmtpMailer, get_mailer
@@ -44,19 +44,12 @@ def user_out(user: User) -> UserOut:
     )
 
 
-def _cookie_args() -> dict:
-    return {
-        "path": "/",
-        "httponly": True,
-        "secure": settings.cookie_secure,
-        "samesite": "strict",
-    }
+class LoginOut(UserOut):
+    token: str  # sent back as `Authorization: Bearer <token>`
 
 
-@router.post("/login", response_model=UserOut)
-def login(
-    body: LoginRequest, response: Response, db: Annotated[Session, Depends(get_db)]
-) -> UserOut:
+@router.post("/login", response_model=LoginOut)
+def login(body: LoginRequest, db: Annotated[Session, Depends(get_db)]) -> LoginOut:
     user = db.scalar(select(User).where(User.email == body.email.lower()))
     stored = user.password_hash if user and user.password_hash else DUMMY_HASH
     password_ok = verify_password(stored, body.password)
@@ -70,22 +63,19 @@ def login(
         )
     )
     db.commit()
-    response.set_cookie(SESSION_COOKIE, token, max_age=int(ttl.total_seconds()), **_cookie_args())
-    return user_out(user)
+    return LoginOut(**user_out(user).model_dump(), token=token)
 
 
 @router.post("/logout", status_code=204)
 def logout(
     db: Annotated[Session, Depends(get_db)],
-    session: Annotated[str | None, Cookie()] = None,
+    token: Annotated[str | None, Depends(bearer_token)],
 ) -> Response:
-    found = find_session(db, session)
+    found = find_session(db, token)
     if found is not None:
         found[0].revoked_at = datetime.now(UTC)
         db.commit()
-    response = Response(status_code=204)
-    response.delete_cookie(SESSION_COOKIE, **_cookie_args())
-    return response
+    return Response(status_code=204)
 
 
 @router.get("/me", response_model=UserOut)
