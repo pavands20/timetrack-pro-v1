@@ -85,6 +85,7 @@ export default function Screen() {
     Promise.all([apiFetch("/api/projects"), apiFetch("/api/clock/status")])
       .then(([list, status]) => {
         if (!live) return;
+        if (!Array.isArray(list) || !status) throw new Error("Unexpected response");
         setProjects(list);
         const e = status.entry;
         const p = (e && list.find((x) => x.id === e.project_id)) || list[0];
@@ -221,7 +222,10 @@ export default function Screen() {
     statusLine = (
       <>
         In progress since{" "}
-        <strong style={{ ...num, color: C.accent, fontWeight: 600 }}>{fmtTime(msOf(entry.start_at))}</strong>.
+        <strong style={{ ...num, color: C.accent, fontWeight: 600 }}>
+          {fmtTime(msOf(entry.start_at))}
+        </strong>
+        .
       </>
     );
   }
@@ -614,7 +618,9 @@ export default function Screen() {
                   </option>
                 ))}
               </Select>
-              <p style={{ margin: "8px 0 0", fontSize: 12, color: C.muted }}>{project ? project.client_name : ""}</p>
+              <p style={{ margin: "8px 0 0", fontSize: 12, color: C.muted }}>
+                {project ? project.client_name : ""}
+              </p>
             </div>
             <div>
               <Label htmlFor="clock-task" style={{ ...label, display: "block", marginBottom: 8 }}>
@@ -688,8 +694,7 @@ export default function Screen() {
           </p>
           {onBreak && (
             <p style={{ margin: "12px 0 0", fontSize: 14, color: C.accent }}>
-              On a break since{" "}
-              <span style={num}>{fmtTime(breaks[breaks.length - 1].start)}</span>.
+              On a break since <span style={num}>{fmtTime(breaks[breaks.length - 1].start)}</span>.
             </p>
           )}
           {entry && !stale && (
