@@ -1,8 +1,20 @@
 """SQLAlchemy models: users and server-side sessions."""
 
 from datetime import datetime
+from decimal import Decimal
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, String, func
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    func,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -61,4 +73,42 @@ class PasswordToken(Base):
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
-__all__ = ["Base", "ROLES", "PasswordToken", "User", "UserSession"]
+class Client(Base):
+    __tablename__ = "clients"
+    __table_args__ = (Index("ix_clients_name_lower", func.lower(text("name")), unique=True),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(200))
+    is_archived: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Project(Base):
+    __tablename__ = "projects"
+    __table_args__ = (
+        Index("ix_projects_client_name_lower", "client_id", func.lower(text("name")), unique=True),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    client_id: Mapped[int] = mapped_column(ForeignKey("clients.id", ondelete="RESTRICT"))
+    name: Mapped[str] = mapped_column(String(200))
+    # Held for reporting only; never copied onto other rows.
+    bill_rate: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    default_billable: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+    __table_args__ = (
+        Index("ix_tasks_project_name_lower", "project_id", func.lower(text("name")), unique=True),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="RESTRICT"))
+    name: Mapped[str] = mapped_column(String(200))
+    is_archived: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+__all__ = ["Base", "ROLES", "Client", "PasswordToken", "Project", "Task", "User", "UserSession"]
