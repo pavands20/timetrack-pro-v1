@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-84 tests · Passed 62 · Failed 1 · Skipped 1 · Not run 20
+83 tests · Passed 51 · Failed 20 · Skipped 12 · Not run 0
 
-Acceptance criteria covered: 14/51 · passing: 4/51
+Acceptance criteria covered: 14/51 · passing: 5/51
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -38,12 +38,12 @@ Acceptance criteria covered: 14/51 · passing: 4/51
 | AC-009 | test_ac009_unknown_email_same_body_no_email | Unit | Passed | `backend/tests/test_auth_us001_qa.py` |
 | — | test_nfr001_password_hash_is_argon2_no_plaintext | Unit | Passed | `backend/tests/test_auth_us001_qa.py` |
 | — | test_nfr004_second_request_invalidates_first_token | Unit | Passed | `backend/tests/test_auth_us001_qa.py` |
-| AC-001 | [AC-001] sign-in lands on the role's home page | E2E | Not run yet | `frontend/e2e/auth.spec.ts` |
-| AC-002 | [AC-002] a wrong password shows the generic error | E2E | Not run yet | `frontend/e2e/auth.spec.ts` |
-| AC-002 | [AC-002] an unknown email shows the same generic error | E2E | Not run yet | `frontend/e2e/auth.spec.ts` |
-| AC-003 | [AC-003] a protected URL without a session redirects to /sign-in | E2E | Not run yet | `frontend/e2e/auth.spec.ts` |
-| AC-003 | [AC-003] sign-out returns to /sign-in and protected URLs redirect back | E2E | Not run yet | `frontend/e2e/auth.spec.ts` |
-| AC-009 | [AC-009] reset request shows the same confirmation for known and unknown emails | E2E | Not run yet | `frontend/e2e/auth.spec.ts` |
+| AC-001 | [AC-001] sign-in lands on the role's home page | E2E | Skipped | `frontend/e2e/auth.spec.ts` |
+| AC-002 | [AC-002] a wrong password shows the generic error | E2E | Passed | `frontend/e2e/auth.spec.ts` |
+| AC-002 | [AC-002] an unknown email shows the same generic error | E2E | Passed | `frontend/e2e/auth.spec.ts` |
+| AC-003 | [AC-003] a protected URL without a session redirects to /sign-in | E2E | Passed | `frontend/e2e/auth.spec.ts` |
+| AC-003 | [AC-003] sign-out returns to /sign-in and protected URLs redirect back | E2E | Skipped | `frontend/e2e/auth.spec.ts` |
+| AC-009 | [AC-009] reset request shows the same confirmation for known and unknown emails | E2E | Passed | `frontend/e2e/auth.spec.ts` |
 
 ### US-004: Create a user account
 
@@ -65,42 +65,41 @@ Acceptance criteria covered: 14/51 · passing: 4/51
 | AC-012 | test_ac012_invalid_field_is_named_with_a_message_and_nothing_is_created[override5-role] | Unit | Passed | `backend/tests/test_admin_users_create_us004.py` |
 | AC-012 | test_ac012_whitespace_only_name_is_treated_as_missing | Unit | Skipped | `backend/tests/test_admin_users_create_us004.py` |
 | — | test_create_requires_a_session_and_the_csrf_header | Unit | Passed | `backend/tests/test_admin_users_create_us004.py` |
-| AC-004 | test_ac004_login_sets_session_cookie | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
 | AC-004 | test_ac004_no_session_401 | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-004 | test_ac004_non_admin_roles_get_403_no_data[Employee] | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-004 | test_ac004_non_admin_roles_get_403_no_data[Manager] | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-004 | test_ac004_non_admin_roles_get_403_no_data[Payroll Admin] | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
+| AC-004 | test_ac004_non_admin_roles_get_403_no_data[Employee] | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-004 | test_ac004_non_admin_roles_get_403_no_data[Manager] | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-004 | test_ac004_non_admin_roles_get_403_no_data[Payroll Admin] | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
 | AC-005 | test_ac005_employee_only_own_records | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-006 | test_ac006_list_and_patch_persist | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-006 | test_ac006_patch_and_deactivate_404 | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-010 | test_ac010_create_invite_and_confirm | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-011 | test_ac011_duplicate_email_any_case_409 | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-011 | test_ac011_patch_duplicate_409 | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-012 | test_ac012_each_missing_field_422[email] | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-012 | test_ac012_each_missing_field_422[full_name] | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-012 | test_ac012_each_missing_field_422[role] | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-012 | test_ac012_each_missing_field_422[time_zone] | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-013 | test_ac013_assign_active_manager | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-014 | test_ac014_invalid_manager_refused[Employee] | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-014 | test_ac014_invalid_manager_refused[Payroll Admin] | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-014 | test_ac014_invalid_manager_refused[inactive] | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-014 | test_ac014_role_change_of_manager_with_reports_refused | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-014 | test_ac014_self_manager_refused | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| — | test_deactivate_revokes_sessions | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| — | test_self_deactivate_409 | Unit | Passed | `backend/tests/test_admin_users_qa.py` |
-| AC-010 | [AC-010] a set-password link with an unknown token is rejected | E2E | Not run yet | `frontend/e2e/admin-users-create.spec.ts` |
-| AC-010 | [AC-010] a sign-in for an account that has no password yet is refused | E2E | Not run yet | `frontend/e2e/admin-users-create.spec.ts` |
-| AC-010 | [AC-010] a state-changing call without X-Requested-With is refused | E2E | Not run yet | `frontend/e2e/admin-users-create.spec.ts` |
-| AC-010 | [AC-010] a valid create returns 201 and the user appears in the list | E2E | Not run yet | `frontend/e2e/admin-users-create.spec.ts` |
-| AC-010 | [AC-010] creating a user without a session is refused and creates nothing | E2E | Not run yet | `frontend/e2e/admin-users-create.spec.ts` |
-| AC-011 | [AC-011] the same email, in any case, is rejected 409 with a clear message | E2E | Not run yet | `frontend/e2e/admin-users-create.spec.ts` |
-| AC-012 | [AC-012] the new-user form names each missing field and creates no account | E2E | Not run yet | `frontend/e2e/admin-users-create.spec.ts` |
-| AC-004 | [AC-004] an Employee opening /admin-users sees no admin data | E2E | Not run yet | `frontend/e2e/admin-users.spec.ts` |
-| AC-006 | [AC-006] edits a user's time zone through the screen | E2E | Not run yet | `frontend/e2e/admin-users.spec.ts` |
-| AC-010 | [AC-010] creates a user through the form | E2E | Not run yet | `frontend/e2e/admin-users.spec.ts` |
-| AC-011 | [AC-011] duplicate email, any case, shows under Email | E2E | Not run yet | `frontend/e2e/admin-users.spec.ts` |
-| AC-012 | [AC-012] missing required fields show messages under the field | E2E | Not run yet | `frontend/e2e/admin-users.spec.ts` |
-| AC-013 | [AC-013] assigning an active manager shows the manager's name | E2E | Not run yet | `frontend/e2e/admin-users.spec.ts` |
+| AC-006 | test_ac006_list_and_patch_persist | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-006 | test_ac006_patch_and_deactivate_404 | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-010 | test_ac010_create_invite_and_confirm | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-011 | test_ac011_duplicate_email_any_case_409 | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-011 | test_ac011_patch_duplicate_409 | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-012 | test_ac012_each_missing_field_422[email] | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-012 | test_ac012_each_missing_field_422[full_name] | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-012 | test_ac012_each_missing_field_422[role] | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-012 | test_ac012_each_missing_field_422[time_zone] | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-013 | test_ac013_assign_active_manager | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-014 | test_ac014_invalid_manager_refused[Employee] | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-014 | test_ac014_invalid_manager_refused[Payroll Admin] | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-014 | test_ac014_invalid_manager_refused[inactive] | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-014 | test_ac014_role_change_of_manager_with_reports_refused | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-014 | test_ac014_self_manager_refused | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| — | test_deactivate_revokes_sessions | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| — | test_self_deactivate_409 | Unit | Failed | `backend/tests/test_admin_users_qa.py` |
+| AC-010 | [AC-010] a set-password link with an unknown token is rejected | E2E | Passed | `frontend/e2e/admin-users-create.spec.ts` |
+| AC-010 | [AC-010] a sign-in for an account that has no password yet is refused | E2E | Passed | `frontend/e2e/admin-users-create.spec.ts` |
+| AC-010 | [AC-010] a state-changing call without X-Requested-With is refused | E2E | Passed | `frontend/e2e/admin-users-create.spec.ts` |
+| AC-010 | [AC-010] a valid create returns 201 and the user appears in the list | E2E | Skipped | `frontend/e2e/admin-users-create.spec.ts` |
+| AC-010 | [AC-010] creating a user without a session is refused and creates nothing | E2E | Passed | `frontend/e2e/admin-users-create.spec.ts` |
+| AC-011 | [AC-011] the same email, in any case, is rejected 409 with a clear message | E2E | Skipped | `frontend/e2e/admin-users-create.spec.ts` |
+| AC-012 | [AC-012] the new-user form names each missing field and creates no account | E2E | Skipped | `frontend/e2e/admin-users-create.spec.ts` |
+| AC-004 | [AC-004] an Employee opening /admin-users sees no admin data | E2E | Skipped | `frontend/e2e/admin-users.spec.ts` |
+| AC-006 | [AC-006] edits a user's time zone through the screen | E2E | Skipped | `frontend/e2e/admin-users.spec.ts` |
+| AC-010 | [AC-010] creates a user through the form | E2E | Skipped | `frontend/e2e/admin-users.spec.ts` |
+| AC-011 | [AC-011] duplicate email, any case, shows under Email | E2E | Skipped | `frontend/e2e/admin-users.spec.ts` |
+| AC-012 | [AC-012] missing required fields show messages under the field | E2E | Skipped | `frontend/e2e/admin-users.spec.ts` |
+| AC-013 | [AC-013] assigning an active manager shows the manager's name | E2E | Skipped | `frontend/e2e/admin-users.spec.ts` |
 
 ## Project setup
 
@@ -108,5 +107,5 @@ Acceptance criteria covered: 14/51 · passing: 4/51
 |---|---|---|---|---|
 | — | test_health_reports_ok | Unit | Passed | `backend/tests/test_health.py` |
 | — | test_the_openapi_document_builds | Unit | Passed | `backend/tests/test_health.py` |
-| — | the app loads | E2E | Not run yet | `frontend/e2e/example.spec.ts` |
+| — | the app loads | E2E | Passed | `frontend/e2e/example.spec.ts` |
 <!-- sdlc:auto:end tests -->
