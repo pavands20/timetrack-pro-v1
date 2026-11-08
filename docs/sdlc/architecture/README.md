@@ -437,7 +437,7 @@ AWS chosen as the cloud. All required services are available in UK/EU regions, w
 | ID | Name | Technology | Responsibility | Depends on |
 |---|---|---|---|---|
 | web_spa | Web App (SPA) | React 19 (TypeScript) | Provides the English-only responsive UI for sign-in, password reset, clock and breaks, weekly timesheet, dashboard, admin screens (users, clients, projects, tasks) and the static user/admin help guides. Converts UTC times to the user's time zone for display. | api |
-| api | REST API | FastAPI 0.115 | Hosts the HTTP endpoints, validates requests (Pydantic) and runs the cookie session middleware. Enforces role-based access on the server for every request (NFR-003). Contains the domain services for auth, users, catalog, clock and timesheet. | auth_service, admin_service, time_service, db |
+| api | REST API | FastAPI 0.115 | Hosts the HTTP endpoints, validates requests (Pydantic) and checks the Bearer session token. Enforces role-based access on the server for every request (NFR-003). Contains the domain services for auth, users, catalog, clock and timesheet. | auth_service, admin_service, time_service, db |
 | auth_service | Auth & Session Module | FastAPI 0.115 module | Handles login and logout, Argon2 password hashing, server-side sessions, and single-use, time-limited reset and set-password tokens. Returns generic error and confirmation messages (NFR-002). Revokes sessions when a user is deactivated. | db, mailer |
 | admin_service | Administration Module | FastAPI 0.115 module | Manages user accounts (create, edit, deactivate) and manager assignment, which must point to an active Manager. Manages clients, projects with bill rate and default billable flag, and tasks with archiving. Never alters existing time entries (NFR-014). | db |
 | time_service | Time Tracking Module | FastAPI 0.115 module | Handles clock in and out, breaks, and fixing a running entry. Handles manual weekly timesheet cells, editing and deleting own entries, and the weekly dashboard aggregates. Computes durations in UTC and local work dates in the user's time zone, with weeks running Monday to Sunday. | db |
@@ -473,7 +473,7 @@ graph TD
 
 ### Sign-in and per-request session check
 
-Login verifies the Argon2 hash and gives the same error for an unknown email or a wrong password. It creates a session row and sets an HttpOnly, Secure, SameSite=Strict cookie. Every request loads the session and user, and rejects the request if the session is revoked or expired or the user is inactive. The role is read fresh from the database on each request, so admin changes apply on the next request.
+Login verifies the Argon2 hash and gives the same error for an unknown email or a wrong password. It creates a session row and returns a random session token in the response body, which the SPA sends as Authorization: Bearer. Every request loads the session and user, and rejects the request if the session is revoked or expired or the user is inactive. The role is read fresh from the database on each request, so admin changes apply on the next request.
 
 - **Components:** web_spa, api, auth_service, db
 - **Modules:** app/auth/router.py, app/auth/service.py, app/auth/deps.py, app/auth/passwords.py
@@ -491,11 +491,11 @@ sequenceDiagram
   S->>S: verify Argon2 hash, dummy verify if no user
   alt valid
     S->>D: insert session with token hash
-    A-->>U: 200 user and role, Set-Cookie HttpOnly Secure
+    A-->>U: 200 user and role, session token in the body
   else invalid
     A-->>U: 401 generic invalid credentials
   end
-  U->>A: GET /api/dashboard/week with cookie
+  U->>A: GET /api/dashboard/week with Bearer token
   A->>D: load session and user, check active and role
   A-->>U: 200 or 401
 ```

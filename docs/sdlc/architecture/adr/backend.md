@@ -2,11 +2,11 @@
 # ADR-0002: Use FastAPI 0.115 for Backend
 
 Status: Accepted  
-Date: 2026-11-07
+Date: 2026-11-08
 
 ## Context and Problem Statement
 
-Which Backend technology does the project use? Decided in architecture v1.
+Which Backend technology does the project use? Decided in architecture v2.
 
 ## Considered Options
 

@@ -2,11 +2,11 @@
 # ADR-0001: Use React 19 for Frontend
 
 Status: Accepted  
-Date: 2026-11-07
+Date: 2026-11-08
 
 ## Context and Problem Statement
 
-Which Frontend technology does the project use? Decided in architecture v1.
+Which Frontend technology does the project use? Decided in architecture v2.
 
 ## Considered Options
 

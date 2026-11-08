@@ -2,7 +2,7 @@
 openapi: 3.1.0
 info:
   title: TimeTrack Pro V1
-  version: architecture-v1
+  version: architecture-v2
   description: Designed API from the approved architecture (not extracted from code).
 paths:
   /api/admin/clients:
@@ -232,12 +232,12 @@ paths:
               description: '{email, password}'
       responses:
         '200':
-          description: 200 {user:{id, full_name, role, time_zone}} plus Set-Cookie
-            session (HttpOnly, Secure, SameSite=Strict)
+          description: '200 {user:{id, full_name, role, time_zone}} plus `token` (the
+            session token, sent back as Authorization: Bearer)'
   /api/auth/logout:
     post:
-      summary: Revoke the current session and clear the cookie (AC-003).
-      description: Revoke the current session and clear the cookie (AC-003).
+      summary: Revoke the current session, so its token stops working (AC-003).
+      description: Revoke the current session, so its token stops working (AC-003).
       operationId: post_api_auth_logout
       parameters: []
       requestBody:

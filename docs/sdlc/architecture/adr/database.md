@@ -2,11 +2,11 @@
 # ADR-0003: Use PostgreSQL 16 for Database
 
 Status: Accepted  
-Date: 2026-11-07
+Date: 2026-11-08
 
 ## Context and Problem Statement
 
-Which Database technology does the project use? Decided in architecture v1.
+Which Database technology does the project use? Decided in architecture v2.
 
 ## Considered Options
 

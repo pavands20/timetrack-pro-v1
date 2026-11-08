@@ -3,6 +3,17 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## e6355dec8dde — 2026-11-08
+
+**Commit:** `e6355de`
+
+**Delivered:**
+- US-001: Sign in with email and password
+- US-002: Role-restricted access
+- US-003: Reset a forgotten password
+- US-004: Create a user account
+- US-005: Assign a manager to an employee
+
 ## d87a3273a648 — 2026-11-08
 
 **Commit:** `d87a327`
@@ -13,11 +24,7 @@ _Nothing delivered in this window._
 
 **Commit:** `a751d37`
 
-**Delivered:**
-- US-001: Sign in with email and password
-- US-002: Role-restricted access
-- US-004: Create a user account
-- US-005: Assign a manager to an employee
+_Nothing delivered in this window._
 
 ## 2991fa7c5e84 — 2026-11-08
 

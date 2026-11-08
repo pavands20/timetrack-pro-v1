@@ -3,170 +3,238 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### DEV-PLAN-V1 · approved · source: plan:version-1
+### DEV-PLAN-V1 · approved · source: plan:V1
 
-Development plan version 1 is approved. It spans 4 sprints of capacity 20 each. It organises 19 user stories under 8 epics, plus implementation tasks for US-010 and US-013.
+The development plan is approved at version 1. It has 4 sprints, each with a capacity of 20 points, covering 8 epics, 19 stories and 6 tasks. Stories total 69 points against 80 points of sprint capacity.
 
-Plan status: approved, version 1.
+- Status: approved, version 1. The approver and approval date are not given in the input.
+- Sprints: 4, each with capacity=20 (total 80).
+- Epics: EPIC-001 to EPIC-008. Epics have no points and no assigned role.
+- Stories: US-001 to US-019, totalling 69 points.
+- Tasks: US-010-T1/T2/T3 and US-013-T1/T2/T3. Tasks have no points.
+- Role assignment by story:
+  - backend-agent: US-001, 003, 004, 005, 006, 007, 008, 009, 010, 011, 012, 015, 017
+  - security-agent: US-002
+  - frontend-agent: US-013, 014, 016, 018
+  - devops-agent: US-019
+- The plan does not explicitly map each story to a sprint. Sprint goals describe the intended content (see DEV-SPRINT-1 to DEV-SPRINT-4).
+- Scope observation for human confirmation: the plan's items cover only part of the project description. They cover:
+  - sign-in
+  - user administration
+  - clients, projects and tasks
+  - clock in/out and breaks
+  - weekly timesheet
+  - billable marking
+  - dashboard
+  - time zone, language and responsive layout
+  - documentation
+- No plan items exist for these features from the project description:
+  - timesheet submission and approval
+  - time off and leave balances
+  - labour rules and compliance report
+  - reports and CSV/payroll export
+  - notifications
+  - audit trail
 
-Sprints (capacity 20 each):
-- Sprint 1: Secure sign-in, server-enforced roles, password reset by email, and admin creation of users with manager assignment.
-- Sprint 2: Complete user administration; set up clients, projects with bill rates, and tasks; let employees clock in and out.
-- Sprint 3: Correct time-zone handling, breaks, recovery of forgotten clock-outs, the weekly timesheet and billable marking.
-- Sprint 4: Edit and delete own entries, weekly hours dashboard, responsive English interface, and user/admin/project documentation.
+**Related:** EPIC-001, EPIC-002, EPIC-003, EPIC-004, EPIC-005, EPIC-006, EPIC-007, EPIC-008, US-001, US-002, US-003, US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-011, US-012, US-013, US-014, US-015, US-016, US-017, US-018, US-019
 
-Backlog (points, assigned role):
-- EPIC-001 Sign-in and account access (unassigned)
-  - US-001 Sign in with email and password (5, backend-agent)
-  - US-002 Role-restricted access (3, security-agent)
-  - US-003 Reset a forgotten password (5, backend-agent)
-- EPIC-002 User account administration (unassigned)
-  - US-004 Create a user account (3, backend-agent)
-  - US-005 Assign a manager to an employee (2, backend-agent)
-  - US-006 Edit and deactivate users (3, backend-agent)
-- EPIC-003 Clients, projects, tasks and bill rate (unassigned)
-  - US-007 Manage clients (3, backend-agent)
-  - US-008 Manage projects with an hourly bill rate (3, backend-agent)
-  - US-009 Manage tasks within a project (3, backend-agent)
-- EPIC-004 Clock in and out with breaks (unassigned)
-  - US-010 Clock in and out against a project and task (8, backend-agent)
-    - US-010-T1 Add time_entries migration (backend-agent)
-    - US-010-T2 Implement clock status, in and out endpoints (backend-agent)
-    - US-010-T3 Build clock page (frontend-agent)
-  - US-011 Record breaks while clocked in (3, backend-agent)
-  - US-012 Recover an entry left running (3, backend-agent)
-- EPIC-005 Weekly timesheet entry (unassigned)
-  - US-013 Enter hours by day in a weekly timesheet (8, frontend-agent)
-    - US-013-T1 Implement timesheet week and cell endpoints (backend-agent)
-    - US-013-T2 Build weekly timesheet grid (frontend-agent)
-    - US-013-T3 Add timesheet API test suite (qa-agent)
-  - US-014 Mark entries billable or non-billable (2, frontend-agent)
-  - US-015 Edit and delete my own time entries (3, backend-agent)
-- EPIC-006 Employee dashboard (unassigned)
-  - US-016 See my weekly hours on a dashboard (3, frontend-agent)
-- EPIC-007 Time zone, week start, language and responsive layout (unassigned)
-  - US-017 Times stored in UTC and shown in my time zone (3, backend-agent)
-  - US-018 English-only, responsive interface (3, frontend-agent)
-- EPIC-008 Basic user and project documentation (unassigned)
-  - US-019 User and admin guides (3, devops-agent)
+### DEV-SPRINT-1 · approved · source: plan:Sprint 1
 
-Total story points: 69 across 19 stories, against 80 points of sprint capacity.
+Sprint 1 covers secure sign-in, server-enforced roles, password reset by email, and admin creation of users with manager assignment. Capacity is 20 points.
 
-The input gives no mapping of individual items to sprints beyond the sprint goals.
+- Goal: Secure sign-in, server-enforced roles, password reset by email, and admin creation of users with manager assignment.
+- Capacity: 20.
+- The goal content matches US-001 (5), US-002 (3), US-003 (5), US-004 (3) and US-005 (2), totalling 18 points. This mapping is inferred from the goal text; the plan does not assign stories to sprints explicitly.
+- All five matching tickets have delivery records (see DEV-US-001 to DEV-US-005).
 
-Scope note: the plan covers only a V1 subset of the project description. It does not include timesheet approval, time off, labour rules and overtime, reports and CSV/payroll export, notifications, or audit.
+**Related:** US-001, US-002, US-003, US-004, US-005, EPIC-001, EPIC-002
+
+### DEV-SPRINT-2 · approved · source: plan:Sprint 2
+
+Sprint 2 covers completing user administration, setting up clients, projects with bill rates and tasks, and employee clock in/out. Capacity is 20 points.
+
+- Goal: Complete user administration, set up clients, projects with bill rates and tasks, and let employees clock in and out.
+- Capacity: 20.
+- The goal content matches US-006 (3), US-007 (3), US-008 (3), US-009 (3) and US-010 (8), totalling 20 points. This mapping is inferred from the goal text.
+- No delivery records exist for any of these stories.
+
+**Related:** US-006, US-007, US-008, US-009, US-010, EPIC-002, EPIC-003, EPIC-004
+
+### DEV-SPRINT-3 · approved · source: plan:Sprint 3
+
+Sprint 3 covers correct time-zone handling, breaks, recovery of forgotten clock-outs, the weekly timesheet and billable marking. Capacity is 20 points.
+
+- Goal: Correct time-zone handling, breaks, recovery of forgotten clock-outs, the weekly timesheet and billable marking.
+- Capacity: 20.
+- The goal content matches US-017 (3), US-011 (3), US-012 (3), US-013 (8) and US-014 (2), totalling 19 points. This mapping is inferred from the goal text.
+- No delivery records exist for any of these stories.
+
+**Related:** US-017, US-011, US-012, US-013, US-014, EPIC-004, EPIC-005, EPIC-007
+
+### DEV-SPRINT-4 · approved · source: plan:Sprint 4
+
+Sprint 4 covers editing and deleting own entries, the weekly hours dashboard, a responsive English interface, and user/admin/project documentation. Capacity is 20 points.
+
+- Goal: Edit and delete own entries, weekly hours dashboard, responsive English interface and user/admin/project documentation.
+- Capacity: 20.
+- The goal content matches US-015 (3), US-016 (3), US-018 (3) and US-019 (3), totalling 12 points. This mapping is inferred from the goal text.
+- No delivery records exist for any of these stories.
+
+**Related:** US-015, US-016, US-018, US-019, EPIC-005, EPIC-006, EPIC-007, EPIC-008
+
+### EPIC-001 · approved · source: plan:EPIC-001
+
+Epic: Sign-in and account access. It contains 3 stories totalling 13 points, all delivered.
+
+- US-001: Sign in with email and password. 5 points, backend-agent. Delivered.
+- US-002: Role-restricted access. 3 points, security-agent. Delivered.
+- US-003: Reset a forgotten password. 5 points, backend-agent. Delivered.
+
+**Related:** US-001, US-002, US-003
+
+### EPIC-002 · approved · source: plan:EPIC-002
+
+Epic: User account administration. It contains 3 stories totalling 8 points; 2 are delivered and US-006 has no delivery record.
+
+- US-004: Create a user account. 3 points, backend-agent. Delivered.
+- US-005: Assign a manager to an employee. 2 points, backend-agent. Delivered.
+- US-006: Edit and deactivate users. 3 points, backend-agent. No ticket record in the development run.
+
+**Related:** US-004, US-005, US-006
+
+### EPIC-003 · approved · source: plan:EPIC-003
+
+Epic: Clients, projects, tasks and bill rate. It contains 3 stories totalling 9 points, none with delivery records.
+
+- US-007: Manage clients. 3 points, backend-agent. No ticket record.
+- US-008: Manage projects with an hourly bill rate. 3 points, backend-agent. No ticket record.
+- US-009: Manage tasks within a project. 3 points, backend-agent. No ticket record.
+
+**Related:** US-007, US-008, US-009
+
+### EPIC-004 · approved · source: plan:EPIC-004
+
+Epic: Clock in and out with breaks. It contains 3 stories totalling 14 points, plus 3 tasks under US-010. None have delivery records.
+
+- US-010: Clock in and out against a project and task. 8 points, backend-agent. No ticket record.
+  - US-010-T1: Add time_entries migration (backend-agent).
+  - US-010-T2: Implement clock status, in and out endpoints (backend-agent).
+  - US-010-T3: Build clock page (frontend-agent).
+- US-011: Record breaks while clocked in. 3 points, backend-agent. No ticket record.
+- US-012: Recover an entry left running. 3 points, backend-agent. No ticket record.
+
+**Related:** US-010, US-010-T1, US-010-T2, US-010-T3, US-011, US-012
+
+### EPIC-005 · approved · source: plan:EPIC-005
+
+Epic: Weekly timesheet entry. It contains 3 stories totalling 13 points, plus 3 tasks under US-013. None have delivery records.
+
+- US-013: Enter hours by day in a weekly timesheet. 8 points, frontend-agent. No ticket record.
+  - US-013-T1: Implement timesheet week and cell endpoints (backend-agent).
+  - US-013-T2: Build weekly timesheet grid (frontend-agent).
+  - US-013-T3: Add timesheet API test suite (qa-agent).
+- US-014: Mark entries billable or non-billable. 2 points, frontend-agent. No ticket record.
+- US-015: Edit and delete my own time entries. 3 points, backend-agent. No ticket record.
+
+**Related:** US-013, US-013-T1, US-013-T2, US-013-T3, US-014, US-015
+
+### EPIC-006 · approved · source: plan:EPIC-006
+
+Epic: Employee dashboard. It contains 1 story of 3 points, with no delivery record.
+
+- US-016: See my weekly hours on a dashboard. 3 points, frontend-agent. No ticket record.
+
+**Related:** US-016
+
+### EPIC-007 · approved · source: plan:EPIC-007
+
+Epic: Time zone, week start, language and responsive layout. It contains 2 stories totalling 6 points, with no delivery records.
+
+- US-017: Times stored in UTC and shown in my time zone. 3 points, backend-agent. No ticket record.
+- US-018: English-only, responsive interface. 3 points, frontend-agent. No ticket record.
+- The epic title mentions 'week start', but no story in the input is specifically about week start.
+
+**Related:** US-017, US-018
+
+### EPIC-008 · approved · source: plan:EPIC-008
+
+Epic: Basic user and project documentation. It contains 1 story of 3 points, with no delivery record.
+
+- US-019: User and admin guides. 3 points, devops-agent. No ticket record.
+
+**Related:** US-019
+
+### DEV-RUN · draft · source: dev:run
+
+The development run is reported as 'completed', but only 5 of the 19 planned stories have ticket records. All 5 are marked delivered on a single commit. The two signals conflict, and both are recorded here.
+
+- Version A (run status): completed.
+- Version B (ticket records): 5 tickets delivered:
+  - US-001 to US-005, all on commit 652228456ccc99486f5f9ec05186cd6593401ae1
+  - 18 of 69 story points
+  - this is roughly the Sprint 1 scope
+- Not present in the input:
+  - ticket records for US-006 to US-019
+  - records for the 6 tasks (US-010-T1/T2/T3, US-013-T1/T2/T3)
+  - test results, code review or acceptance sign-off for any ticket
+  - dates
+- Open question for a human: is 'completed' meant for the whole plan or only for the delivered subset?
+- Status 'draft' is used because no review or approval of the delivered work is recorded.
 
 **Related:** US-001, US-002, US-003, US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-011, US-012, US-013, US-014, US-015, US-016, US-017, US-018, US-019
 
-### DEV-RUN-1 · draft · source: dev:run
+### DEV-US-001 · draft · source: dev:US-001
 
-The development run is reported as 'completed'. Only 5 ticket outcomes are recorded: 3 delivered, 1 failed and 1 skipped. The run-level status conflicts with the ticket-level results.
+Ticket US-001, 'Sign in with email and password', is delivered.
 
-Run status as reported: completed.
+- Status: delivered.
+- Commit: 652228456ccc99486f5f9ec05186cd6593401ae1.
+- Plan: 5 points, backend-agent.
+- No test results or acceptance records are provided.
 
-Ticket outcomes:
-- US-001: failed, no commit.
-- US-002: delivered, commit 9c75752a7a93df0da23f5db5ff9fefe5b17baa4e.
-- US-003: skipped, no commit.
-- US-004: delivered, commit 9c75752a7a93df0da23f5db5ff9fefe5b17baa4e.
-- US-005: delivered, commit 9c75752a7a93df0da23f5db5ff9fefe5b17baa4e.
+**Related:** US-001, EPIC-001, DEV-SPRINT-1
 
-Conflict (both versions recorded):
-- Version A: the run status says 'completed'.
-- Version B: the ticket list shows 1 failed ticket, 1 skipped ticket, and no outcome at all for 14 of the 19 planned stories (US-006 to US-019).
+### DEV-US-002 · draft · source: dev:US-002
 
-The input does not explain:
-- why the run is marked completed;
-- why US-003 was skipped;
-- why US-001 failed.
+Ticket US-002, 'Role-restricted access', is delivered.
 
-**Related:** US-001, US-002, US-003, US-004, US-005
+- Status: delivered.
+- Commit: 652228456ccc99486f5f9ec05186cd6593401ae1.
+- Plan: 3 points, security-agent.
+- The Sprint 1 goal states roles are server-enforced. No implementation detail or test results are provided.
 
-### US-001 · draft · source: dev:US-001
+**Related:** US-002, EPIC-001, DEV-SPRINT-1
 
-Sign in with email and password failed in the development run. No commit was produced.
+### DEV-US-003 · draft · source: dev:US-003
 
-- Ticket: US-001 Sign in with email and password.
-- Epic: EPIC-001.
-- Points: 5. Role: backend-agent. Planned in Sprint 1.
-- Result: failed. Commit: none.
-- No failure reason is given in the input.
-- Impact on the plan: this was the core of the Sprint 1 goal ('Secure sign-in'). Email/password sign-in is not confirmed as built.
+Ticket US-003, 'Reset a forgotten password', is delivered.
 
-**Related:** EPIC-001, DEV-PLAN-V1
+- Status: delivered.
+- Commit: 652228456ccc99486f5f9ec05186cd6593401ae1.
+- Plan: 5 points, backend-agent.
+- The Sprint 1 goal describes password reset by email. No test results are provided.
 
-### US-002 · draft · source: dev:US-002
+**Related:** US-003, EPIC-001, DEV-SPRINT-1
 
-Role-restricted access was delivered in commit 9c75752a. It maps to the Sprint 1 goal of server-enforced roles.
+### DEV-US-004 · draft · source: dev:US-004
 
-- Ticket: US-002 Role-restricted access.
-- Epic: EPIC-001.
-- Points: 3. Role: security-agent. Planned in Sprint 1.
-- Result: delivered.
-- Commit: 9c75752a7a93df0da23f5db5ff9fefe5b17baa4e. This is shared with US-004 and US-005.
-- Observation: this was delivered while US-001 (sign-in) in the same epic failed. The input does not state how roles are exercised without a delivered sign-in.
+Ticket US-004, 'Create a user account', is delivered.
 
-**Related:** EPIC-001, DEV-PLAN-V1, US-001
+- Status: delivered.
+- Commit: 652228456ccc99486f5f9ec05186cd6593401ae1.
+- Plan: 3 points, backend-agent.
+- No test results are provided.
 
-### US-003 · draft · source: dev:US-003
+**Related:** US-004, EPIC-002, DEV-SPRINT-1
 
-Password reset by email was skipped in the development run. No commit was produced.
+### DEV-US-005 · draft · source: dev:US-005
 
-- Ticket: US-003 Reset a forgotten password.
-- Epic: EPIC-001.
-- Points: 5. Role: backend-agent. Planned in Sprint 1.
-- Result: skipped. Commit: none.
-- No reason for skipping is given in the input.
+Ticket US-005, 'Assign a manager to an employee', is delivered.
 
-**Related:** EPIC-001, DEV-PLAN-V1
+- Status: delivered.
+- Commit: 652228456ccc99486f5f9ec05186cd6593401ae1.
+- Plan: 2 points, backend-agent.
+- No test results are provided.
 
-### US-004 · draft · source: dev:US-004
-
-Admin creation of user accounts was delivered in commit 9c75752a.
-
-- Ticket: US-004 Create a user account.
-- Epic: EPIC-002.
-- Points: 3. Role: backend-agent. Planned in Sprint 1.
-- Result: delivered.
-- Commit: 9c75752a7a93df0da23f5db5ff9fefe5b17baa4e. This is shared with US-002 and US-005.
-
-**Related:** EPIC-002, DEV-PLAN-V1
-
-### US-005 · draft · source: dev:US-005
-
-Assigning a manager to an employee was delivered in commit 9c75752a.
-
-- Ticket: US-005 Assign a manager to an employee.
-- Epic: EPIC-002.
-- Points: 2. Role: backend-agent. Planned in Sprint 1.
-- Result: delivered.
-- Commit: 9c75752a7a93df0da23f5db5ff9fefe5b17baa4e. This is shared with US-002 and US-004.
-
-**Related:** EPIC-002, DEV-PLAN-V1, US-004
-
-### DEV-UNREPORTED · draft · source: plan:version-1
-
-14 planned stories (US-006 to US-019) have no ticket outcome in the development run. Their implementation status is unknown and must not be assumed.
-
-Stories in the approved plan with no ticket result, commit or status in the development input:
-- US-006 Edit and deactivate users
-- US-007 Manage clients
-- US-008 Manage projects with an hourly bill rate
-- US-009 Manage tasks within a project
-- US-010 Clock in and out against a project and task, including tasks T1-T3
-- US-011 Record breaks while clocked in
-- US-012 Recover an entry left running
-- US-013 Enter hours by day in a weekly timesheet, including tasks T1-T3
-- US-014 Mark entries billable or non-billable
-- US-015 Edit and delete my own time entries
-- US-016 See my weekly hours on a dashboard
-- US-017 Times stored in UTC and shown in my time zone
-- US-018 English-only, responsive interface
-- US-019 User and admin guides
-
-This covers Sprint 1 through Sprint 4 scope, apart from the five reported tickets.
-
-This gap conflicts with the run status of 'completed' (see DEV-RUN-1). For that reason, no end-user guide is produced for these capabilities.
-
-**Related:** US-006, US-007, US-008, US-009, US-010, US-011, US-012, US-013, US-014, US-015, US-016, US-017, US-018, US-019
+**Related:** US-005, EPIC-002, DEV-SPRINT-1
 <!-- sdlc:auto:end narrative -->
