@@ -11,8 +11,6 @@ const { Button, Input, Label, Select, Table, THead, TBody, TR, TH, TD, Avatar } 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { Check, User, Users, Edit } = Icons;
 
-const { Button, Input, Label, Table, THead, TBody, TR, TH, TD, Avatar, Badge } = UI;
-
 const ROLES = ['Employee', 'Manager', 'Payroll Admin', 'System Admin'];
 const TIME_ZONES = [
   'Europe/London',
