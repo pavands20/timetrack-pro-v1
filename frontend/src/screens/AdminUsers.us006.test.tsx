@@ -83,7 +83,15 @@ describe("AdminUsers edit and deactivate (US-006)", () => {
     setup({
       ...base,
       "POST /api/admin/users/2/deactivate": () =>
-        json(au({ id: 2, full_name: "Mia Manager", email: "mia@x.co", role: "Manager", is_active: false })),
+        json(
+          au({
+            id: 2,
+            full_name: "Mia Manager",
+            email: "mia@x.co",
+            role: "Manager",
+            is_active: false,
+          }),
+        ),
     });
     await userEvent.click(await screen.findByRole("button", { name: "Edit Mia Manager" }));
     await userEvent.click(screen.getByRole("button", { name: "Deactivate" }));
@@ -94,9 +102,9 @@ describe("AdminUsers edit and deactivate (US-006)", () => {
 
     // Pick someone else: neither deactivated manager is offered.
     await userEvent.click(screen.getByRole("button", { name: "Edit Eve Employee" }));
-    const options = Array.from(
-      (screen.getByLabelText("Manager") as HTMLSelectElement).options,
-    ).map((o) => o.text);
+    const options = Array.from((screen.getByLabelText("Manager") as HTMLSelectElement).options).map(
+      (o) => o.text,
+    );
     expect(options).not.toContain("Mia Manager");
     expect(options).not.toContain("Old Manager");
   });

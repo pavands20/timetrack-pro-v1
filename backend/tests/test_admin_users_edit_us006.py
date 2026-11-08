@@ -138,9 +138,7 @@ def test_ac015_name_and_time_zone_show_on_the_users_next_request(client, db_sess
     assert after.json()["time_zone"] == "Europe/Dublin"
 
 
-def test_ac015_promotion_applies_on_the_next_request_without_new_sign_in(
-    client, db_session, admin
-):
+def test_ac015_promotion_applies_on_the_next_request_without_new_sign_in(client, db_session, admin):
     _, c = admin
     e = mk(db_session, "us006e@example.com")
     ec = sign_in(client, e.email)
@@ -252,9 +250,7 @@ def test_ac016_record_is_kept_and_still_listed_as_deactivated(client, db_session
     assert db_session.get(User, mgr.id) is not None
 
 
-def test_ac016_deactivated_user_cannot_be_assigned_as_manager_by_patch(
-    client, db_session, admin
-):
+def test_ac016_deactivated_user_cannot_be_assigned_as_manager_by_patch(client, db_session, admin):
     _, c = admin
     mgr = mk(db_session, "us006m@example.com", "Manager")
     e = mk(db_session, "us006e@example.com")
@@ -265,9 +261,7 @@ def test_ac016_deactivated_user_cannot_be_assigned_as_manager_by_patch(
     assert e.manager_id is None
 
 
-def test_ac016_deactivated_user_cannot_be_assigned_as_manager_on_create(
-    client, db_session, admin
-):
+def test_ac016_deactivated_user_cannot_be_assigned_as_manager_on_create(client, db_session, admin):
     _, c = admin
     mgr = mk(db_session, "us006m@example.com", "Manager")
     deactivate(client, c, mgr.id)
@@ -307,9 +301,7 @@ def test_ac016_deactivate_unknown_user_404(client, admin):
     assert deactivate(client, c, 999999).status_code == 404
 
 
-def test_ac016_deactivated_admin_loses_admin_access_with_their_old_token(
-    client, db_session, admin
-):
+def test_ac016_deactivated_admin_loses_admin_access_with_their_old_token(client, db_session, admin):
     _, c = admin
     second = mk(db_session, "us006admin2@example.com", "System Admin")
     sc = sign_in(client, second.email)
