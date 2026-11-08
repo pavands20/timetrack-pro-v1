@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 
 from app import models  # noqa: F401 -- imported so every table registers on the metadata
 from app.config import settings
+from app.routers import admin_users as admin_users_router
 from app.routers import auth as auth_router
 
 
@@ -82,3 +83,4 @@ async def health() -> dict[str, str]:
 
 
 app.include_router(auth_router.router)
+app.include_router(admin_users_router.router)

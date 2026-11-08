@@ -40,6 +40,8 @@ class Settings:
     smtp_user: str = field(default_factory=lambda: os.getenv("SMTP_USER", ""))
     smtp_password: str = field(default_factory=lambda: os.getenv("SMTP_PASSWORD", ""))
     smtp_from: str = field(default_factory=lambda: os.getenv("SMTP_FROM", "no-reply@localhost"))
+    # Where emailed links point; defaults to the first allowed origin (the SPA).
+    app_url: str = field(default_factory=lambda: os.getenv("APP_URL", ""))
     environment: str = field(default_factory=lambda: os.getenv("ENVIRONMENT", "development"))
     # Secure cookies only; switch off for plain-http local development.
     cookie_secure: bool = field(

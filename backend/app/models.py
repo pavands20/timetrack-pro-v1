@@ -43,4 +43,22 @@ class UserSession(Base):
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
-__all__ = ["Base", "ROLES", "User", "UserSession"]
+class PasswordToken(Base):
+    """A single-use, time-limited link token: a password reset or a new user's first password."""
+
+    __tablename__ = "password_reset_tokens"
+    __table_args__ = (
+        CheckConstraint("purpose IN ('reset', 'set_initial')", name="ck_password_tokens_purpose"),
+        Index("ix_password_reset_tokens_token_hash", "token_hash", unique=True),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    token_hash: Mapped[str] = mapped_column(String(64))
+    purpose: Mapped[str] = mapped_column(String(20))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+__all__ = ["Base", "ROLES", "PasswordToken", "User", "UserSession"]

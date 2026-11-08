@@ -231,7 +231,10 @@ def test_ac008_expired_unknown_and_short_password(client, db_session, mailer):
     assert r.status_code == 422
     assert r.json() == {
         "detail": [
-            {"loc": ["body", "new_password"], "msg": "Password must be at least 12 characters long."}
+            {
+                "loc": ["body", "new_password"],
+                "msg": "Password must be at least 12 characters long.",
+            }
         ]
     }
     assert login(client, password=PW).status_code == 200  # unchanged

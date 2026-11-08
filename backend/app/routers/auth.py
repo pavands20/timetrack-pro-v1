@@ -1,17 +1,19 @@
-"""Session endpoints: login, logout, me."""
+"""Session endpoints: login, logout, me, and password reset."""
 
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.auth_deps import SESSION_COOKIE, find_session, get_current_user
 from app.config import settings
 from app.database import get_db
+from app.mailer import SmtpMailer, get_mailer
 from app.models import User, UserSession
+from app.password_tokens import issue_password_token, use_password_token
 from app.security import DUMMY_HASH, new_token, token_digest, verify_password
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -89,3 +91,43 @@ def logout(
 @router.get("/me", response_model=UserOut)
 def me(user: Annotated[User, Depends(get_current_user)]) -> UserOut:
     return user_out(user)
+
+
+RESET_SENT = {"message": "If that email has an account, a reset link has been sent."}
+MIN_PASSWORD = 12
+
+
+class ResetRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetConfirm(BaseModel):
+    token: str = Field(min_length=1)
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def _long_enough(cls, value: str) -> str:
+        if len(value) < MIN_PASSWORD:
+            raise ValueError(f"Password must be at least {MIN_PASSWORD} characters long.")
+        return value
+
+
+@router.post("/password-reset/request", status_code=202)
+def request_password_reset(
+    body: ResetRequest,
+    db: Annotated[Session, Depends(get_db)],
+    mailer: Annotated[SmtpMailer, Depends(get_mailer)],
+) -> dict[str, str]:
+    """The same reply whether or not the account exists (AC-009)."""
+    user = db.scalar(select(User).where(User.email == body.email.lower()))
+    if user is not None and user.is_active:
+        issue_password_token(db, user, "reset", mailer)
+    return RESET_SENT
+
+
+@router.post("/password-reset/confirm", status_code=204)
+def confirm_password_reset(body: ResetConfirm, db: Annotated[Session, Depends(get_db)]) -> Response:
+    if not use_password_token(db, body.token, body.new_password):
+        raise HTTPException(status_code=400, detail="This reset link is invalid or has expired.")
+    return Response(status_code=204)
