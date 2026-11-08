@@ -111,4 +111,49 @@ class Task(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
-__all__ = ["Base", "ROLES", "Client", "PasswordToken", "Project", "Task", "User", "UserSession"]
+class TimeEntry(Base):
+    """A clock-in/clock-out record. Times are timestamptz (UTC). Never deleted by the app."""
+
+    __tablename__ = "time_entries"
+    __table_args__ = (
+        Index(
+            "ux_time_entries_one_open_per_user",
+            "user_id",
+            unique=True,
+            postgresql_where=text("end_at IS NULL"),
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="RESTRICT"))
+    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id", ondelete="RESTRICT"))
+    billable: Mapped[bool] = mapped_column(Boolean)
+    start_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    end_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Break(Base):
+    __tablename__ = "breaks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    time_entry_id: Mapped[int] = mapped_column(
+        ForeignKey("time_entries.id", ondelete="RESTRICT"), index=True
+    )
+    start_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    end_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+__all__ = [
+    "Base",
+    "ROLES",
+    "Break",
+    "Client",
+    "PasswordToken",
+    "Project",
+    "Task",
+    "TimeEntry",
+    "User",
+    "UserSession",
+]

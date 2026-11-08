@@ -1,49 +1,25 @@
 // @ts-nocheck -- generated from the approved design under its JS runtime contract; not hand-written TypeScript.
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
+import { DateTime } from "luxon";
 
 import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import { useNavigate } from "@/lib/navigate";
+import { ApiError, apiFetch } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { Input, Label, Select } = UI;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const { User, Home, Clock } = Icons;
 
-const TZ = "Europe/London";
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const DAY_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const DAY_DATES = [2, 3, 4, 5, 6, 7, 8];
 const TODAY_INDEX = 5;
-const NOW0 = Date.UTC(2026, 10, 7, 10, 14);
 
-const PROJECTS = [
-  {
-    id: "p1",
-    client: "Northgate Housing",
-    name: "Tenant Portal Redesign",
-    defaultBillable: true,
-    tasks: ["Design", "Frontend build", "User research", "Stakeholder review"],
-  },
-  {
-    id: "p2",
-    client: "Marlow & Finch",
-    name: "Annual Report 2026",
-    defaultBillable: true,
-    tasks: ["Copy editing", "Layout", "Data visuals"],
-  },
-  {
-    id: "p3",
-    client: "Internal",
-    name: "Team Admin",
-    defaultBillable: false,
-    tasks: ["Team meetings", "Training", "Planning"],
-  },
-];
-
-// minutes per day, split billable / non-billable. Total 26.5 h: 21.0 billable, 5.5 non-billable.
+// minutes per day, split billable / non-billable. Seeded prototype chart for a later story.
 const INITIAL_DAYS = [
   { b: 390, n: 90 },
   { b: 330, n: 90 },
@@ -54,190 +30,136 @@ const INITIAL_DAYS = [
   { b: 0, n: 0 },
 ];
 
-const STALE_ENTRY = {
-  start: Date.UTC(2026, 10, 5, 9, 0),
-  breaks: [{ start: Date.UTC(2026, 10, 5, 12, 30), end: Date.UTC(2026, 10, 5, 13, 0) }],
-  projectId: "p1",
-  task: "Design",
-  billable: true,
-  stale: true,
-};
-
 const pad = (n) => String(n).padStart(2, "0");
 const fmtH = (min) => (min / 60).toFixed(1);
 const fmtHM = (min) => `${Math.floor(min / 60)}:${pad(Math.round(min % 60))}`;
-const fmtTime = (ms) =>
-  new Intl.DateTimeFormat("en-GB", {
-    timeZone: TZ,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(ms);
-const fmtDay = (ms) => {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: TZ,
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  }).formatToParts(ms);
-  const get = (t) => (parts.find((p) => p.type === t) || {}).value;
-  return `${get("weekday")} ${get("day")} ${get("month")}`;
+const msOf = (iso) => DateTime.fromISO(iso, { zone: "utc" }).toMillis();
+const detailOf = (err) => {
+  const d = err instanceof ApiError ? err.body?.detail : null;
+  if (typeof d === "string") return d;
+  if (Array.isArray(d) && d[0]?.msg) return d[0].msg;
+  return "Something went wrong. Try again.";
 };
-const toLocalInput = (ms) => {
-  const p = new Intl.DateTimeFormat("en-CA", {
-    timeZone: TZ,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(ms);
-  const g = (t) => (p.find((x) => x.type === t) || {}).value;
-  return `${g("year")}-${g("month")}-${g("day")}T${g("hour") === "24" ? "00" : g("hour")}:${g("minute")}`;
-};
-const netMinutes = (entry, endMs) => {
-  const brk = entry.breaks.reduce((s, b) => s + ((b.end || endMs) - b.start), 0);
-  return Math.max(0, Math.round((endMs - entry.start - brk) / 60000));
-};
-const breakMinutes = (entry, nowMs) =>
-  Math.round(entry.breaks.reduce((s, b) => s + ((b.end || nowMs) - b.start), 0) / 60000);
 
 export default function Screen() {
   const navigate = useNavigate();
-  const mountRef = React.useRef(Date.now());
-  const getNow = () => NOW0 + (Date.now() - mountRef.current);
-  const [now, setNow] = React.useState(NOW0);
+  const { user } = useAuth();
+  const tz = user?.time_zone || "UTC";
+  const fmtTime = (ms) => DateTime.fromMillis(ms, { zone: tz }).toFormat("HH:mm");
+
+  const [now, setNow] = React.useState(() => Date.now());
   React.useEffect(() => {
-    const id = setInterval(() => setNow(getNow()), 30000);
+    const id = setInterval(() => setNow(Date.now()), 30000);
     return () => clearInterval(id);
   }, []);
 
-  const [days, setDays] = React.useState(INITIAL_DAYS);
-  const [entry, setEntry] = React.useState(STALE_ENTRY);
-  const [projectId, setProjectId] = React.useState(STALE_ENTRY.projectId);
-  const [task, setTask] = React.useState(STALE_ENTRY.task);
+  const [days] = React.useState(INITIAL_DAYS);
+  const [projects, setProjects] = React.useState([]);
+  const [entry, setEntry] = React.useState(null);
+  const [breaks, setBreaks] = React.useState([]);
+  const [projectId, setProjectId] = React.useState("");
+  const [taskId, setTaskId] = React.useState("");
   const [billable, setBillable] = React.useState("billable");
-  const [endValue, setEndValue] = React.useState("2026-11-05T17:30");
-  const [endError, setEndError] = React.useState("");
-  const [fixed, setFixed] = React.useState(null);
+  const [clockError, setClockError] = React.useState("");
   const [notice, setNotice] = React.useState(null);
 
-  const project = PROJECTS.find((p) => p.id === projectId);
-  const onBreak = !!(entry && entry.breaks.length && !entry.breaks[entry.breaks.length - 1].end);
-  const stale = !!(entry && entry.stale);
+  const project = projects.find((p) => String(p.id) === String(projectId));
+  const onBreak = !!(entry && breaks.length && !breaks[breaks.length - 1].end);
+  const stale = false;
   const totalB = days.reduce((s, d) => s + d.b, 0);
   const totalN = days.reduce((s, d) => s + d.n, 0);
   const total = totalB + totalN;
   const maxDay = Math.max(600, ...days.map((d) => d.b + d.n));
-  const nowMs = getNow();
 
   const say = (kind, text) => setNotice({ kind, text, at: Date.now() });
+  const guard = (err) => {
+    if (err instanceof ApiError && err.status === 401) {
+      navigate("/sign-in");
+      return true;
+    }
+    return false;
+  };
+
+  React.useEffect(() => {
+    let live = true;
+    Promise.all([apiFetch("/api/projects"), apiFetch("/api/clock/status")])
+      .then(([list, status]) => {
+        if (!live) return;
+        setProjects(list);
+        const e = status.entry;
+        const p = (e && list.find((x) => x.id === e.project_id)) || list[0];
+        setEntry(e);
+        if (p) {
+          setProjectId(String(p.id));
+          setTaskId(String(e ? e.task_id : (p.tasks[0]?.id ?? "")));
+          setBillable((e ? e.billable : p.default_billable) ? "billable" : "non-billable");
+        }
+      })
+      .catch((err) => {
+        if (live && !guard(err)) say("error", "Could not load the clock. Try again.");
+      });
+    return () => {
+      live = false;
+    };
+  }, []);
 
   const changeProject = (id) => {
-    const p = PROJECTS.find((x) => x.id === id);
+    const p = projects.find((x) => String(x.id) === id);
     setProjectId(id);
-    setTask(p.tasks[0]);
-    setBillable(p.defaultBillable ? "billable" : "non-billable");
+    setTaskId(String(p?.tasks[0]?.id ?? ""));
+    setBillable(p?.default_billable ? "billable" : "non-billable");
+    setClockError("");
   };
 
-  const addMinutes = (idx, mins, isBillable) =>
-    setDays((prev) =>
-      prev.map((d, i) =>
-        i === idx ? { b: d.b + (isBillable ? mins : 0), n: d.n + (isBillable ? 0 : mins) } : d,
-      ),
-    );
-
-  const saveEnd = (e) => {
-    e.preventDefault();
-    if (!endValue) {
-      setEndError("Enter the time you actually stopped work.");
-      return;
+  const clockIn = async () => {
+    setClockError("");
+    try {
+      const e = await apiFetch("/api/clock/in", {
+        method: "POST",
+        body: JSON.stringify({
+          project_id: Number(projectId),
+          task_id: Number(taskId),
+          billable: billable === "billable",
+        }),
+      });
+      setEntry(e);
+      setBreaks([]);
+      say("ok", `Clocked in at ${fmtTime(msOf(e.start_at))} on ${e.project_name}, ${e.task_name}.`);
+    } catch (err) {
+      if (guard(err)) return;
+      if (err instanceof ApiError && err.status === 422) setClockError(detailOf(err));
+      else say("error", detailOf(err));
     }
-    const endMs = Date.parse(endValue + ":00Z");
-    const lastBreak = entry.breaks[entry.breaks.length - 1];
-    if (!(endMs > entry.start)) {
-      setEndError(
-        `End time must be after the start (${fmtDay(entry.start)}, ${fmtTime(entry.start)}).`,
-      );
-      return;
-    }
-    if (lastBreak && lastBreak.end && endMs < lastBreak.end) {
-      setEndError(
-        `End time falls inside the recorded break, which ended at ${fmtTime(lastBreak.end)}.`,
-      );
-      return;
-    }
-    if (endMs > nowMs) {
-      setEndError("End time cannot be in the future.");
-      return;
-    }
-    const mins = netMinutes(entry, endMs);
-    addMinutes(3, mins, entry.billable);
-    setFixed({ mins, end: endMs });
-    setEndError("");
-    setEntry(null);
-    say("ok", `Entry from ${fmtDay(entry.start)} closed. You can clock in again.`);
-  };
-
-  const clockIn = () => {
-    if (entry) {
-      say(
-        "error",
-        stale
-          ? `You are already clocked in. Your entry from ${fmtDay(entry.start)} is still running, so set its end time first.`
-          : `You are already clocked in since ${fmtTime(entry.start)}. Clock out before starting a new entry.`,
-      );
-      return;
-    }
-    const t = getNow();
-    setEntry({
-      start: t,
-      breaks: [],
-      projectId,
-      task,
-      billable: billable === "billable",
-      stale: false,
-    });
-    say("ok", `Clocked in at ${fmtTime(t)} on ${project.name}, ${task}.`);
   };
   const startBreak = () => {
     if (!entry) return say("error", "Clock in first. A break needs a running entry.");
-    if (stale)
-      return say(
-        "error",
-        `Your entry from ${fmtDay(entry.start)} is still running. Set its end time above before using breaks.`,
-      );
     if (onBreak)
       return say(
         "error",
-        `You are already on a break since ${fmtTime(entry.breaks[entry.breaks.length - 1].start)}. End it before starting another.`,
+        `You are already on a break since ${fmtTime(breaks[breaks.length - 1].start)}. End it before starting another.`,
       );
-    const t = getNow();
-    setEntry({ ...entry, breaks: [...entry.breaks, { start: t, end: null }] });
+    const t = Date.now();
+    setBreaks([...breaks, { start: t, end: null }]);
     say("ok", `Break started at ${fmtTime(t)}. It will not count towards your hours.`);
   };
   const endBreak = () => {
     if (!onBreak) return say("error", "There is no break running to end.");
-    const t = getNow();
-    setEntry({
-      ...entry,
-      breaks: entry.breaks.map((b, i) => (i === entry.breaks.length - 1 ? { ...b, end: t } : b)),
-    });
+    const t = Date.now();
+    setBreaks(breaks.map((b, i) => (i === breaks.length - 1 ? { ...b, end: t } : b)));
     say("ok", `Break ended at ${fmtTime(t)}. Back on the clock.`);
   };
-  const clockOut = () => {
-    if (!entry) return say("error", "You are not clocked in, so there is nothing to clock out of.");
-    if (stale)
-      return say(
-        "error",
-        `Your entry from ${fmtDay(entry.start)} has been running for days. Set the correct end time above instead.`,
-      );
-    const t = getNow();
-    const mins = netMinutes(entry, t);
-    addMinutes(TODAY_INDEX, mins, entry.billable);
-    setEntry(null);
-    say("ok", `Clocked out at ${fmtTime(t)}. ${fmtHM(mins)} h added to Saturday.`);
+  const clockOut = async () => {
+    setClockError("");
+    try {
+      const r = await apiFetch("/api/clock/out", { method: "POST" });
+      setEntry(null);
+      setBreaks([]);
+      const day = DateTime.fromISO(r.work_date, { zone: tz }).toFormat("ccc d LLL");
+      say("ok", `${fmtHM(r.duration_minutes)} h added to ${day}`);
+    } catch (err) {
+      if (guard(err)) return;
+      say("error", detailOf(err));
+    }
   };
 
   const C = {
@@ -290,7 +212,7 @@ export default function Screen() {
     opacity: dim ? 0.5 : 1,
   });
 
-  const primaryAction = !entry ? "in" : stale ? null : onBreak ? "endbreak" : "out";
+  const primaryAction = !entry ? "in" : onBreak ? "endbreak" : "out";
 
   let statusLine;
   if (!entry) {
@@ -299,9 +221,7 @@ export default function Screen() {
     statusLine = (
       <>
         In progress since{" "}
-        <strong style={{ ...num, color: C.accent, fontWeight: 600 }}>{fmtTime(entry.start)}</strong>
-        {stale ? ` (${fmtDay(entry.start)})` : ""}. Break taken:{" "}
-        <span style={num}>{fmtHM(breakMinutes(entry, nowMs))}</span>.
+        <strong style={{ ...num, color: C.accent, fontWeight: 600 }}>{fmtTime(msOf(entry.start_at))}</strong>.
       </>
     );
   }
@@ -342,7 +262,7 @@ export default function Screen() {
             Home
           </h1>
           <p style={{ color: C.muted, margin: "8px 0 0", fontSize: 15 }}>
-            Week of Mon 2 to Sun 8 Nov 2026 · Saturday, {fmtTime(nowMs)} in London
+            Week of Mon 2 to Sun 8 Nov 2026 · {fmtTime(now)} in {tz}
           </p>
         </div>
         <div className="col-span-12 sm:col-span-4 flex sm:justify-end items-start">
@@ -358,125 +278,6 @@ export default function Screen() {
         </div>
 
         {/* Row 2 */}
-        {(stale || fixed) && (
-          <section
-            data-wf="b-1-0"
-            aria-labelledby="fc-h"
-            className="col-span-12 tt-in"
-            style={{ ...panel, borderLeft: `3px solid ${C.accent}` }}
-          >
-            {stale ? (
-              <form onSubmit={saveEnd} noValidate className="grid grid-cols-12 gap-6 items-end">
-                <div className="col-span-12 lg:col-span-6">
-                  <p
-                    style={{
-                      ...label,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      color: C.accent,
-                      margin: 0,
-                    }}
-                  >
-                    <Icons.AlertCircle width={16} height={16} aria-hidden="true" /> Needs your
-                    attention
-                  </p>
-                  <h2
-                    id="fc-h"
-                    style={{ ...serif, fontSize: 22, fontWeight: 700, margin: "8px 0" }}
-                  >
-                    Forgotten clock-out
-                  </h2>
-                  <p style={{ margin: 0, fontSize: 15, lineHeight: 1.5 }}>
-                    Your entry from <strong>{fmtDay(entry.start)}</strong> is still running. Set the
-                    correct end time.
-                  </p>
-                  <p style={{ margin: "8px 0 0", fontSize: 13, color: C.muted, ...num }}>
-                    {project.name} · {entry.task} · started {fmtTime(entry.start)} · break{" "}
-                    {fmtHM(breakMinutes(entry, nowMs))}
-                  </p>
-                </div>
-                <div className="col-span-12 sm:col-span-8 lg:col-span-4">
-                  <Label htmlFor="end-time" style={{ ...label, display: "block", marginBottom: 8 }}>
-                    End time
-                  </Label>
-                  <Input
-                    data-wf="i-1-0-0"
-                    id="end-time"
-                    type="datetime-local"
-                    value={endValue}
-                    min={toLocalInput(entry.start)}
-                    max={toLocalInput(nowMs)}
-                    onChange={(e) => {
-                      setEndValue(e.target.value);
-                      setEndError("");
-                    }}
-                    aria-invalid={endError ? "true" : "false"}
-                    aria-describedby={endError ? "end-err" : "end-help"}
-                    style={{ ...field, ...num, borderColor: endError ? C.fg : C.line }}
-                  />
-                </div>
-                <div className="col-span-12 sm:col-span-4 lg:col-span-2">
-                  <button
-                    data-wf="i-1-0-1"
-                    type="submit"
-                    className="tt-btn"
-                    data-primary="true"
-                    style={{ ...actionBtn(true), width: "100%" }}
-                  >
-                    Save end time
-                  </button>
-                </div>
-                <div className="col-span-12" style={{ marginTop: -8 }}>
-                  {endError ? (
-                    <p
-                      id="end-err"
-                      role="alert"
-                      style={{
-                        margin: 0,
-                        fontSize: 14,
-                        display: "flex",
-                        gap: 8,
-                        alignItems: "center",
-                      }}
-                    >
-                      <Icons.AlertCircle width={16} height={16} aria-hidden="true" /> {endError}{" "}
-                      Your entry is unchanged.
-                    </p>
-                  ) : (
-                    <p id="end-help" style={{ margin: 0, fontSize: 13, color: C.muted }}>
-                      Times are in Europe/London. The 0:30 break already recorded is taken off your
-                      worked hours.
-                    </p>
-                  )}
-                </div>
-              </form>
-            ) : (
-              <div role="status" style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                <Icons.CheckCircle
-                  width={20}
-                  height={20}
-                  aria-hidden="true"
-                  style={{ color: C.accent, flexShrink: 0, marginTop: 2 }}
-                />
-                <div>
-                  <h2
-                    id="fc-h"
-                    style={{ ...serif, fontSize: 22, fontWeight: 700, margin: "0 0 4px" }}
-                  >
-                    End time saved
-                  </h2>
-                  <p style={{ margin: 0, fontSize: 15, ...num }}>
-                    Thursday's entry now ends at {fmtTime(fixed.end)}.{" "}
-                    <strong style={{ color: C.accent }}>{fmtHM(fixed.mins)} h</strong> were added to
-                    Thu 5 Nov.
-                  </p>
-                </div>
-              </div>
-            )}
-          </section>
-        )}
-
         {/* Row 3 */}
         <section
           data-wf="b-2-0"
@@ -788,7 +589,7 @@ export default function Screen() {
                 fontWeight: 400,
               }}
             >
-              (times shown in Europe/London)
+              (times shown in {tz})
             </span>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" style={{ marginTop: 24 }}>
@@ -807,13 +608,13 @@ export default function Screen() {
                 onChange={(e) => changeProject(e.target.value)}
                 style={field}
               >
-                {PROJECTS.map((p) => (
-                  <option key={p.id} value={p.id}>
+                {projects.map((p) => (
+                  <option key={p.id} value={String(p.id)}>
                     {p.name}
                   </option>
                 ))}
               </Select>
-              <p style={{ margin: "8px 0 0", fontSize: 12, color: C.muted }}>{project.client}</p>
+              <p style={{ margin: "8px 0 0", fontSize: 12, color: C.muted }}>{project ? project.client_name : ""}</p>
             </div>
             <div>
               <Label htmlFor="clock-task" style={{ ...label, display: "block", marginBottom: 8 }}>
@@ -822,14 +623,14 @@ export default function Screen() {
               <Select
                 data-wf="i-3-0-1"
                 id="clock-task"
-                value={task}
+                value={taskId}
                 disabled={!!entry}
-                onChange={(e) => setTask(e.target.value)}
+                onChange={(e) => setTaskId(e.target.value)}
                 style={field}
               >
-                {project.tasks.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
+                {(project ? project.tasks : []).map((t) => (
+                  <option key={t.id} value={String(t.id)}>
+                    {t.name}
                   </option>
                 ))}
               </Select>
@@ -853,10 +654,15 @@ export default function Screen() {
                 <option value="non-billable">Non-billable</option>
               </Select>
               <p style={{ margin: "8px 0 0", fontSize: 12, color: C.muted }}>
-                Project default: {project.defaultBillable ? "billable" : "non-billable"}
+                Project default: {project && project.default_billable ? "billable" : "non-billable"}
               </p>
             </div>
           </div>
+          {clockError && (
+            <p role="alert" style={{ margin: "16px 0 0", fontSize: 14 }}>
+              {clockError}
+            </p>
+          )}
           {entry && (
             <p style={{ margin: "16px 0 0", fontSize: 13, color: C.muted }}>
               Choices are locked while an entry is running.
@@ -883,12 +689,12 @@ export default function Screen() {
           {onBreak && (
             <p style={{ margin: "12px 0 0", fontSize: 14, color: C.accent }}>
               On a break since{" "}
-              <span style={num}>{fmtTime(entry.breaks[entry.breaks.length - 1].start)}</span>.
+              <span style={num}>{fmtTime(breaks[breaks.length - 1].start)}</span>.
             </p>
           )}
           {entry && !stale && (
             <p style={{ margin: "12px 0 0", fontSize: 14, color: C.muted, ...num }}>
-              Worked so far (net of breaks): {fmtHM(netMinutes(entry, nowMs))}
+              Worked so far: {fmtHM(Math.max(0, Math.round((now - msOf(entry.start_at)) / 60000)))}
             </p>
           )}
         </div>
