@@ -10,6 +10,7 @@ export default defineConfig({
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
+  server: { proxy: { "/api": "http://localhost:8000" } },
   // Component tests live beside the components they cover. jsdom because Testing
   // Library needs a DOM; globals so a test file reads the way every Vitest
   // example does.

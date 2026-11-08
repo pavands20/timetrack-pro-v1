@@ -1,9 +1,11 @@
 // @ts-nocheck -- generated from the approved design under its JS runtime contract; not hand-written TypeScript.
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import React from "react";
 
 import { brand } from "@/lib/brand";
-import { useNavigate } from "@/lib/navigate";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ApiError, apiFetch } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 
 const PRODUCT = "TimeTrack Pro V1";
 const SCREEN = "Sign in and password reset";
@@ -11,6 +13,14 @@ const HAIRLINE = "1px solid rgba(255,255,255,0.10)";
 
 export default function Screen() {
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const [params] = useSearchParams();
+  const resetToken = params.get("reset_token");
+  const [signInError, setSignInError] = React.useState("");
+  const [resetMessage, setResetMessage] = React.useState("");
+  const [resetError, setResetError] = React.useState("");
+  const [passwordError, setPasswordError] = React.useState("");
+  const [resetDone, setResetDone] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [resetEmail, setResetEmail] = React.useState("");
@@ -27,16 +37,67 @@ export default function Screen() {
   const label = { color: brand.neutralColor, letterSpacing: "0.18em" };
   const mismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
 
-  const signIn = () => navigate("home");
+  const fieldMessage = (err, name) => {
+    const list = err instanceof ApiError && Array.isArray(err.body?.detail) ? err.body.detail : [];
+    const hit = list.find((d) => d.loc && d.loc[d.loc.length - 1] === name);
+    return hit ? hit.msg : "";
+  };
+  const signIn = async () => {
+    setSignInError("");
+    try {
+      const u = await login(email, password);
+      navigate(u.home_path);
+    } catch (err) {
+      const msg =
+        err instanceof ApiError && err.status === 422
+          ? fieldMessage(err, "email") || fieldMessage(err, "password")
+          : "";
+      setSignInError(msg || "Incorrect email or password");
+    }
+  };
   const handleSignInClick = (e) => {
     const f = e.currentTarget.form;
     if (f && !f.reportValidity()) return;
     signIn();
   };
+  const submitReset = async () => {
+    setResetError("");
+    setPasswordError("");
+    setResetDone(false);
+    if (resetToken) {
+      if (newPassword !== confirmPassword) return;
+      try {
+        await apiFetch("/api/auth/password-reset/confirm", {
+          method: "POST",
+          body: JSON.stringify({ token: resetToken, new_password: newPassword }),
+        });
+        setResetDone(true);
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 422) {
+          setPasswordError(fieldMessage(err, "new_password") || "Enter a valid password.");
+        } else if (err instanceof ApiError && err.status === 400) {
+          setResetError("This reset link is invalid or has expired.");
+        } else {
+          setResetError("Something went wrong. Try again.");
+        }
+      }
+      return;
+    }
+    try {
+      const r = await apiFetch("/api/auth/password-reset/request", {
+        method: "POST",
+        body: JSON.stringify({ email: resetEmail }),
+      });
+      setResetMessage(r.message);
+      setResetSent(true);
+    } catch (err) {
+      setResetError(fieldMessage(err, "email") || "Something went wrong. Try again.");
+    }
+  };
   const handleResetClick = (e) => {
     const f = e.currentTarget.form;
     if (f && !f.reportValidity()) return;
-    setResetSent(true);
+    submitReset();
   };
 
   return (
@@ -85,6 +146,11 @@ export default function Screen() {
             <h2 className="text-lg" style={{ fontFamily: brand.fontHeading }}>
               Sign in
             </h2>
+            {signInError && (
+              <p role="alert" className="text-sm" style={{ color: "rgb(232,150,140)" }}>
+                {signInError}
+              </p>
+            )}
             <div className="space-y-2">
               <label htmlFor="vl-email" className="block text-xs uppercase" style={label}>
                 Email
@@ -142,7 +208,7 @@ export default function Screen() {
             className="space-y-5 md:col-start-2 md:row-start-1"
             onSubmit={(e) => {
               e.preventDefault();
-              setResetSent(true);
+              submitReset();
             }}
           >
             <h2 className="text-lg" style={{ fontFamily: brand.fontHeading }}>
@@ -157,7 +223,7 @@ export default function Screen() {
                 id="vl-reset-email"
                 type="email"
                 autoComplete="email"
-                required
+                required={!resetToken}
                 value={resetEmail}
                 onChange={(e) => {
                   setResetEmail(e.target.value);
@@ -178,12 +244,16 @@ export default function Screen() {
                 autoComplete="new-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                aria-describedby="vl-new-hint"
+                aria-invalid={!!passwordError}
+                aria-describedby="vl-new-hint vl-new-error"
                 className="vl-focus w-full px-3 text-sm outline-none"
                 style={field}
               />
               <p id="vl-new-hint" className="text-xs" style={{ color: brand.neutralColor }}>
                 Only needed once you have opened the link from your email.
+              </p>
+              <p id="vl-new-error" className="text-xs" style={{ color: "rgb(232,150,140)" }}>
+                {passwordError}
               </p>
             </div>
             <div className="space-y-2">
@@ -221,7 +291,17 @@ export default function Screen() {
                 className="text-sm"
                 style={{ borderLeft: "1px solid " + brand.accentColor, paddingLeft: 12 }}
               >
-                If that email has an account, a reset link has been sent.
+                {resetMessage}
+              </p>
+            )}
+            {resetDone && (
+              <p role="status" className="text-sm">
+                Your password has been reset. You can now sign in.
+              </p>
+            )}
+            {resetError && (
+              <p role="alert" className="text-sm" style={{ color: "rgb(232,150,140)" }}>
+                {resetError}
               </p>
             )}
           </form>

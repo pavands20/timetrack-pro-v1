@@ -1,6 +1,8 @@
-import { NavLink, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import type * as React from "react";
+import { NavLink, Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 
 import { Icons } from "@/lib/icons";
+import { useAuth } from "@/lib/auth";
 import SignIn from "@/screens/SignIn";
 import Home from "@/screens/Home";
 import Timesheet from "@/screens/Timesheet";
@@ -16,6 +18,23 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 // The app's menu, drawn around every screen except the ones routed outside it below.
 function AppShellLayout() {
+  const { user, loading, logout } = useAuth();
+  const navigate = useNavigate();
+  if (loading)
+    return (
+      <p role="status" className="p-8">
+        Loading…
+      </p>
+    );
+  if (!user) return <Navigate to="/sign-in" replace />;
+  const isAdmin = user.role === "System Admin";
+  const signOut = async () => {
+    try {
+      await logout();
+    } finally {
+      navigate("/sign-in", { replace: true });
+    }
+  };
   return (
     <div className="flex min-h-screen">
       <aside
@@ -40,17 +59,28 @@ function AppShellLayout() {
             <Icons.Menu size={16} />
             {"Timesheet"}
           </NavLink>
-          <NavLink to="/admin-users" className={navLinkClass}>
-            <Icons.User size={16} />
-            {"Users"}
-          </NavLink>
-          <NavLink to="/admin-projects" className={navLinkClass}>
-            <Icons.Settings size={16} />
-            {"Projects"}
-          </NavLink>
+          {isAdmin && (
+            <NavLink to="/admin-users" className={navLinkClass}>
+              <Icons.User size={16} />
+              {"Users"}
+            </NavLink>
+          )}
+          {isAdmin && (
+            <NavLink to="/admin-projects" className={navLinkClass}>
+              <Icons.Settings size={16} />
+              {"Projects"}
+            </NavLink>
+          )}
           <NavLink to="/help" className={navLinkClass}>
             {"Help"}
           </NavLink>
+          <button
+            type="button"
+            onClick={signOut}
+            className="flex items-center gap-2 rounded-[var(--brand-radius)] px-3 py-2 text-left text-sm font-medium text-[var(--brand-fg-muted)]"
+          >
+            {"Sign out"}
+          </button>
         </nav>
       </aside>
       <main className="flex-1 overflow-auto">
@@ -60,14 +90,33 @@ function AppShellLayout() {
   );
 }
 
+function AdminOnly({ children }: { children: React.ReactElement }) {
+  const { user } = useAuth();
+  return user?.role === "System Admin" ? children : <Navigate to="/home" replace />;
+}
+
 export default function App() {
   return (
     <Routes>
       <Route element={<AppShellLayout />}>
         <Route path="/home" element={<Home />} />
         <Route path="/timesheet" element={<Timesheet />} />
-        <Route path="/admin-users" element={<AdminUsers />} />
-        <Route path="/admin-projects" element={<AdminProjects />} />
+        <Route
+          path="/admin-users"
+          element={
+            <AdminOnly>
+              <AdminUsers />
+            </AdminOnly>
+          }
+        />
+        <Route
+          path="/admin-projects"
+          element={
+            <AdminOnly>
+              <AdminProjects />
+            </AdminOnly>
+          }
+        />
         <Route path="/help" element={<Help />} />
       </Route>
       <Route path="/sign-in" element={<SignIn />} />

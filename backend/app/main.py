@@ -1,42 +1,71 @@
-"""Application entrypoint.
-
-Generated from the approved architecture: one router per component that owns
-endpoints, one route per endpoint the API spec declares. Every generated route
-is a stub that returns a typed placeholder, so the service starts, serves its
-OpenAPI document and passes its tests before a single handler is implemented.
-"""
+"""Application entrypoint."""
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app import models  # noqa: F401 -- imported so every table registers on the metadata
 from app.config import settings
+from app.routers import auth as auth_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Nothing to do on startup: the schema changes only through Alembic migrations
     (`alembic upgrade head`, which the container runs before it serves).
-
-    Importing the application never opens a connection, so a test can point `get_db`
-    at a database of its own.
     """
     yield
 
+
+_PROD = settings.environment.lower() == "production"
 
 app = FastAPI(
     title="TimeTrack Pro V1",
     description="Time and labour management API: time tracking, timesheets and administration.",
     version="0.1.0",
     lifespan=lifespan,
+    docs_url=None if _PROD else "/docs",
+    redoc_url=None if _PROD else "/redoc",
+    openapi_url=None if _PROD else "/openapi.json",
 )
 
-# The SPA runs on a different origin than the API, so the browser refuses its calls
-# unless that origin is allowed here. The platform injects the frontend's real URL as
-# ALLOWED_ORIGINS (comma separated); see app/config.py for the local default.
+_UNSAFE = {"POST", "PUT", "PATCH", "DELETE"}
+
+
+@app.middleware("http")
+async def require_csrf_header(request: Request, call_next):  # type: ignore[no-untyped-def]
+    """State-changing /api requests must carry X-Requested-With (CSRF defence)."""
+    if (
+        request.method in _UNSAFE
+        and request.url.path.startswith("/api")
+        and not request.headers.get("x-requested-with")
+    ):
+        return JSONResponse(
+            status_code=403, content={"detail": "You do not have access to this resource."}
+        )
+    return await call_next(request)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
+    errors = []
+    for err in exc.errors():
+        msg = str(err.get("msg", "Invalid value."))
+        if err.get("type") == "missing":
+            msg = "This field is required."
+        elif "email" in msg.lower():
+            msg = "Enter a valid email address."
+        else:
+            msg = msg.removeprefix("Value error, ")
+        errors.append({"loc": list(err.get("loc", [])), "msg": msg})
+    return JSONResponse(status_code=422, content={"detail": errors})
+
+
+# The SPA and API share one origin in production; CORS only matters for local dev.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
@@ -48,5 +77,8 @@ app.add_middleware(
 
 @app.get("/health")
 async def health() -> dict[str, str]:
-    """Liveness probe, and the only route here that is not a stub."""
+    """Liveness probe."""
     return {"status": "ok"}
+
+
+app.include_router(auth_router.router)

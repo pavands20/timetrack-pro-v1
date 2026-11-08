@@ -40,6 +40,18 @@ class Settings:
     smtp_user: str = field(default_factory=lambda: os.getenv("SMTP_USER", ""))
     smtp_password: str = field(default_factory=lambda: os.getenv("SMTP_PASSWORD", ""))
     smtp_from: str = field(default_factory=lambda: os.getenv("SMTP_FROM", "no-reply@localhost"))
+    environment: str = field(default_factory=lambda: os.getenv("ENVIRONMENT", "development"))
+    # Secure cookies only; switch off for plain-http local development.
+    cookie_secure: bool = field(
+        default_factory=lambda: os.getenv("COOKIE_SECURE", "true").lower() != "false"
+    )
+    session_ttl_hours: int = field(default_factory=lambda: int(os.getenv("SESSION_TTL_HOURS", "8")))
+    bootstrap_admin_email: str = field(
+        default_factory=lambda: os.getenv("BOOTSTRAP_ADMIN_EMAIL", "")
+    )
+    bootstrap_admin_password: str = field(
+        default_factory=lambda: os.getenv("BOOTSTRAP_ADMIN_PASSWORD", "")
+    )
 
 
 settings = Settings()
