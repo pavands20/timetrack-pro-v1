@@ -56,6 +56,7 @@ def client(db_session: Session) -> Iterator[TestClient]:
 
     app.dependency_overrides[get_db] = _get_db
     try:
-        yield TestClient(app)
+        # https so a Secure session cookie (any ENVIRONMENT) is kept in and sent from the jar.
+        yield TestClient(app, base_url="https://testserver")
     finally:
         app.dependency_overrides.clear()

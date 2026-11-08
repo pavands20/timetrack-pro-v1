@@ -44,8 +44,15 @@ def login(client, email="a@example.com", password=PW):
     return client.post("/api/auth/login", json={"email": email, "password": password}, headers=H)
 
 
-def ck(r):
-    return {"Authorization": "Bearer " + r.json()["token"]}
+def session_value(client):
+    value = client.cookies.get("session")
+    assert value, "login set no session cookie"
+    return value
+
+
+def restore(client, value):
+    client.cookies.clear()
+    client.cookies.set("session", value, domain="testserver")
 
 
 # ---------- AC-001 / AC-002 / AC-003 ----------
@@ -57,10 +64,21 @@ def test_ac001_login_body_cookie_and_no_hash_leak(client, db_session):
     assert r.status_code == 200
     body = r.json()
     assert body["home_path"] == "/home" and body["email"] == "a@example.com"
-    assert set(body) == {"id", "email", "full_name", "role", "time_zone", "home_path", "token"}
-    assert "set-cookie" not in r.headers
+    assert set(body) == {"id", "email", "full_name", "role", "time_zone", "home_path"}
+    assert "token" not in body
+    flags = r.headers["set-cookie"].lower()
+    assert "httponly" in flags and "samesite=strict" in flags
     blob = r.text + str(dict(r.headers))
     assert u.password_hash not in blob and "$argon2" not in blob and "password_hash" not in blob
+
+
+def test_ac001_bearer_rejected_401_on_me(client, db_session):
+    mk(db_session)
+    login(client)
+    value = session_value(client)
+    client.cookies.clear()
+    r = client.get("/api/auth/me", headers={"Authorization": f"Bearer {value}"})
+    assert r.status_code == 401
 
 
 def test_ac002_failures_byte_identical(client, db_session):
@@ -76,6 +94,8 @@ def test_ac002_failures_byte_identical(client, db_session):
     assert {r.status_code for r in rs} == {401}
     assert len({r.content for r in rs}) == 1
     assert rs[0].json() == {"detail": "Incorrect email or password"}
+    assert all("set-cookie" not in r.headers for r in rs)
+    assert not client.cookies
 
 
 def test_ac002_login_malformed_email_422(client):
@@ -86,10 +106,12 @@ def test_ac002_login_malformed_email_422(client):
 
 def test_ac003_logout_old_cookie_401_on_me_and_protected_route(client, db_session):
     mk(db_session)
-    c = ck(login(client))
-    assert client.get("/api/auth/me", headers=c).status_code == 200
-    assert client.post("/api/auth/logout", headers={**c, **H}).status_code == 204
-    r = client.get("/api/auth/me", headers=c)
+    login(client)
+    old = session_value(client)
+    assert client.get("/api/auth/me").status_code == 200
+    assert client.post("/api/auth/logout", headers=H).status_code == 204
+    restore(client, old)
+    r = client.get("/api/auth/me")
     assert r.status_code == 401 and r.json() == {"detail": "Not signed in"}
 
     from fastapi import Depends
@@ -101,7 +123,7 @@ def test_ac003_logout_old_cookie_401_on_me_and_protected_route(client, db_sessio
         return {"ok": True}
 
     try:
-        assert client.get("/_qa_protected", headers=c).status_code == 401
+        assert client.get("/_qa_protected").status_code == 401
     finally:
         app.router.routes[:] = [
             x for x in app.router.routes if getattr(x, "path", "") != "/_qa_protected"
@@ -205,19 +227,24 @@ def test_ac007_one_email_hash_only_and_expiry(client, db_session, mailer):
     exp = db_session.execute(
         text(f"SELECT {[c for c in cols if 'expire' in c][0]} FROM {table}")
     ).scalar()
+    if isinstance(exp, str):  # raw text() on SQLite returns a string; PostgreSQL a datetime
+        exp = datetime.fromisoformat(exp)
     exp = exp if exp.tzinfo else exp.replace(tzinfo=UTC)
     assert exp > datetime.now(UTC)
 
 
 def test_ac008_confirm_flow_and_session_revocation(client, db_session, mailer):
     mk(db_session)
-    session_cookie = ck(login(client))
+    login(client)
+    old = session_value(client)
+    client.cookies.clear()
     request_reset(client)
     tok = token_from(mailer)
     assert confirm(client, tok).status_code == 204
     assert login(client, password=PW).status_code == 401
     assert login(client, password=NEW_PW).status_code == 200
-    assert client.get("/api/auth/me", headers=session_cookie).status_code == 401
+    restore(client, old)
+    assert client.get("/api/auth/me").status_code == 401
     r = confirm(client, tok, "another-password-22")
     assert r.status_code == 400 and r.json() == INVALID
 

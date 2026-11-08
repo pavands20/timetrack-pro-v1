@@ -1,28 +1,8 @@
 /// <reference types="vite/client" />
-// Deployed, the SPA and the API are on different origins: the platform bakes the API's
-// URL in as VITE_API_BASE_URL. Unset (npm run dev, tests), calls stay relative and Vite
-// proxies /api. Browsers drop cross-site cookies, so the session token from login is
-// kept here and sent as `Authorization: Bearer`.
+// The session is an HttpOnly cookie the browser sends on its own (same origin); the SPA
+// never reads, stores or sends a token. Unset VITE_API_BASE_URL keeps calls relative and
+// Vite proxies /api.
 export const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL ?? "";
-
-const SESSION_TOKEN_KEY = "session_token";
-
-export function getSessionToken(): string | null {
-  try {
-    return localStorage.getItem(SESSION_TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-export function setSessionToken(token: string | null): void {
-  try {
-    if (token) localStorage.setItem(SESSION_TOKEN_KEY, token);
-    else localStorage.removeItem(SESSION_TOKEN_KEY);
-  } catch {
-    // Storage unavailable (private mode): the session just won't survive a reload.
-  }
-}
 
 export class ApiError extends Error {
   status: number;
@@ -37,13 +17,12 @@ export class ApiError extends Error {
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const method = init?.method ?? "GET";
-  const token = getSessionToken();
   const response = await fetch(`${API_BASE_URL.replace(/\/+$/, "")}${path}`, {
     ...init,
+    credentials: "same-origin",
     headers: {
       "Content-Type": "application/json",
       "X-Requested-With": "XMLHttpRequest",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers ?? {}),
     },
   });

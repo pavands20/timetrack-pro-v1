@@ -8,7 +8,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.auth_deps import bearer_token, find_session, get_current_user
+from app.auth_deps import SESSION_COOKIE, find_session, get_current_user, session_token
 from app.config import settings
 from app.database import get_db
 from app.mailer import SmtpMailer, get_mailer
@@ -44,12 +44,14 @@ def user_out(user: User) -> UserOut:
     )
 
 
-class LoginOut(UserOut):
-    token: str  # sent back as `Authorization: Bearer <token>`
+def _secure_cookie() -> bool:
+    return settings.environment.lower() not in {"local", "dev", "development"}
 
 
-@router.post("/login", response_model=LoginOut)
-def login(body: LoginRequest, db: Annotated[Session, Depends(get_db)]) -> LoginOut:
+@router.post("/login", response_model=UserOut)
+def login(
+    body: LoginRequest, response: Response, db: Annotated[Session, Depends(get_db)]
+) -> UserOut:
     user = db.scalar(select(User).where(User.email == body.email.lower()))
     stored = user.password_hash if user and user.password_hash else DUMMY_HASH
     password_ok = verify_password(stored, body.password)
@@ -63,19 +65,32 @@ def login(body: LoginRequest, db: Annotated[Session, Depends(get_db)]) -> LoginO
         )
     )
     db.commit()
-    return LoginOut(**user_out(user).model_dump(), token=token)
+    response.set_cookie(
+        SESSION_COOKIE,
+        token,
+        max_age=int(ttl.total_seconds()),
+        path="/",
+        httponly=True,
+        samesite="strict",
+        secure=_secure_cookie(),
+    )
+    return user_out(user)
 
 
 @router.post("/logout", status_code=204)
 def logout(
     db: Annotated[Session, Depends(get_db)],
-    token: Annotated[str | None, Depends(bearer_token)],
+    token: Annotated[str | None, Depends(session_token)],
 ) -> Response:
     found = find_session(db, token)
     if found is not None:
         found[0].revoked_at = datetime.now(UTC)
         db.commit()
-    return Response(status_code=204)
+    resp = Response(status_code=204)
+    resp.delete_cookie(
+        SESSION_COOKIE, path="/", httponly=True, samesite="strict", secure=_secure_cookie()
+    )
+    return resp
 
 
 @router.get("/me", response_model=UserOut)
