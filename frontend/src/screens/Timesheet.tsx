@@ -9,58 +9,133 @@ import { useNavigate } from "@/lib/navigate";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { Home } = Icons;
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const DAY_MS = 86400000;
 const WEEK_START = { cur: Date.UTC(2026, 10, 2), prev: Date.UTC(2026, 9, 26) };
 const TODAY = Date.UTC(2026, 10, 7);
 
 const CATALOG = [
   {
-    id: 'c1', name: 'Northwind Logistics', archived: false,
-    projects: [{
-      id: 'p1', name: 'Route optimisation', defaultBillable: true, archived: false,
-      tasks: [
-        { id: 't1', name: 'Analysis', archived: false },
-        { id: 't2', name: 'Development', archived: false },
-        { id: 't3', name: 'Stakeholder reporting', archived: false },
-        { id: 't4', name: 'Legacy import', archived: true },
-      ],
-    }],
+    id: "c1",
+    name: "Northwind Logistics",
+    archived: false,
+    projects: [
+      {
+        id: "p1",
+        name: "Route optimisation",
+        defaultBillable: true,
+        archived: false,
+        tasks: [
+          { id: "t1", name: "Analysis", archived: false },
+          { id: "t2", name: "Development", archived: false },
+          { id: "t3", name: "Stakeholder reporting", archived: false },
+          { id: "t4", name: "Legacy import", archived: true },
+        ],
+      },
+    ],
   },
   {
-    id: 'c2', name: 'Harbourline Studio', archived: false,
-    projects: [{
-      id: 'p2', name: 'Brand site rebuild', defaultBillable: true, archived: false,
-      tasks: [
-        { id: 't5', name: 'Design review', archived: false },
-        { id: 't6', name: 'Front-end build', archived: false },
-        { id: 't7', name: 'Content migration', archived: false },
-      ],
-    }],
+    id: "c2",
+    name: "Harbourline Studio",
+    archived: false,
+    projects: [
+      {
+        id: "p2",
+        name: "Brand site rebuild",
+        defaultBillable: true,
+        archived: false,
+        tasks: [
+          { id: "t5", name: "Design review", archived: false },
+          { id: "t6", name: "Front-end build", archived: false },
+          { id: "t7", name: "Content migration", archived: false },
+        ],
+      },
+    ],
   },
   {
-    id: 'c3', name: 'Internal', archived: false,
-    projects: [{
-      id: 'p3', name: 'Team operations', defaultBillable: false, archived: false,
-      tasks: [
-        { id: 't8', name: 'Admin & planning', archived: false },
-        { id: 't9', name: 'Training', archived: false },
-        { id: 't10', name: 'Recruiting support', archived: false },
-      ],
-    }],
+    id: "c3",
+    name: "Internal",
+    archived: false,
+    projects: [
+      {
+        id: "p3",
+        name: "Team operations",
+        defaultBillable: false,
+        archived: false,
+        tasks: [
+          { id: "t8", name: "Admin & planning", archived: false },
+          { id: "t9", name: "Training", archived: false },
+          { id: "t10", name: "Recruiting support", archived: false },
+        ],
+      },
+    ],
   },
 ];
 
 const INIT_CUR = [
-  { id: 'e1', project: 'p1', task: 't1', billable: true, source: 'manual', note: '', fresh: false, hours: ['3', '3.5', '4', '', '', '', ''] },
-  { id: 'e2', project: 'p1', task: 't2', billable: true, source: 'clock', note: 'Mon–Thu · latest Thu 09:04–12:04 GMT', fresh: false, hours: ['4', '4', '3', '3', '', '', ''] },
-  { id: 'e3', project: 'p3', task: 't8', billable: false, source: 'manual', note: '', fresh: false, hours: ['1', '', '1', '', '', '', ''] },
+  {
+    id: "e1",
+    project: "p1",
+    task: "t1",
+    billable: true,
+    source: "manual",
+    note: "",
+    fresh: false,
+    hours: ["3", "3.5", "4", "", "", "", ""],
+  },
+  {
+    id: "e2",
+    project: "p1",
+    task: "t2",
+    billable: true,
+    source: "clock",
+    note: "Mon–Thu · latest Thu 09:04–12:04 GMT",
+    fresh: false,
+    hours: ["4", "4", "3", "3", "", "", ""],
+  },
+  {
+    id: "e3",
+    project: "p3",
+    task: "t8",
+    billable: false,
+    source: "manual",
+    note: "",
+    fresh: false,
+    hours: ["1", "", "1", "", "", "", ""],
+  },
 ];
 const INIT_PREV = [
-  { id: 'e4', project: 'p1', task: 't2', billable: true, source: 'clock', note: 'Mon–Fri · latest Fri 08:58–14:58 GMT, 30 min break', fresh: false, hours: ['6', '6.5', '7', '6', '5.5', '', ''] },
-  { id: 'e5', project: 'p2', task: 't5', billable: true, source: 'manual', note: '', fresh: false, hours: ['2', '1.5', '1', '2', '1.5', '', ''] },
-  { id: 'e6', project: 'p3', task: 't9', billable: false, source: 'manual', note: '', fresh: false, hours: ['', '', '', '', '1', '', ''] },
+  {
+    id: "e4",
+    project: "p1",
+    task: "t2",
+    billable: true,
+    source: "clock",
+    note: "Mon–Fri · latest Fri 08:58–14:58 GMT, 30 min break",
+    fresh: false,
+    hours: ["6", "6.5", "7", "6", "5.5", "", ""],
+  },
+  {
+    id: "e5",
+    project: "p2",
+    task: "t5",
+    billable: true,
+    source: "manual",
+    note: "",
+    fresh: false,
+    hours: ["2", "1.5", "1", "2", "1.5", "", ""],
+  },
+  {
+    id: "e6",
+    project: "p3",
+    task: "t9",
+    billable: false,
+    source: "manual",
+    note: "",
+    fresh: false,
+    hours: ["", "", "", "", "1", "", ""],
+  },
 ];
 
 const CSS = `
@@ -175,24 +250,26 @@ const CSS = `
 `;
 
 function parseHours(v) {
-  const s = String(v).trim().replace(',', '.');
-  if (s === '') return { ok: true, n: 0 };
-  if (!/^-?\d*\.?\d+$/.test(s)) return { ok: false, n: 0, msg: 'enter hours as a number, like 7.5.' };
+  const s = String(v).trim().replace(",", ".");
+  if (s === "") return { ok: true, n: 0 };
+  if (!/^-?\d*\.?\d+$/.test(s))
+    return { ok: false, n: 0, msg: "enter hours as a number, like 7.5." };
   const n = Number(s);
   if (n < 0) return { ok: false, n: 0, msg: "hours can't be negative." };
   if (n > 24) return { ok: false, n: 0, msg: "a day can't have more than 24 hours." };
   return { ok: true, n };
 }
-const fmt = (n) => (n === 0 ? '0' : n.toFixed(1));
+const fmt = (n) => (n === 0 ? "0" : n.toFixed(1));
 const findProject = (id) => {
-  for (const c of CATALOG) for (const p of c.projects) if (p.id === id) return { client: c, project: p };
+  for (const c of CATALOG)
+    for (const p of c.projects) if (p.id === id) return { client: c, project: p };
   return null;
 };
 const rowLabel = (r) => {
   const f = findProject(r.project);
-  if (!f) return '';
+  if (!f) return "";
   const t = f.project.tasks.find((x) => x.id === r.task);
-  return `${f.project.name}${t ? ' / ' + t.name : ''}`;
+  return `${f.project.name}${t ? " / " + t.name : ""}`;
 };
 const dayText = (ms) => {
   const d = new Date(ms);
@@ -201,14 +278,14 @@ const dayText = (ms) => {
 
 export default function Screen() {
   const navigate = useNavigate();
-  const [weekKey, setWeekKey] = React.useState('cur');
+  const [weekKey, setWeekKey] = React.useState("cur");
   const [weeks, setWeeks] = React.useState({ cur: INIT_CUR, prev: INIT_PREV });
   const [saved, setSaved] = React.useState({ cur: INIT_CUR, prev: INIT_PREV });
   const [errors, setErrors] = React.useState([]);
   const [confirmId, setConfirmId] = React.useState(null);
   const [saving, setSaving] = React.useState(false);
-  const [savedAt, setSavedAt] = React.useState('');
-  const [notice, setNotice] = React.useState('');
+  const [savedAt, setSavedAt] = React.useState("");
+  const [notice, setNotice] = React.useState("");
   const [focusId, setFocusId] = React.useState(null);
   const counter = React.useRef(1);
   const alertRef = React.useRef(null);
@@ -232,9 +309,15 @@ export default function Screen() {
       setWeeks((w) => ({ ...w, [weekKey]: clean }));
       setSaved((s) => ({ ...s, [weekKey]: clean }));
       setSavedAt(
-        new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date())
+        new Intl.DateTimeFormat("en-GB", {
+          timeZone: "Europe/London",
+          day: "numeric",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        }).format(new Date()),
       );
-      setNotice('Timesheet saved. Totals are up to date.');
+      setNotice("Timesheet saved. Totals are up to date.");
       setSaving(false);
     }, 600);
     return () => clearTimeout(t);
@@ -242,7 +325,7 @@ export default function Screen() {
 
   React.useEffect(() => {
     if (focusId) {
-      const el = document.getElementById('proj-' + focusId);
+      const el = document.getElementById("proj-" + focusId);
       if (el) el.focus();
       setFocusId(null);
     }
@@ -253,9 +336,12 @@ export default function Screen() {
   }, [errors]);
 
   const patchRow = (id, patch, clearKeys) => {
-    setWeeks((w) => ({ ...w, [weekKey]: w[weekKey].map((r) => (r.id === id ? { ...r, ...patch } : r)) }));
+    setWeeks((w) => ({
+      ...w,
+      [weekKey]: w[weekKey].map((r) => (r.id === id ? { ...r, ...patch } : r)),
+    }));
     if (clearKeys) setErrors((e) => e.filter((x) => !clearKeys.includes(x.key)));
-    setNotice('');
+    setNotice("");
   };
   const setHour = (r, i, val) => {
     const hours = r.hours.slice();
@@ -267,73 +353,92 @@ export default function Screen() {
     const first = f ? f.project.tasks.find((t) => !t.archived) : null;
     patchRow(
       r.id,
-      { project: pid, task: first ? first.id : '', billable: f && r.fresh ? f.project.defaultBillable : r.billable },
-      [`${r.id}:proj`]
+      {
+        project: pid,
+        task: first ? first.id : "",
+        billable: f && r.fresh ? f.project.defaultBillable : r.billable,
+      },
+      [`${r.id}:proj`],
     );
   };
   const addRow = () => {
-    const id = 'n' + counter.current++;
-    const row = { id, project: '', task: '', billable: true, source: 'manual', note: '', fresh: true, hours: ['', '', '', '', '', '', ''] };
+    const id = "n" + counter.current++;
+    const row = {
+      id,
+      project: "",
+      task: "",
+      billable: true,
+      source: "manual",
+      note: "",
+      fresh: true,
+      hours: ["", "", "", "", "", "", ""],
+    };
     setWeeks((w) => ({ ...w, [weekKey]: [...w[weekKey], row] }));
-    setNotice('');
+    setNotice("");
     setFocusId(id);
   };
   const deleteRow = (id) => {
     setWeeks((w) => ({ ...w, [weekKey]: w[weekKey].filter((r) => r.id !== id) }));
-    setErrors((e) => e.filter((x) => !x.key.startsWith(id + ':')));
+    setErrors((e) => e.filter((x) => !x.key.startsWith(id + ":")));
     setConfirmId(null);
-    setNotice('Entry removed from this week. Totals updated.');
-    const add = document.getElementById('ts-add');
+    setNotice("Entry removed from this week. Totals updated.");
+    const add = document.getElementById("ts-add");
     if (add) add.focus();
   };
   const switchWeek = () => {
-    setWeekKey(weekKey === 'cur' ? 'prev' : 'cur');
+    setWeekKey(weekKey === "cur" ? "prev" : "cur");
     setErrors([]);
     setConfirmId(null);
-    setNotice('');
+    setNotice("");
   };
   const onSave = () => {
     const errs = [];
     rows.forEach((r, ri) => {
       const label = rowLabel(r) || `Row ${ri + 1}`;
-      if (!r.project || !r.task) errs.push({ key: `${r.id}:proj`, msg: `Row ${ri + 1}: choose a project and a task.` });
+      if (!r.project || !r.task)
+        errs.push({ key: `${r.id}:proj`, msg: `Row ${ri + 1}: choose a project and a task.` });
       r.hours.forEach((h, i) => {
         const p = parseHours(h);
         if (!p.ok) errs.push({ key: `${r.id}:${i}`, msg: `${label}, ${DAYS[i]}: ${p.msg}` });
       });
     });
     DAYS.forEach((d, i) => {
-      if (dayTotals[i] > 24) errs.push({ key: `day:${i}`, msg: `${d}: the day adds up to more than 24 hours.` });
+      if (dayTotals[i] > 24)
+        errs.push({ key: `day:${i}`, msg: `${d}: the day adds up to more than 24 hours.` });
     });
     if (errs.length) {
       setErrors(errs);
-      setNotice('');
+      setNotice("");
       return;
     }
     setErrors([]);
-    setNotice('');
+    setNotice("");
     setSaving(true);
   };
 
   const rootStyle = {
-    '--ts-bg': brand.backgroundColor,
-    '--ts-surface': `color-mix(in srgb, ${brand.primaryColor} 5%, ${brand.backgroundColor})`,
-    '--ts-field': `color-mix(in srgb, black 18%, ${brand.backgroundColor})`,
-    '--ts-hair': `color-mix(in srgb, ${brand.primaryColor} 12%, transparent)`,
-    '--ts-text': brand.primaryColor,
-    '--ts-muted': brand.neutralColor,
-    '--ts-accent': brand.accentColor,
-    '--ts-danger': 'hsl(6 62% 72%)',
-    '--ts-head': brand.fontHeading,
-    '--ts-body': brand.fontBody,
+    "--ts-bg": brand.backgroundColor,
+    "--ts-surface": `color-mix(in srgb, ${brand.primaryColor} 5%, ${brand.backgroundColor})`,
+    "--ts-field": `color-mix(in srgb, black 18%, ${brand.backgroundColor})`,
+    "--ts-hair": `color-mix(in srgb, ${brand.primaryColor} 12%, transparent)`,
+    "--ts-text": brand.primaryColor,
+    "--ts-muted": brand.neutralColor,
+    "--ts-accent": brand.accentColor,
+    "--ts-danger": "hsl(6 62% 72%)",
+    "--ts-head": brand.fontHeading,
+    "--ts-body": brand.fontBody,
     paddingBottom: 32,
   };
 
   const projectOptions = CATALOG.filter((c) => !c.archived).map((c) => (
     <optgroup key={c.id} label={c.name}>
-      {c.projects.filter((p) => !p.archived).map((p) => (
-        <option key={p.id} value={p.id}>{p.name}</option>
-      ))}
+      {c.projects
+        .filter((p) => !p.archived)
+        .map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name}
+          </option>
+        ))}
     </optgroup>
   ));
   const taskOptions = (r) => {
@@ -341,16 +446,26 @@ export default function Screen() {
     if (!f) return [];
     return f.project.tasks
       .filter((t) => !t.archived || t.id === r.task)
-      .map((t) => <option key={t.id} value={t.id}>{t.name}{t.archived ? ' (archived)' : ''}</option>);
+      .map((t) => (
+        <option key={t.id} value={t.id}>
+          {t.name}
+          {t.archived ? " (archived)" : ""}
+        </option>
+      ));
   };
 
   const statusNode = saving ? (
-    <span className="inline-flex items-center gap-2"><Icons.Clock className="ts-ico" aria-hidden="true" /> Saving timesheet…</span>
+    <span className="inline-flex items-center gap-2">
+      <Icons.Clock className="ts-ico" aria-hidden="true" /> Saving timesheet…
+    </span>
   ) : dirty ? (
-    <span className="inline-flex items-center gap-2"><Icons.Edit className="ts-ico" aria-hidden="true" /> Unsaved changes</span>
+    <span className="inline-flex items-center gap-2">
+      <Icons.Edit className="ts-ico" aria-hidden="true" /> Unsaved changes
+    </span>
   ) : (
     <span className="inline-flex items-center gap-2" style={{ color: brand.accentColor }}>
-      <Icons.CheckCircle className="ts-ico" aria-hidden="true" /> All changes saved{savedAt ? ` · ${savedAt} GMT` : ''}
+      <Icons.CheckCircle className="ts-ico" aria-hidden="true" /> All changes saved
+      {savedAt ? ` · ${savedAt} GMT` : ""}
     </span>
   );
 
@@ -360,7 +475,9 @@ export default function Screen() {
 
       <div className="ts-top">
         <div className="ts-c-title" data-wf="b-0-0">
-          <p className="ts-eyebrow" style={{ marginBottom: 12 }}>Monday to Sunday · Europe/London</p>
+          <p className="ts-eyebrow" style={{ marginBottom: 12 }}>
+            Monday to Sunday · Europe/London
+          </p>
           <h1 className="ts-title">{title}</h1>
           <span className="ts-rule" aria-hidden="true" />
         </div>
@@ -370,30 +487,63 @@ export default function Screen() {
             className="ts-btn"
             data-wf="b-0-1"
             onClick={switchWeek}
-            aria-label={weekKey === 'cur' ? 'Go to last week, 26 Oct to 1 Nov' : 'Go to this week, 2 Nov to 8 Nov'}
+            aria-label={
+              weekKey === "cur"
+                ? "Go to last week, 26 Oct to 1 Nov"
+                : "Go to this week, 2 Nov to 8 Nov"
+            }
           >
-            {weekKey === 'cur' ? <Icons.ChevronLeft className="ts-ico" aria-hidden="true" /> : null}
-            {weekKey === 'cur' ? 'Last week' : 'This week'}
-            {weekKey === 'cur' ? null : <Icons.ChevronRight className="ts-ico" aria-hidden="true" />}
+            {weekKey === "cur" ? <Icons.ChevronLeft className="ts-ico" aria-hidden="true" /> : null}
+            {weekKey === "cur" ? "Last week" : "This week"}
+            {weekKey === "cur" ? null : (
+              <Icons.ChevronRight className="ts-ico" aria-hidden="true" />
+            )}
           </button>
         </div>
         <div className="ts-c-add">
-          <button type="button" id="ts-add" className="ts-btn ts-btn-accent" data-wf="b-0-2" onClick={addRow}>
+          <button
+            type="button"
+            id="ts-add"
+            className="ts-btn ts-btn-accent"
+            data-wf="b-0-2"
+            onClick={addRow}
+          >
             <Icons.Plus className="ts-ico" aria-hidden="true" /> Add row
           </button>
         </div>
       </div>
 
       <section className="ts-panel" data-wf="b-1-0" aria-labelledby="ts-week-hours">
-        <div style={{ padding: '16px 16px 12px', display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', alignItems: 'baseline' }}>
-          <h2 id="ts-week-hours" className="ts-eyebrow" style={{ fontFamily: 'var(--ts-body)', fontSize: 12 }}>Week hours</h2>
-          <p className="ts-note" style={{ margin: 0 }}>Clocked entries are shown in Europe/London time and stored in UTC.</p>
+        <div
+          style={{
+            padding: "16px 16px 12px",
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 16,
+            flexWrap: "wrap",
+            alignItems: "baseline",
+          }}
+        >
+          <h2
+            id="ts-week-hours"
+            className="ts-eyebrow"
+            style={{ fontFamily: "var(--ts-body)", fontSize: 12 }}
+          >
+            Week hours
+          </h2>
+          <p className="ts-note" style={{ margin: 0 }}>
+            Clocked entries are shown in Europe/London time and stored in UTC.
+          </p>
         </div>
         <table className="ts-table">
           <thead>
             <tr>
-              <th scope="col" className="ts-th ts-th-first" data-wf="i-1-0-0">Project / Task</th>
-              <th scope="col" className="ts-th" data-wf="i-1-0-1">Billable</th>
+              <th scope="col" className="ts-th ts-th-first" data-wf="i-1-0-0">
+                Project / Task
+              </th>
+              <th scope="col" className="ts-th" data-wf="i-1-0-1">
+                Billable
+              </th>
               {DAYS.map((d, i) => (
                 <th key={d} scope="col" className="ts-th" data-wf={`i-1-0-${i + 2}`}>
                   {d}
@@ -401,8 +551,12 @@ export default function Screen() {
                   {dates[i] === TODAY ? <span className="ts-today">Today</span> : null}
                 </th>
               ))}
-              <th scope="col" className="ts-th" data-wf="i-1-0-9">Total</th>
-              <th scope="col" className="ts-th" data-wf="i-1-0-10">Delete</th>
+              <th scope="col" className="ts-th" data-wf="i-1-0-9">
+                Total
+              </th>
+              <th scope="col" className="ts-th" data-wf="i-1-0-10">
+                Delete
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -414,12 +568,14 @@ export default function Screen() {
                   <tr className="ts-row">
                     <td className="ts-proj">
                       <div className="ts-sel">
-                        <label htmlFor={`proj-${r.id}`} className="sr-only">Project for {label}</label>
+                        <label htmlFor={`proj-${r.id}`} className="sr-only">
+                          Project for {label}
+                        </label>
                         <select
                           id={`proj-${r.id}`}
                           className="ts-field"
                           value={r.project}
-                          aria-invalid={invalid(`${r.id}:proj`) ? 'true' : undefined}
+                          aria-invalid={invalid(`${r.id}:proj`) ? "true" : undefined}
                           onChange={(e) => changeProject(r, e.target.value)}
                         >
                           <option value="">Choose a project</option>
@@ -427,26 +583,44 @@ export default function Screen() {
                         </select>
                       </div>
                       <div className="ts-sel">
-                        <label htmlFor={`task-${r.id}`} className="sr-only">Task for {label}</label>
+                        <label htmlFor={`task-${r.id}`} className="sr-only">
+                          Task for {label}
+                        </label>
                         <select
                           id={`task-${r.id}`}
                           className="ts-field"
                           value={r.task}
                           disabled={!f}
-                          aria-invalid={invalid(`${r.id}:proj`) ? 'true' : undefined}
-                          onChange={(e) => patchRow(r.id, { task: e.target.value }, [`${r.id}:proj`])}
+                          aria-invalid={invalid(`${r.id}:proj`) ? "true" : undefined}
+                          onChange={(e) =>
+                            patchRow(r.id, { task: e.target.value }, [`${r.id}:proj`])
+                          }
                         >
-                          <option value="">{f ? 'Choose a task' : 'Choose a project first'}</option>
+                          <option value="">{f ? "Choose a task" : "Choose a project first"}</option>
                           {taskOptions(r)}
                         </select>
                       </div>
-                      {r.source === 'clock' ? (
+                      {r.source === "clock" ? (
                         <>
-                          <span className="ts-src ts-src-clock"><Icons.Clock className="ts-ico" aria-hidden="true" style={{ width: 12, height: 12 }} /> Clocked</span>
+                          <span className="ts-src ts-src-clock">
+                            <Icons.Clock
+                              className="ts-ico"
+                              aria-hidden="true"
+                              style={{ width: 12, height: 12 }}
+                            />{" "}
+                            Clocked
+                          </span>
                           <p className="ts-note">{r.note}</p>
                         </>
                       ) : (
-                        <span className="ts-src"><Icons.Edit className="ts-ico" aria-hidden="true" style={{ width: 12, height: 12 }} /> {r.fresh ? 'New row' : 'Entered by hand'}</span>
+                        <span className="ts-src">
+                          <Icons.Edit
+                            className="ts-ico"
+                            aria-hidden="true"
+                            style={{ width: 12, height: 12 }}
+                          />{" "}
+                          {r.fresh ? "New row" : "Entered by hand"}
+                        </span>
                       )}
                     </td>
                     <td className="ts-bill">
@@ -457,13 +631,21 @@ export default function Screen() {
                           checked={r.billable}
                           onChange={(e) => patchRow(r.id, { billable: e.target.checked })}
                         />
-                        <span>{r.billable ? 'Billable' : 'Non-billable'}</span>
+                        <span>{r.billable ? "Billable" : "Non-billable"}</span>
                       </label>
                     </td>
                     {DAYS.map((d, i) => (
                       <td key={d} className="ts-day">
-                        <label htmlFor={`h-${r.id}-${i}`} className="ts-daylabel" aria-hidden="true">{d}</label>
-                        <span className="sr-only">Hours on {d} {dayText(dates[i])} for {label}</span>
+                        <label
+                          htmlFor={`h-${r.id}-${i}`}
+                          className="ts-daylabel"
+                          aria-hidden="true"
+                        >
+                          {d}
+                        </label>
+                        <span className="sr-only">
+                          Hours on {d} {dayText(dates[i])} for {label}
+                        </span>
                         <input
                           id={`h-${r.id}-${i}`}
                           className="ts-field ts-hours"
@@ -472,17 +654,26 @@ export default function Screen() {
                           autoComplete="off"
                           placeholder="–"
                           value={r.hours[i]}
-                          aria-invalid={invalid(`${r.id}:${i}`) ? 'true' : undefined}
+                          aria-invalid={invalid(`${r.id}:${i}`) ? "true" : undefined}
                           aria-describedby={`hint-${r.id}-${i}`}
                           onChange={(e) => setHour(r, i, e.target.value)}
                         />
-                        <span id={`hint-${r.id}-${i}`} className="sr-only">{invalid(`${r.id}:${i}`) ? 'Invalid hours. Use a number from 0 to 24.' : 'Hours from 0 to 24.'}</span>
+                        <span id={`hint-${r.id}-${i}`} className="sr-only">
+                          {invalid(`${r.id}:${i}`)
+                            ? "Invalid hours. Use a number from 0 to 24."
+                            : "Hours from 0 to 24."}
+                        </span>
                       </td>
                     ))}
                     <td className="ts-total">
-                      <span className="ts-narrow-only ts-eyebrow" style={{ marginRight: 8 }}>Row total</span>
+                      <span className="ts-narrow-only ts-eyebrow" style={{ marginRight: 8 }}>
+                        Row total
+                      </span>
                       <span className="ts-totalfig">{fmt(rowTotal(r))}</span>
-                      <span className="ts-narrow-only ts-num" style={{ color: 'var(--ts-muted)' }}> h</span>
+                      <span className="ts-narrow-only ts-num" style={{ color: "var(--ts-muted)" }}>
+                        {" "}
+                        h
+                      </span>
                     </td>
                     <td className="ts-del">
                       <button
@@ -498,15 +689,37 @@ export default function Screen() {
                     </td>
                   </tr>
                   {confirmId === r.id ? (
-                    <tr className="ts-confirm" onKeyDown={(e) => { if (e.key === 'Escape') setConfirmId(null); }}>
+                    <tr
+                      className="ts-confirm"
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") setConfirmId(null);
+                      }}
+                    >
                       <td colSpan={11}>
-                        <div className="ts-confirm-body" role="group" aria-label={`Confirm deleting ${label}`}>
-                          <p style={{ maxWidth: '60ch' }}>
-                            Delete <strong>{label}</strong> and its <span className="ts-num">{fmt(rowTotal(r))} h</span> from this week? This can’t be undone.
+                        <div
+                          className="ts-confirm-body"
+                          role="group"
+                          aria-label={`Confirm deleting ${label}`}
+                        >
+                          <p style={{ maxWidth: "60ch" }}>
+                            Delete <strong>{label}</strong> and its{" "}
+                            <span className="ts-num">{fmt(rowTotal(r))} h</span> from this week?
+                            This can’t be undone.
                           </p>
                           <div className="ts-confirm-actions">
-                            <button type="button" className="ts-btn ts-btn-auto" autoFocus onClick={() => setConfirmId(null)}>Keep entry</button>
-                            <button type="button" className="ts-btn ts-btn-danger" onClick={() => deleteRow(r.id)}>
+                            <button
+                              type="button"
+                              className="ts-btn ts-btn-auto"
+                              autoFocus
+                              onClick={() => setConfirmId(null)}
+                            >
+                              Keep entry
+                            </button>
+                            <button
+                              type="button"
+                              className="ts-btn ts-btn-danger"
+                              onClick={() => deleteRow(r.id)}
+                            >
                               <Icons.Trash className="ts-ico" aria-hidden="true" /> Delete entry
                             </button>
                           </div>
@@ -521,9 +734,18 @@ export default function Screen() {
         </table>
         {rows.length === 0 ? (
           <div className="ts-empty">
-            <span style={{ color: 'var(--ts-accent)' }}><Icons.Calendar className="ts-ico" aria-hidden="true" style={{ width: 28, height: 28 }} /></span>
+            <span style={{ color: "var(--ts-accent)" }}>
+              <Icons.Calendar
+                className="ts-ico"
+                aria-hidden="true"
+                style={{ width: 28, height: 28 }}
+              />
+            </span>
             <h3>No hours on this week yet</h3>
-            <p>Add a row to charge time to a project and task, or clock in from Home. Clocked entries land on their day by themselves.</p>
+            <p>
+              Add a row to charge time to a project and task, or clock in from Home. Clocked entries
+              land on their day by themselves.
+            </p>
             <button type="button" className="ts-btn ts-btn-accent ts-btn-auto" onClick={addRow}>
               <Icons.Plus className="ts-ico" aria-hidden="true" /> Add row
             </button>
@@ -534,35 +756,58 @@ export default function Screen() {
       <div className="ts-mid">
         <div className="ts-c-sum" data-wf="b-2-0">
           <p className="ts-num" style={{ fontSize: 15, lineHeight: 1.7 }}>
-            Daily totals: {dayTotals.map(fmt).join(' · ')}. Week total:{' '}
-            <strong style={{ fontFamily: 'var(--ts-head)', fontWeight: 400, fontSize: 22, color: 'var(--ts-accent)' }}>{fmt(weekTotal)} h</strong>
+            Daily totals: {dayTotals.map(fmt).join(" · ")}. Week total:{" "}
+            <strong
+              style={{
+                fontFamily: "var(--ts-head)",
+                fontWeight: 400,
+                fontSize: 22,
+                color: "var(--ts-accent)",
+              }}
+            >
+              {fmt(weekTotal)} h
+            </strong>
             . Clocked entries appear on their day.
           </p>
           {errors.length ? (
             <div className="ts-alert" role="alert" tabIndex={-1} ref={alertRef}>
-              <Icons.AlertCircle className="ts-ico" aria-hidden="true" style={{ color: 'var(--ts-danger)', marginTop: 4 }} />
+              <Icons.AlertCircle
+                className="ts-ico"
+                aria-hidden="true"
+                style={{ color: "var(--ts-danger)", marginTop: 4 }}
+              />
               <div>
-                <strong>Timesheet not saved.</strong> Nothing you typed has been lost. Fix {errors.length === 1 ? 'this' : `these ${errors.length}`} and save again:
+                <strong>Timesheet not saved.</strong> Nothing you typed has been lost. Fix{" "}
+                {errors.length === 1 ? "this" : `these ${errors.length}`} and save again:
                 <ul>
-                  {errors.map((e) => <li key={e.key}>{e.msg}</li>)}
+                  {errors.map((e) => (
+                    <li key={e.key}>{e.msg}</li>
+                  ))}
                 </ul>
               </div>
             </div>
           ) : null}
         </div>
         <div className="ts-c-save">
-          <button type="button" className="ts-btn ts-btn-primary" data-wf="b-2-1" onClick={onSave} disabled={saving}>
-            <Icons.Check className="ts-ico" aria-hidden="true" /> {saving ? 'Saving…' : 'Save timesheet'}
+          <button
+            type="button"
+            className="ts-btn ts-btn-primary"
+            data-wf="b-2-1"
+            onClick={onSave}
+            disabled={saving}
+          >
+            <Icons.Check className="ts-ico" aria-hidden="true" />{" "}
+            {saving ? "Saving…" : "Save timesheet"}
           </button>
           <p role="status" className="ts-note" style={{ marginTop: 12, fontSize: 13 }}>
             {statusNode}
-            {notice ? <span style={{ display: 'block', marginTop: 4 }}>{notice}</span> : null}
+            {notice ? <span style={{ display: "block", marginTop: 4 }}>{notice}</span> : null}
           </p>
         </div>
       </div>
 
       <div data-wf="b-3-0">
-        <button type="button" className="ts-link" onClick={() => navigate('home')}>
+        <button type="button" className="ts-link" onClick={() => navigate("home")}>
           <Icons.ArrowLeft className="ts-ico" aria-hidden="true" /> Back to home and clock
         </button>
       </div>

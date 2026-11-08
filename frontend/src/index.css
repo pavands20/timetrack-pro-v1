@@ -7,11 +7,11 @@
   --brand-radius: 6px;
   --brand-font-heading: "Baskerville", "Libre Baskerville", "Times New Roman", Georgia, serif;
   --brand-font-body: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --brand-surface: rgba(255,255,255,0.04);
-  --brand-border: rgba(255,255,255,0.10);
+  --brand-surface: rgba(255, 255, 255, 0.04);
+  --brand-border: rgba(255, 255, 255, 0.1);
   --brand-fg: #e2e8f0;
-  --brand-fg-muted: rgba(226,232,240,0.65);
-  --brand-hover: rgba(255,255,255,0.06);
+  --brand-fg-muted: rgba(226, 232, 240, 0.65);
+  --brand-hover: rgba(255, 255, 255, 0.06);
   --brand-background: #16211c;
 }
 

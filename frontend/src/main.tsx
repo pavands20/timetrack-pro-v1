@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import App from "@/App";
+import { AuthProvider } from "@/lib/auth";
 import "@/index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -13,7 +14,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         time, so this is a no-op for a plain `npm run dev`/`build` and any
         already-deployed app. */}
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </BrowserRouter>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

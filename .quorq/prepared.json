@@ -1,0 +1,47 @@
+{
+  "key": {
+    "app_design_id": "7f1fdb0d-8d48-4604-8603-72743f8ab5c5",
+    "app_design_version": 1,
+    "architecture_document_id": "8509476b-a8fd-4d63-9df2-32a5b604bc23",
+    "architecture_version": 1
+  },
+  "outcome": "prepared",
+  "packages": [
+    {
+      "ecosystem": "pypi",
+      "installed_version": "25.1.0",
+      "name": "argon2-cffi",
+      "status": "installed",
+      "version": ">=23.1.0"
+    },
+    {
+      "ecosystem": "pypi",
+      "installed_version": "2.3.0",
+      "name": "email-validator",
+      "status": "installed",
+      "version": ">=2.0"
+    },
+    {
+      "ecosystem": "pypi",
+      "installed_version": "2026.6",
+      "name": "tzdata",
+      "status": "installed",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "error": "already provided by the scaffold",
+      "name": "luxon",
+      "status": "skipped",
+      "version": ">=3.0"
+    },
+    {
+      "ecosystem": "npm",
+      "error": "already provided by the scaffold",
+      "name": "react-markdown",
+      "status": "skipped",
+      "version": ""
+    }
+  ],
+  "prepared_by_run": "393d65b0-0578-4288-8637-ec2bb11fa45f"
+}

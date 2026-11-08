@@ -1,49 +1,55 @@
-"""Test fixtures: one fresh database per test, never the application's own.
+"""Test fixtures: the sandbox's real PostgreSQL, rolled back after every test.
 
-Without this file every test shares the SQLite file `DATABASE_URL` names, so a row
-one test writes is still there for the next one, and the order the tests run in
-decides whether they pass. Worse, a deployment that points `DATABASE_URL` at
-Postgres makes the suite need a database server to collect at all.
-
-Each test gets an in-memory database of its own. `StaticPool` keeps every session
-on the one connection that memory lives in, and the `get_db` override makes the
-application use it instead of the engine `app.database` built at import.
+The schema is brought up with Alembic (`upgrade head`) once per session, so the tests
+run against the migrations and not against a schema the models merely imply. Each test
+works inside an outer transaction that is rolled back at the end, so no row one test
+writes is visible to the next and the order the tests run in does not matter.
 """
 
 from collections.abc import Iterator
+from pathlib import Path
 
 import pytest
+from alembic import command
+from alembic.config import Config
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.orm import Session
 
-from app import models  # noqa: F401 -- imported so the tables register before create_all
-from app.database import Base, get_db
+from app.database import engine, get_db
 from app.main import app
+
+_ALEMBIC_INI = Path(__file__).resolve().parent.parent / "alembic.ini"
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _migrated_schema() -> None:
+    command.upgrade(Config(str(_ALEMBIC_INI)), "head")
 
 
 @pytest.fixture
 def db_session() -> Iterator[Session]:
-    """An empty database, built and thrown away around one test."""
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-        future=True,
+    """A session whose work is rolled back when the test ends."""
+    connection = engine.connect()
+    transaction = connection.begin()
+    # join_transaction_mode keeps a `session.commit()` inside the test from committing
+    # the outer transaction.
+    session = Session(
+        bind=connection,
+        autoflush=False,
+        expire_on_commit=False,
+        join_transaction_mode="create_savepoint",
     )
-    Base.metadata.create_all(bind=engine)
-    session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)()
     try:
         yield session
     finally:
         session.close()
-        engine.dispose()
+        transaction.rollback()
+        connection.close()
 
 
 @pytest.fixture
 def client(db_session: Session) -> Iterator[TestClient]:
-    """The application, talking to this test's database and nothing else."""
+    """The application, talking to this test's session and nothing else."""
 
     def _get_db() -> Iterator[Session]:
         yield db_session
