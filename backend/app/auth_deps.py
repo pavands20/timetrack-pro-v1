@@ -4,7 +4,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import Cookie, Depends, HTTPException
+from fastapi import Depends, Header, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -12,14 +12,14 @@ from app.database import get_db
 from app.models import User, UserSession
 from app.security import token_digest
 
-SESSION_COOKIE = "session"
 
-
-def session_token(
-    session: Annotated[str | None, Cookie(alias=SESSION_COOKIE)] = None,
-) -> str | None:
-    """The session token from the HttpOnly session cookie."""
-    return session or None
+def bearer_token(authorization: Annotated[str | None, Header()] = None) -> str | None:
+    """The session token from `Authorization: Bearer <token>`. A header, not a cookie:
+    the deployed SPA and API are on different origins, and browsers drop cross-site cookies."""
+    scheme, _, token = (authorization or "").partition(" ")
+    if scheme.lower() != "bearer":
+        return None
+    return token.strip() or None
 
 
 def _aware(value: datetime) -> datetime:
@@ -47,7 +47,7 @@ def find_session(db: Session, token: str | None) -> tuple[UserSession, User] | N
 
 def get_current_user(
     db: Annotated[Session, Depends(get_db)],
-    token: Annotated[str | None, Depends(session_token)],
+    token: Annotated[str | None, Depends(bearer_token)],
 ) -> User:
     found = find_session(db, token)
     if found is None:

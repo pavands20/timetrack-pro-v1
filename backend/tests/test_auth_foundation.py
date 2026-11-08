@@ -1,4 +1,4 @@
-"""Auth foundation: login, logout, me, CSRF, roles, seed (cookie session)."""
+"""Auth foundation: login, logout, me, CSRF, roles, seed."""
 
 from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
@@ -39,39 +39,21 @@ def login(client: TestClient, email="a@example.com", password=PW):
     return client.post("/api/auth/login", json={"email": email, "password": password}, headers=H)
 
 
-def session_value(client: TestClient) -> str:
-    value = client.cookies.get("session")
-    assert value, "login set no session cookie"
-    return value
+def cookie_of(resp) -> dict:
+    return {"Authorization": "Bearer " + resp.json()["token"]}
 
 
-def restore_cookie(client: TestClient, value: str) -> None:
-    client.cookies.clear()
-    client.cookies.set("session", value, domain="testserver")
-
-
-def test_ac001_login_sets_httponly_strict_cookie_and_no_token(client, db_session):
+def test_ac001_login_returns_token_not_cookie(client, db_session):
     make_user(db_session, "admin@example.com", "System Admin")
     make_user(db_session, "emp@example.com", "Employee")
     r = login(client, "Admin@Example.com")
     assert r.status_code == 200
     assert r.json()["home_path"] == "/admin-users"
-    flags = r.headers["set-cookie"].lower()
-    assert flags.startswith("session=") and "httponly" in flags and "samesite=strict" in flags
-    assert "token" not in r.json()
+    assert "set-cookie" not in r.headers
     assert login(client, "emp@example.com").json()["home_path"] == "/home"
     stored = db_session.query(UserSession).all()
     assert all(len(s.token_hash) == 64 for s in stored)
-    assert session_value(client) not in [s.token_hash for s in stored]
-
-
-def test_ac001_bearer_header_is_rejected_on_me(client, db_session):
-    make_user(db_session)
-    login(client)
-    value = session_value(client)
-    client.cookies.clear()
-    r = client.get("/api/auth/me", headers={"Authorization": "Bearer " + value})
-    assert r.status_code == 401
+    assert r.json()["token"] not in [s.token_hash for s in stored]
 
 
 def test_ac002_all_failures_identical(client, db_session):
@@ -87,8 +69,6 @@ def test_ac002_all_failures_identical(client, db_session):
     for r in results:
         assert r.status_code == 401
         assert r.json() == {"detail": "Incorrect email or password"}
-        assert "set-cookie" not in r.headers
-    assert not client.cookies
 
 
 def test_ac002_login_validation_422_and_csrf_403(client):
@@ -102,14 +82,11 @@ def test_ac002_login_validation_422_and_csrf_403(client):
 
 def test_ac003_logout_revokes_session(client, db_session):
     make_user(db_session)
-    login(client)
-    old = session_value(client)
-    assert client.get("/api/auth/me").status_code == 200
-    r = client.post("/api/auth/logout", headers=H)
+    c = cookie_of(login(client))
+    assert client.get("/api/auth/me", headers=c).status_code == 200
+    r = client.post("/api/auth/logout", headers={**c, **H})
     assert r.status_code == 204
-    assert not client.cookies.get("session")
-    restore_cookie(client, old)
-    r = client.get("/api/auth/me")
+    r = client.get("/api/auth/me", headers=c)
     assert r.status_code == 401
     assert r.json() == {"detail": "Not signed in"}
 
@@ -120,25 +97,24 @@ def test_logout_without_csrf_header_is_403(client):
 
 def test_me_returns_user_and_401_without_session(client, db_session):
     make_user(db_session)
-    login(client)
-    body = client.get("/api/auth/me").json()
+    c = cookie_of(login(client))
+    body = client.get("/api/auth/me", headers=c).json()
     assert body["email"] == "a@example.com" and "password_hash" not in body
-    client.cookies.clear()
     assert client.get("/api/auth/me").status_code == 401
 
 
 def test_nfr001_expired_or_deactivated_session_is_401(client, db_session):
     user = make_user(db_session)
-    login(client)
-    digest = token_digest(session_value(client))
+    c = cookie_of(login(client))
+    digest = token_digest(c["Authorization"].split(" ", 1)[1])
     sess = db_session.query(UserSession).filter_by(token_hash=digest).one()
     user.is_active = False
     db_session.commit()
-    assert client.get("/api/auth/me").status_code == 401
+    assert client.get("/api/auth/me", headers=c).status_code == 401
     user.is_active = True
     sess.expires_at = datetime.now(UTC) - timedelta(seconds=1)
     db_session.commit()
-    assert client.get("/api/auth/me").status_code == 401
+    assert client.get("/api/auth/me", headers=c).status_code == 401
 
 
 @pytest.fixture
@@ -155,20 +131,18 @@ def role_client(db_session) -> Iterator[TestClient]:
         return {"ok": True}
 
     app.include_router(router)
-    yield TestClient(app, base_url="https://testserver")
+    yield TestClient(app)
 
 
 def test_nfr003_require_role_403_without_data(role_client, db_session):
     make_user(db_session, "emp@example.com", "Employee")
     make_user(db_session, "admin@example.com", "System Admin")
-    login(role_client, "emp@example.com")
-    r = role_client.get("/admin-only")
+    emp = cookie_of(login(role_client, "emp@example.com"))
+    r = role_client.get("/admin-only", headers=emp)
     assert r.status_code == 403
     assert r.json() == {"detail": "You do not have access to this resource."}
-    role_client.cookies.clear()
-    login(role_client, "admin@example.com")
-    assert role_client.get("/admin-only").status_code == 200
-    role_client.cookies.clear()
+    adm = cookie_of(login(role_client, "admin@example.com"))
+    assert role_client.get("/admin-only", headers=adm).status_code == 200
     assert role_client.get("/admin-only").status_code == 401
 
 

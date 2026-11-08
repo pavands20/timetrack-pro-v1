@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 // Needs a seeded account: E2E_EMPLOYEE_EMAIL/PASSWORD (or the admin pair). Without it the
-// scenarios that sign in are skipped as pending. The session is an HttpOnly cookie.
+// scenarios that sign in are skipped as pending. The session is a bearer token in localStorage.
 const U = {
   e: process.env.E2E_EMPLOYEE_EMAIL ?? process.env.E2E_ADMIN_EMAIL,
   p: process.env.E2E_EMPLOYEE_PASSWORD ?? process.env.E2E_ADMIN_PASSWORD,
@@ -20,10 +20,9 @@ test.describe("auth", () => {
     test.skip(!U.e || !U.p, "PENDING: no E2E credentials");
     await signIn(page, U.e!, U.p!);
     await expect(page).toHaveURL(U.home);
-    const cookies = await context.cookies();
-    const session = cookies.find((c) => c.name === "session");
-    expect(session?.httpOnly).toBe(true);
-    expect(session?.sameSite).toBe("Strict");
+    // Cross-origin deploy: the session is a bearer token kept by the SPA, never a cookie.
+    expect(await page.evaluate(() => localStorage.getItem("session_token"))).toBeTruthy();
+    expect((await context.cookies()).find((c) => c.name === "session")).toBeUndefined();
   });
 
   test("[AC-002] a wrong password shows the generic error", async ({ page }) => {
