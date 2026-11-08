@@ -49,7 +49,6 @@ describe("SignIn", () => {
           role: "Manager",
           time_zone: "UTC",
           home_path: "/somewhere",
-          token: "tok-123",
         }),
     });
     await userEvent.type(screen.getByLabelText("Email"), "a@b.co");
@@ -57,11 +56,11 @@ describe("SignIn", () => {
     await userEvent.click(screen.getAllByRole("button", { name: "Sign in" })[0]);
     expect(await screen.findByText("somewhere page")).toBeInTheDocument();
     const call = fn.mock.calls.find((c) => c[0] === "/api/auth/login")!;
-    expect((call[1] as RequestInit).headers).toMatchObject({
-      "X-Requested-With": "XMLHttpRequest",
-    });
-    // Cross-origin: the session travels as a bearer token, not a cookie.
-    expect(localStorage.getItem("session_token")).toBe("tok-123");
+    const init = call[1] as RequestInit;
+    expect(init.headers).toMatchObject({ "X-Requested-With": "XMLHttpRequest" });
+    expect(init.headers).not.toHaveProperty("Authorization");
+    expect(init.credentials).toBe("same-origin");
+    expect(localStorage.getItem("session_token")).toBeNull();
   });
 
   it("[AC-002] a 401 shows the generic message in an alert", async () => {
