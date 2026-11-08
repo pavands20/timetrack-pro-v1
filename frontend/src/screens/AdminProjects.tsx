@@ -8,9 +8,8 @@ import { brand } from "@/lib/brand";
 import { useNavigate } from "react-router-dom";
 import { ApiError, apiFetch } from "@/lib/api";
 
- 
 const { Input, Label, Select, Table, THead, TBody, TR, TH, TD, Empty } = UI;
- 
+
 const { Edit } = Icons;
 
 const pad = (n, w) => String(n).padStart(w, "0");
@@ -28,7 +27,12 @@ const toProject = (p) => ({
   rate: p.bill_rate,
   defaultBillable: p.default_billable,
 });
-const toTask = (k) => ({ id: k.id, projectId: k.project_id, name: k.name, archived: k.is_archived });
+const toTask = (k) => ({
+  id: k.id,
+  projectId: k.project_id,
+  name: k.name,
+  archived: k.is_archived,
+});
 const flatten = (data) => {
   const clients = [];
   const projects = [];
@@ -64,8 +68,6 @@ const fieldErrors = (err, map) => {
 };
 
 export default function Screen() {
-  const { Table, THead, TBody, TR, TH, TD, Input, Label, Empty } = UI;
-
   const navigate = useNavigate();
   const [clients, setClients] = React.useState([]);
   const [projects, setProjects] = React.useState([]);
@@ -328,10 +330,13 @@ export default function Screen() {
       const body = creating
         ? { client_id: clientId, name, bill_rate: rate, default_billable: form.defaultBillable }
         : { name, bill_rate: rate, default_billable: form.defaultBillable };
-      const p = await apiFetch(creating ? "/api/admin/projects" : `/api/admin/projects/${editingId}`, {
-        method: creating ? "POST" : "PATCH",
-        body: JSON.stringify(body),
-      });
+      const p = await apiFetch(
+        creating ? "/api/admin/projects" : `/api/admin/projects/${editingId}`,
+        {
+          method: creating ? "POST" : "PATCH",
+          body: JSON.stringify(body),
+        },
+      );
       setProjects((l) => upsert(l, toProject({ ...p, client_id: p.client_id ?? clientId })));
       setProjectId(p.id);
       setEditingId(p.id);

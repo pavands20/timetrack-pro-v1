@@ -55,23 +55,21 @@ class ClockOutOut(BaseModel):
     task_id: int
 
 
+def _aware(value: datetime) -> datetime:
+    return value if value.tzinfo else value.replace(tzinfo=UTC)
+
+
 def utc_iso(value: datetime) -> str:
     """ISO-8601 in UTC with a Z suffix (NFR-009)."""
-    if value.tzinfo is None:
-        value = value.replace(tzinfo=UTC)
-    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
+    return _aware(value).astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
 def local(value: datetime, user: User) -> datetime:
-    if value.tzinfo is None:
-        value = value.replace(tzinfo=UTC)
-    return value.astimezone(ZoneInfo(user.time_zone))
+    return _aware(value).astimezone(ZoneInfo(user.time_zone))
 
 
 def _seconds(start: datetime, end: datetime) -> float:
-    start = start if start.tzinfo else start.replace(tzinfo=UTC)
-    end = end if end.tzinfo else end.replace(tzinfo=UTC)
-    return (end - start).total_seconds()
+    return (_aware(end) - _aware(start)).total_seconds()
 
 
 def _break_seconds(breaks: list[Break], now: datetime) -> float:
