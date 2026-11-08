@@ -28,13 +28,17 @@ test.describe("auth", () => {
 
   test("[AC-002] a wrong password shows the generic error", async ({ page }) => {
     await signIn(page, U.e ?? "nobody@example.com", "wrong-password-xyz");
-    await expect(page.getByRole("alert").filter({ hasText: "Incorrect email or password" })).toBeVisible();
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Incorrect email or password" }),
+    ).toBeVisible();
     await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test("[AC-002] an unknown email shows the same generic error", async ({ page }) => {
     await signIn(page, `nobody${Date.now()}@example.com`, "wrong-password-xyz");
-    await expect(page.getByRole("alert").filter({ hasText: "Incorrect email or password" })).toBeVisible();
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Incorrect email or password" }),
+    ).toBeVisible();
   });
 
   test("[AC-003] sign-out returns to /sign-in and protected URLs redirect back", async ({
