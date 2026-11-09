@@ -12,9 +12,7 @@ test.describe("admin projects screen", () => {
     await page.getByLabel("Password").fill(A.p!);
     await page.getByRole("button", { name: /sign in/i }).click();
     await page.goto("/admin-projects");
-    await expect(
-      page.getByRole("heading", { name: "Clients, projects and tasks" }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Clients, projects and tasks" })).toBeVisible();
   });
 
   test("[AC-019] admin creates a client and a project with a rate, adds a task and archives it", async ({
@@ -53,9 +51,7 @@ test.describe("admin projects screen", () => {
     for (const bad of ["-5", "abc"]) {
       await page.getByLabel(/bill rate/i).fill(bad);
       await page.getByRole("button", { name: "Save project" }).click();
-      await expect(
-        page.getByText(/The bill rate must be a number of 0 or more/),
-      ).toBeVisible();
+      await expect(page.getByText(/The bill rate must be a number of 0 or more/)).toBeVisible();
     }
   });
 

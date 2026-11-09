@@ -243,9 +243,7 @@ def create_task(project_id: int, body: TaskCreate, _: Admin, db: Db) -> Task:
         raise HTTPException(status_code=404, detail="Project not found.")
     if db.get(Client, project.client_id).is_archived:
         raise HTTPException(status_code=409, detail=ARCHIVED)
-    dup = HTTPException(
-        status_code=409, detail=f"This project already has a task called “{name}”."
-    )
+    dup = HTTPException(status_code=409, detail=f"This project already has a task called “{name}”.")
     if db.scalar(
         select(Task.id).where(Task.project_id == project.id, func.lower(Task.name) == name.lower())
     ):
