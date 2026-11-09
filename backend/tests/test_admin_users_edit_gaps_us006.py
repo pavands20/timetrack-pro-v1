@@ -52,9 +52,7 @@ def admin(client, db_session):
     return u, sign_in(client, u.email)
 
 
-def test_ac015_demotion_and_all_fields_show_on_next_request_same_session(
-    client, db_session, admin
-):
+def test_ac015_demotion_and_all_fields_show_on_next_request_same_session(client, db_session, admin):
     _, c = admin
     mgr = mk(db_session, "gapm@example.com", "Manager", "Mia Manager")
     target = mk(db_session, "gapt@example.com", "System Admin", "Before Name")
@@ -97,9 +95,7 @@ def test_ac016_deactivated_login_refusal_is_byte_identical_to_bad_password(
     assert "token" not in off.text
 
 
-def test_ac016_nfr014_deactivated_row_keeps_its_own_manager_and_reports(
-    client, db_session, admin
-):
+def test_ac016_nfr014_deactivated_row_keeps_its_own_manager_and_reports(client, db_session, admin):
     _, c = admin
     boss = mk(db_session, "gapboss@example.com", "Manager", "Big Boss")
     mid = mk(db_session, "gapmid@example.com", "Manager", "Mid Manager", manager_id=boss.id)

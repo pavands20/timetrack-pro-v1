@@ -2,8 +2,8 @@
   "key": {
     "app_design_id": "7f1fdb0d-8d48-4604-8603-72743f8ab5c5",
     "app_design_version": 1,
-    "architecture_document_id": "8509476b-a8fd-4d63-9df2-32a5b604bc23",
-    "architecture_version": 2
+    "architecture_document_id": "a56a0848-301d-4d28-8058-541506c9cc43",
+    "architecture_version": 1
   },
   "outcome": "prepared",
   "packages": [
@@ -43,5 +43,5 @@
       "version": ""
     }
   ],
-  "prepared_by_run": "5fdc25a2-a43d-47c7-8498-125806122e3f"
+  "prepared_by_run": "e7f5a29b-d231-40ce-a1f6-68494a2b57d0"
 }

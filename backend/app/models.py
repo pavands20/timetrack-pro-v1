@@ -161,6 +161,7 @@ class Break(Base):
             "time_entry_id",
             unique=True,
             postgresql_where=text("end_at IS NULL"),
+            sqlite_where=text("end_at IS NULL"),
         ),
     )
 
