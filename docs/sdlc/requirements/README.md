@@ -5,468 +5,460 @@
 <!-- sdlc:auto:start narrative -->
 ## Summary
 
-### REQ-SCOPE · draft · source: requirements:v1
+### REQ-OVERVIEW · draft · source: requirements:v2
 
-Requirements version 1 uses a Lightweight delivery scope. It covers sign-in, user administration, clients, projects and tasks, clock in and out, the weekly timesheet, the dashboard, display rules and documentation. Several features from the project description are deferred.
+TimeTrack Pro V1 is a time and labour management web app for up to 500 employees, similar to Replicon. Requirements version 2 is delivered under the Lightweight scope. It has 9 epics and 22 stories covering sign-in, user admin, project setup, clock in/out, weekly timesheets, a dashboard, display rules, documentation and a read-only manager team view.
 
-- Requirements version: 1
 - Delivery scope: lightweight
-- Capabilities in scope:
-  - Email and password sign-in
-  - User accounts created by admins
-  - Client, project and task setup
-  - Hourly bill rate per project
-  - Clock in and out with breaks
-  - Weekly timesheet entry by day
-  - Billable and non-billable marking per entry
-  - Employee dashboard of weekly hours
-  - Editing and deleting own time entries
-  - Basic user and project documentation
-  - Times stored in UTC and shown in the user's time zone
-  - Week starts on Monday
-  - English-only interface
-  - Bill rate used for reporting only, with no invoicing
-  - Initial data entered manually, with no SSO or HR-system sync
-- Out of scope:
-  - Native mobile app (the web app is responsive in the browser instead)
-  - Invoicing and payroll calculation (the app only exports approved hours)
-- Discussed but deferred from the Lightweight MVP (per the EPIC-001 scope note):
-  - Timesheet approval
-  - Leave
-  - Labour-rule flags
-  - Reports
-  - Payroll export and API
-  - Notifications
-  - Audit log
-- Conflict recorded:
-  - The project description includes timesheet approval, time off, labour rules, reports, CSV and payroll export, notifications and audit.
-  - The v1 requirements exclude these from the Lightweight scope.
-  - The description's 'only exports approved hours' implies approval and export, but neither is drafted in v1.
+- Requirements version: 2
+- Roles: Employee, Manager, Payroll Admin, System Admin (exactly one role per user, see US-002)
+- Epics:
+  - EPIC-001 Sign-in and account access (US-001 to US-003)
+  - EPIC-002 User account administration (US-004 to US-006)
+  - EPIC-003 Clients, projects, tasks and bill rate (US-007 to US-009)
+  - EPIC-004 Clock in and out with breaks (US-010 to US-012)
+  - EPIC-005 Weekly timesheet entry (US-013 to US-015)
+  - EPIC-006 Employee dashboard (US-016)
+  - EPIC-007 Time zone, week start, language and responsive layout (US-017, US-018)
+  - EPIC-008 Basic user and project documentation (US-019)
+  - EPIC-009 Manager team view, read-only (US-020 to US-022), from CHG-001
+- Priorities:
+  - Critical: US-001, US-004, US-010, US-013, US-022
+  - High: US-002, US-005, US-007, US-008, US-009, US-011, US-014, US-015, US-017, US-020, US-021
+  - Medium: US-003, US-006, US-012, US-016, US-018, US-019
+- Acceptance criteria run from AC-001 to AC-065. AC-064 sits under US-002 and AC-065 under US-019.
+- No story-level sign-off is given in the input.
 
-**Related:** EPIC-001, EPIC-002, EPIC-003, EPIC-004, EPIC-005, EPIC-006, EPIC-007, EPIC-008
+**Related:** EPIC-001, EPIC-002, EPIC-003, EPIC-004, EPIC-005, EPIC-006, EPIC-007, EPIC-008, EPIC-009, CHG-001
 
 ### REQ-STACK · approved · source: requirements:technology-stack
 
-The product owner approved the technology stack: FastAPI 0.115, AWS, PostgreSQL 16 and React 19. Designs must use exactly these technologies.
+The product owner approved the stack: FastAPI 0.115 backend, AWS (EU/UK regions), PostgreSQL 16 and React 19. Designs must use exactly these, with no substitution. This conflicts with the Node.js assumption still written in EPIC-001.
 
+Approved stack and stated rationale:
 - Backend: FastAPI 0.115 (Python)
-  - Replaces the analyst's assumed Node.js API, because Node is not available on the platform.
-  - Reasons given: strict request validation; automatic interactive API docs, useful for a future payroll connector; handles 500 users comfortably.
+  - Node.js is not available on the platform.
+  - Offers a REST API with strict request validation, suited to timesheet, leave and rate data.
+  - Generates interactive API docs automatically.
+  - 500 users is well within capacity.
 - Cloud: AWS
-  - EU/UK regions available: Ireland, Frankfurt, Paris and London.
+  - EU/UK hosting is required; Ireland, Frankfurt, Paris and London regions are available.
   - Managed PostgreSQL, encrypted backups and email sending are available in-region.
 - Database: PostgreSQL 16
-  - Reasons given: relational data; reports as queries; transactions for locking and audit; UTC times; access to sick-leave rows can be restricted.
+  - The data is relational.
+  - Reports are database queries.
+  - Transactions support locking and auditing.
+  - Stores UTC times.
+  - Access to sick-leave rows can be restricted.
 - Frontend: React 19 with TypeScript
-  - Reasons given: responsive browser app for phones; approval queues, tables and reports; handles the Monday submission peak.
-- Conflict recorded:
-  - EPIC-001 still lists the assumption 'React/TypeScript, Node.js REST API and PostgreSQL'.
-  - The approved stack replaces Node.js with FastAPI.
+  - Responsive browser app (no native app).
+  - Supports approval queues, tables and reports.
+  - Handles the Monday-morning submission peak client-side.
 
-**Related:** EPIC-001, NFR-006, NFR-015
+CONFLICTS (both versions recorded):
+- Backend:
+  - EPIC-001 open assumption: 'stack is React/TypeScript, Node.js REST API and PostgreSQL'.
+  - Approved stack: FastAPI 0.115. The approved stack explicitly supersedes the analyst's Node.js assumption.
+- Payroll API:
+  - The FastAPI rationale refers to 'the read-only payroll API you want a future payroll connector to use'.
+  - EPIC-001's scope note puts the payroll export/API outside the Lightweight MVP, and no story covers it.
+- Leave and approvals:
+  - The rationale refers to leave data, sick-leave rows, approval queues, reports and locking of approved sheets.
+  - None of these are in this version's stories.
+
+**Related:** EPIC-001, US-017, US-018, US-002, REQ-OVERVIEW
 
 ### REQ-SERVICES · approved · source: requirements:services
 
-The product owner approved an SMTP email service for password-reset emails. Email is sent through Amazon SES in an EU region.
+One runtime service is approved: an SMTP email server, sent via Amazon SES in an EU region, used for password-reset emails. It requires four environment variables. EPIC-001 still states the email key has not been supplied.
 
-- Service: Email via SMTP server (SaaS)
-- Environment variables: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
-- Purpose: password-reset emails
-- Provider: Amazon SES in an EU region, so email handling stays in the EU
-- API keys this app needs: SMTP_HOST, SMTP_PASSWORD, SMTP_PORT, SMTP_USER
-- Conflict recorded:
-  - EPIC-001 states the email service API key 'has not yet been supplied'.
-  - The services list names the required keys but does not confirm the values are supplied.
+- Email:
+  - Type: SMTP server (SaaS).
+  - Required environment variables: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD.
+  - Purpose: password-reset emails (US-003).
+  - Provider: Amazon SES in an EU region, so email handling stays in the EU.
+- API keys this app needs: SMTP_HOST, SMTP_PASSWORD, SMTP_PORT, SMTP_USER.
+- AC-051 requires the project documentation to describe this configuration, including the email service API key.
 
-**Related:** US-003, NFR-006, NFR-016
+CONFLICT (both versions recorded):
+- EPIC-001 assumption: 'Password reset needs an email service API key, which has not yet been supplied.'
+- Services section: SMTP has been approved by the product owner, with named environment variables.
+- The input does not confirm whether real credential values have been supplied.
+
+**Related:** US-003, EPIC-001, US-019
+
+### REQ-SCOPE · draft · source: requirements:scope
+
+The in-scope capabilities cover sign-in, admin-created accounts, project setup with bill rates, clock in/out, weekly timesheets, a dashboard and display rules. Native mobile, invoicing and payroll calculation are explicitly out of scope. Several features in the project description are also excluded from the Lightweight MVP and are not drafted.
+
+In scope:
+- Email and password sign-in
+- User accounts created by admins
+- Client, project and task setup
+- Hourly bill rate per project
+- Clock in and out with breaks
+- Weekly timesheet entry by day
+- Billable and non-billable marking per entry
+- Employee dashboard of weekly hours
+- Editing and deleting own time entries
+- Basic user and project documentation
+- Times stored in UTC and shown in the user's time zone
+- Week starts on Monday
+- English-only interface
+- Bill rate used for reporting only, no invoicing
+- Initial data entered manually, no SSO or HR-system sync
+- Added via CHG-001: read-only Manager team view (EPIC-009)
+
+Explicitly out of scope:
+- Native mobile app (a responsive web app replaces it)
+- Invoicing and payroll calculation (the app only exports approved hours)
+
+In the project description but excluded from the Lightweight MVP (EPIC-001 scope note), not drafted:
+- Timesheet submission, approval and locking
+- Time off / leave and leave balances
+- Labour-rule flags (overtime, minimum break) and the compliance report
+- Reports
+- Payroll export and payroll API
+- Notifications
+- Audit log
+
+Other exclusions stated in the input:
+- SSO, CSV import and HR-system sync (EPIC-002)
+- Configurable week start day (EPIC-007)
+- Breaks are recorded but not checked against rules (EPIC-004)
+- Timesheets stay editable by their owner in this version (EPIC-005)
+- EPIC-009 excludes: approving or locking timesheets, reports, exports, notifications, skip-level reports, and team access for Payroll Admin or System Admin
+
+Note: the out-of-scope line says 'the app only exports approved hours', but the payroll export itself is also outside this delivery scope.
+
+**Related:** EPIC-001, EPIC-004, EPIC-005, EPIC-009, US-008, US-018
+
+### CHG-001 · approved · source: requirements:EPIC-009
+
+Change request CHG-001 is classed as major and produced a new requirements version. It adds a read-only 'My team' view so Managers can see their direct reports' timesheets. Access comes only from the employee's Manager field and is checked on the server for every request.
+
+- Classification: major, new version.
+- Status recorded as approved because the change was incorporated into requirements v2. No approver or date is given.
+- Adds EPIC-009 with stories US-020, US-021 and US-022.
+- Also extends earlier stories:
+  - AC-064 (US-002): server-side ownership / reporting-line check.
+  - AC-050 (US-019): admin guide explains how manager access is granted and removed.
+  - AC-065 (US-019): Manager help section on the My team view.
+- Rules:
+  - Times are shown in the employee's own time zone.
+  - The week runs Monday to Sunday.
+  - Read-only for Managers.
+- Excluded:
+  - Approving or locking timesheets
+  - Reports, exports and notifications
+  - Indirect (skip-level) reports
+  - Team access for Payroll Admin or System Admin
+
+**Related:** EPIC-009, US-020, US-021, US-022, AC-064, AC-050, AC-065
 
 ### US-001 · draft · source: requirements:US-001
 
-Priority: critical. Users sign in with email and password and land on the home page for their role. Users can sign out.
+Critical. Users with an account sign in with email and password. They land on the home page for their role and can sign out.
 
-Epic: EPIC-001 Sign-in and account access
-- AC-001: Correct credentials start a session, and the user lands on their role's home page.
-- AC-002: A wrong password or unknown email is refused with a generic error that does not reveal whether the email exists.
-- AC-003: Signing out ends the session, and protected pages require signing in again.
-- Epic assumptions:
-  - Hashed passwords, session cookies and password reset by email.
-  - EU/UK hosting.
-  - No SSO.
+Epic: EPIC-001 Sign-in and account access.
 
-**Related:** EPIC-001, NFR-001, NFR-002
+Auth assumption (open):
+- Hashed passwords
+- Session cookies
+- Password reset by email
+- No SSO
+
+Acceptance criteria:
+- AC-001: With correct credentials on the sign-in page, a session starts and the user lands on the home page for their role.
+- AC-002: An incorrect password or unknown email is refused with a generic error that does not reveal whether the email exists.
+- AC-003: Signing out ends the session; protected pages then require signing in again.
+
+**Related:** EPIC-001, AC-001, AC-002, AC-003
 
 ### US-002 · draft · source: requirements:US-002
 
-Priority: high. Each user has exactly one role: Employee, Manager, Payroll Admin or System Admin. Access is restricted by role.
+High. Each user has exactly one role: Employee, Manager, Payroll Admin or System Admin. Access is restricted by role. Since CHG-001, the server also checks ownership or reporting line for any request for another user's time data.
 
-Epic: EPIC-001
-- AC-004: An Employee is denied admin pages and admin API data, and no admin data is returned.
-- AC-005: An Employee can see and change only their own time entries.
-- AC-006: A System Admin can view and change user accounts and roles.
+Acceptance criteria:
+- AC-004: An Employee opening an admin page or requesting admin data via the API is denied, and no admin data is returned.
+- AC-005: An Employee can only see and change their own time entries.
+- AC-006: A System Admin can view and change user accounts and roles in user administration.
+- AC-064: For any request for another user's time entries, breaks or timesheets (UI or API), the server checks ownership or the recorded reporting line before returning anything.
+  - A Manager can read, but never create, edit or delete, the time data of users whose Manager field is set to them.
+  - Every other request for another user's time data, and every change request by a Manager, gets 403 with no data returned or changed.
 
-**Related:** EPIC-001, NFR-003, NFR-007
+**Related:** EPIC-001, AC-004, AC-005, AC-006, AC-064, US-022, US-015
 
 ### US-003 · draft · source: requirements:US-003
 
-Priority: medium. A user who forgot their password requests a reset link by email.
+Medium. A user who forgot their password requests a reset by email. They receive a single-use, time-limited link. This depends on the SMTP service.
 
-Epic: EPIC-001
-- AC-007: For an active account, with the email service configured, a single-use, time-limited reset link is emailed.
-- AC-008: A valid link plus a compliant new password updates the password. The link is then invalid, and the user can sign in with the new password.
-- AC-009: An unknown email shows the same confirmation message, and no email is sent.
-- Dependency: the email service API key (see REQ-SERVICES).
+Acceptance criteria:
+- AC-007: For an active account with the email service configured, a reset request emails a single-use, time-limited link to that address.
+- AC-008: With a valid link, setting a new password that meets the password rules updates the password, invalidates the link and allows sign-in with the new password.
+- AC-009: For an email with no account, the same confirmation message is shown and no email is sent.
 
-**Related:** EPIC-001, NFR-002, NFR-004, REQ-SERVICES
+Dependency: SMTP (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD). See REQ-SERVICES for the conflict about whether the key has been supplied.
+
+Gap: the password rules are referenced but not defined in the input.
+
+**Related:** EPIC-001, AC-007, AC-008, AC-009, REQ-SERVICES
 
 ### US-004 · draft · source: requirements:US-004
 
-Priority: critical. A System Admin creates a user with name, unique email, role and time zone.
+Critical. A System Admin creates a user with name, unique email, role and time zone. The new user can then set a password and sign in.
 
-Epic: EPIC-002 User account administration. Initial data is entered manually; no CSV import, SSO or HR sync.
-- AC-010: Valid details with an unused email create the account. The user can then set a password and sign in.
+Epic: EPIC-002. Initial data is entered manually; there is no CSV import, SSO or HR sync.
+
+Acceptance criteria:
+- AC-010: Valid details with an unused email create the account; the user can set a password and sign in.
 - AC-011: A duplicate email is rejected with a clear duplicate-email message.
 - AC-012: A missing required field is identified on the form, and no account is created.
 
-**Related:** EPIC-002, NFR-013
+Gap: how the new user sets their first password is not specified.
+
+**Related:** EPIC-002, AC-010, AC-011, AC-012
 
 ### US-005 · draft · source: requirements:US-005
 
-Priority: high. A System Admin assigns a manager to each employee, recording the reporting line for later approval features.
+High. A System Admin assigns a manager to each employee. Only users with the Manager role can be assigned. Since CHG-001, this field is also what grants team-view access.
 
-Epic: EPIC-002
+Acceptance criteria:
 - AC-013: Assigning a Manager-role user to an employee shows that manager on the employee's record.
 - AC-014: Assigning a user who is not a Manager is refused.
 
-**Related:** EPIC-002, NFR-003
+The story's stated purpose is 'recorded for later approval features'. After CHG-001, the Manager field also drives My team access (US-020, US-022).
+
+**Related:** EPIC-002, AC-013, AC-014, US-020, US-022
 
 ### US-006 · draft · source: requirements:US-006
 
-Priority: medium. A System Admin edits user details and deactivates users.
+Medium. A System Admin edits a user's name, role, manager or time zone, or deactivates the user. Deactivated users cannot sign in, but their time entries are kept.
 
-Epic: EPIC-002
+Acceptance criteria:
 - AC-015: Changes to name, role, manager or time zone are stored and apply from the user's next request.
-- AC-016: A deactivated user cannot sign in. Their time entries are kept, and they cannot be selected as a new manager.
+- AC-016: A deactivated user cannot sign in, their existing time entries are kept, and they cannot be selected as a new manager.
 
-**Related:** EPIC-002, NFR-005, NFR-014
+Related: AC-062 (team access re-evaluated after deactivation or role change).
+
+**Related:** EPIC-002, AC-015, AC-016, US-022
 
 ### US-007 · draft · source: requirements:US-007
 
-Priority: high. A System Admin creates, edits and archives clients.
+High. A System Admin creates, edits and archives clients. Archiving a client blocks new time on its projects but keeps existing entries visible.
 
-Epic: EPIC-003 Clients, projects, tasks and bill rate. The rate is for reporting only, with no invoicing, payments or payroll calculation.
-- AC-017: A client created with a unique name appears in the client list.
-- AC-018: Archiving a client blocks new time entries on its projects. Existing entries remain visible.
+Acceptance criteria:
+- AC-017: Creating a client with a unique name adds it to the client list.
+- AC-018: Archiving a client with projects stops those projects receiving new time entries; existing entries remain visible.
 
-**Related:** EPIC-003, NFR-014
+**Related:** EPIC-003, AC-017, AC-018
 
 ### US-008 · draft · source: requirements:US-008
 
-Priority: high. A System Admin creates and edits projects under a client, each with an hourly bill rate.
+High. A System Admin creates and edits projects under a client, each with a non-negative hourly bill rate. The rate is held for reporting only; there is no invoicing or payment function.
 
-Epic: EPIC-003
-- AC-019: A project with a name and a non-negative rate is saved under its client.
+Acceptance criteria:
+- AC-019: A project with a name and a non-negative hourly rate is saved under its client.
 - AC-020: A negative or non-numeric rate is rejected with a validation message.
-- AC-021: Changing the rate stores the new value. Existing entries are not deleted or altered.
-- AC-022: No screen offers invoice or payment functions.
+- AC-021: Changing the rate stores the new rate and leaves existing time entries unchanged and undeleted.
+- AC-022: No invoice or payment function is offered on any screen in this release.
 
-**Related:** EPIC-003, NFR-013, NFR-014, NFR-017
+Note: AC-038 refers to a 'default for its project' billable setting. This story does not define such a project field.
+
+**Related:** EPIC-003, AC-019, AC-020, AC-021, AC-022, US-014
 
 ### US-009 · draft · source: requirements:US-009
 
-Priority: high. A System Admin creates, edits and archives tasks under a project.
+High. A System Admin creates, edits and archives tasks under a project. Archived tasks are hidden from new entries but still shown on existing entries.
 
-Epic: EPIC-003
+Acceptance criteria:
 - AC-023: A task added with a name becomes selectable on that project.
-- AC-024: Archived tasks are not offered for new entries, but existing entries still display them.
+- AC-024: Archived tasks are not offered for new entries, but existing entries using them still display them.
 
-**Related:** EPIC-003, NFR-014
+**Related:** EPIC-003, AC-023, AC-024
 
 ### US-010 · draft · source: requirements:US-010
 
-Priority: critical. An employee clocks in and out in the browser, choosing a project, task and billable status.
+Critical. An employee clocks in from the browser after choosing a project, task and billable status, then clocks out. The duration, net of breaks, appears on that day of their timesheet. Clocking in twice is refused.
 
-Epic: EPIC-004 Clock in and out with breaks. Times are stored in UTC and shown in the user's time zone. Breaks are recorded but not checked against labour rules (out of scope).
-- AC-025: Selecting a project, task and billable status and clocking in starts a running entry shown as in progress.
-- AC-026: Clocking out closes the entry. Its duration, net of breaks, appears on that day of the timesheet.
+Epic: EPIC-004. Times are stored in UTC and shown in the user's time zone. Labour-rule flagging is out of scope.
+
+Acceptance criteria:
+- AC-025: After selecting a project, task and billable/non-billable and clocking in, a running entry starts at the current time and is shown as in progress.
+- AC-026: Clocking out closes the entry with an end time; its duration, net of breaks, appears on that day of the timesheet.
 - AC-027: A second clock-in while already clocked in is refused with a message.
 
-**Related:** EPIC-004, NFR-009, NFR-012
+**Related:** EPIC-004, AC-025, AC-026, AC-027, US-013, US-014, US-017
 
 ### US-011 · draft · source: requirements:US-011
 
-Priority: high. An employee starts and ends breaks during a running entry, and break time is excluded from worked hours.
+High. Employees start and end breaks during a running entry. Break time is subtracted from worked time. Breaks are recorded but not checked against labour rules.
 
-Epic: EPIC-004
-- AC-028: The break's start and end times are recorded and subtracted from the worked duration.
-- AC-029: Clocking out during a break ends the break at the clock-out time.
-- AC-030: Starting another break while already on a break is refused.
+Acceptance criteria:
+- AC-028: A started and ended break is recorded with start and end times and subtracted from the worked duration.
+- AC-029: Clocking out while on a break ends the break at clock-out time and closes the entry.
+- AC-030: Starting a second break while already on a break is refused.
 
-**Related:** EPIC-004
+**Related:** EPIC-004, AC-028, AC-029, AC-030, US-010
 
 ### US-012 · draft · source: requirements:US-012
 
-Priority: medium. An employee corrects an entry they forgot to clock out of.
+Medium. If an entry has been left running since an earlier day, the employee is alerted on the clock page and can set the correct end time. End times before the start time are rejected.
 
-Epic: EPIC-004
-- AC-031: An entry left running from an earlier day triggers an alert on the clock page, and the employee can set the correct end time.
-- AC-032: An end time before the start time is rejected with a validation message.
+Acceptance criteria:
+- AC-031: For an entry running since an earlier day, the employee is alerted on the clock page when they next open the app and can set the correct end time.
+- AC-032: An end time earlier than the start time is rejected with a validation message.
 
-**Related:** EPIC-004, NFR-013
+**Related:** EPIC-004, AC-031, AC-032, US-010
 
 ### US-013 · draft · source: requirements:US-013
 
-Priority: critical. An employee enters hours per day for a week, with a row per project and task.
+Critical. Employees enter hours per day in a Monday-to-Sunday weekly timesheet, by project and task. Clocked entries appear alongside manual ones. Submission and approval are not in this version.
 
-Epic: EPIC-005 Weekly timesheet entry. Submission, approval and locking are out of Lightweight scope, so timesheets stay editable by their owner.
-- AC-033: Adding a row with a project, task and daily hours saves the hours and updates daily and weekly totals.
-- AC-034: Hours that are negative, non-numeric or above 24 are rejected with a validation message.
+Epic: EPIC-005. Timesheets remain editable by their owner in this version.
+
+Acceptance criteria:
+- AC-033: Adding a row with a project and task and entering hours on one or more days saves the hours and updates daily and weekly totals.
+- AC-034: Hours that are negative, non-numeric or above 24 for a day are rejected with a validation message.
 - AC-035: The week runs Monday to Sunday.
 - AC-036: Clocked entries appear on the correct days alongside manually entered hours.
 
-**Related:** EPIC-005, NFR-009, NFR-010, NFR-012, NFR-013
+**Related:** EPIC-005, AC-033, AC-034, AC-035, AC-036, US-010
 
 ### US-014 · draft · source: requirements:US-014
 
-Priority: high. Each time entry is marked billable or non-billable.
+High. Each time entry is marked billable or non-billable. If no choice is made, the entry takes the project default, or billable if there is none.
 
-Epic: EPIC-005
-- AC-037: The billable or non-billable choice is saved with the entry.
-- AC-038: With no choice made, the entry uses the project default, or billable if none is set. The value is visible before saving.
+Acceptance criteria:
+- AC-037: The billable/non-billable choice is saved with the entry on create or edit.
+- AC-038: With no choice made, the entry takes its project's default, or billable if none is set; the value is visible before saving.
 
-**Related:** EPIC-005
+Gap: no story defines how a project-level billable default is configured.
+
+**Related:** EPIC-005, AC-037, AC-038, US-008
 
 ### US-015 · draft · source: requirements:US-015
 
-Priority: high. Employees edit or delete their own time entries, but not anyone else's.
+High. Employees edit or delete their own entries, and totals recalculate. Edits or deletions of other people's entries are denied via both UI and API.
 
-Epic: EPIC-005
-- AC-039: Changing the day, hours, project, task or billable flag updates the entry, and totals recalculate.
-- AC-040: A confirmed delete removes the entry from the timesheet and totals.
-- AC-041: Editing or deleting another employee's entry, via the UI or API, is denied.
+Acceptance criteria:
+- AC-039: Changing an own entry's day, hours, project, task or billable flag updates the entry and recalculates totals.
+- AC-040: Confirming deletion removes the entry from the timesheet and totals.
+- AC-041: An Employee's attempt to edit or delete another employee's entry via UI or API is denied.
 
-**Related:** EPIC-005, NFR-003
+**Related:** EPIC-005, AC-039, AC-040, AC-041, US-002
 
 ### US-016 · draft · source: requirements:US-016
 
-Priority: medium. A dashboard shows the employee's hours for the current week.
+Medium. The employee dashboard shows the current week's total hours, hours per day and the billable/non-billable split. When there are no entries, it shows zero with links to record time.
 
-Epic: EPIC-006 Employee dashboard
-- AC-042: The dashboard shows weekly total, hours per day and the billable versus non-billable split.
-- AC-043: With no entries this week, it shows zero hours and links to the clock and timesheet.
-- AC-044: Figures reflect entries recorded or deleted since the last visit.
+Acceptance criteria:
+- AC-042: The dashboard shows weekly total, hours per day and the billable vs non-billable split.
+- AC-043: With no entries this week, it shows zero hours with a link to the clock and the timesheet.
+- AC-044: Figures reflect entries recorded or deleted when the employee returns to the dashboard.
 
-**Related:** EPIC-006, NFR-010, NFR-012
+**Related:** EPIC-006, AC-042, AC-043, AC-044
 
 ### US-017 · draft · source: requirements:US-017
 
-Priority: high. Times are stored in UTC and displayed in the user's own time zone.
+High. Times are stored in UTC and displayed in the user's profile time zone. Durations stay correct across daylight-saving changes.
 
-Epic: EPIC-007 Time zone, week start, language and responsive layout
-- AC-045: For a Europe/London user, clocking in at 09:00 local time stores a UTC timestamp and displays 09:00.
-- AC-046: Durations and local times are correct across daylight-saving changes.
+Acceptance criteria:
+- AC-045: A user in Europe/London who clocks in at 09:00 local time gets a UTC timestamp stored, and the entry displays as 09:00 local.
+- AC-046: Entries spanning a daylight-saving change show correct durations and local times.
 
-**Related:** EPIC-007, NFR-009
+Related: AC-056 (the team view uses the direct report's time zone).
+
+**Related:** EPIC-007, AC-045, AC-046, US-021
 
 ### US-018 · draft · source: requirements:US-018
 
-Priority: medium. The interface is English-only and works on phone browsers as well as desktop.
+Medium. The interface is English-only and responsive. The clock, timesheet and dashboard must work on phone browsers without horizontal scrolling. There is no native app.
 
-Epic: EPIC-007. A native mobile app is out of scope.
-- AC-047: At phone screen widths, the clock, timesheet and dashboard need no horizontal scrolling, and controls are tappable.
+Acceptance criteria:
+- AC-047: At phone-typical width, the clock, timesheet and dashboard are usable without horizontal scrolling, and controls are tappable.
 - AC-048: All labels and messages are in English.
 
-**Related:** EPIC-007, NFR-011, NFR-012
+**Related:** EPIC-007, AC-047, AC-048
 
 ### US-019 · draft · source: requirements:US-019
 
-Priority: medium. Basic user, admin and project documentation is provided.
-
-Epic: EPIC-008 Basic user and project documentation
-- AC-049: The help link opens a user guide covering clocking in and out, breaks, the weekly timesheet, editing entries and the dashboard.
-- AC-050: The admin guide covers creating users, assigning managers, and setting up clients, projects, tasks and bill rates.
-- AC-051: Project documentation covers the stack, setup, configuration (including the email service API key) and the EU/UK hosting region.
-
-**Related:** EPIC-008, NFR-016, REQ-SERVICES
-
-### NFR-001 · draft · source: requirements:NFR-001
-
-Security: passwords are stored safely and sessions use secure cookies.
-
-- Passwords are stored only as hashed values.
-- Sessions use secure cookies that browser scripts cannot read.
-- Signing out ends the session.
-- Applies to: US-001
-
-**Related:** US-001
-
-### NFR-002 · draft · source: requirements:NFR-002
-
-Security: sign-in and reset messages reveal nothing about which accounts exist.
-
-- Failed sign-ins show the same generic error whether the password is wrong or the email is unknown.
-- Reset requests show the same confirmation whether or not an account exists.
-- Applies to: US-001, US-003
-
-**Related:** US-001, US-003
-
-### NFR-003 · draft · source: requirements:NFR-003
-
-Security: role-based access is enforced on the server.
-
-- Access is checked on the server for every page and every API request, not only hidden in the UI.
-- Employees never receive admin data and see or change only their own entries.
-- Applies to: US-002, US-005, US-015
-
-**Related:** US-002, US-005, US-015
-
-### NFR-004 · draft · source: requirements:NFR-004
-
-Security: password reset links are single-use and time-limited.
-
-- A link works once and expires after a limited time.
-- New passwords must meet the password rules.
-- The link stops working once the password is changed.
-- Applies to: US-003
-
-**Related:** US-003
-
-### NFR-005 · draft · source: requirements:NFR-005
-
-Security: deactivated users lose access immediately.
-
-- A deactivated user cannot sign in.
-- Admin changes to a user's details or role apply from that user's next request.
-- Applies to: US-006
-
-**Related:** US-006
-
-### NFR-006 · draft · source: requirements:NFR-006
-
-Privacy: all personal data is hosted in an EU or UK region.
-
-- Covers employee identities, working hours and any health-related data.
-- Password-reset email is also handled in an EU region.
-- Applies to: whole system
-
-**Related:** REQ-STACK, REQ-SERVICES
-
-### NFR-007 · draft · source: requirements:NFR-007
-
-Compliance: the product must comply with GDPR and UK GDPR.
-
-- Employees work only in the EU and UK.
-- Access to personal data is limited by role.
-- Applies to: whole system
-- Note: compliance traceability is for human confirmation and is not legal advice.
-
-**Related:** US-002, NFR-003
-
-### NFR-008 · draft · source: requirements:NFR-008
-
-Privacy: time records are kept for a configurable retention period, defaulting to 6 years.
-
-- Target: default retention of 6 years for time records.
-- Applies to: whole system
-
-### NFR-009 · draft · source: requirements:NFR-009
-
-Compatibility: times are stored in UTC and shown in each user's time zone.
-
-- Daylight-saving changes must give correct local times and durations.
-- Applies to: US-017, US-010, US-013
-
-**Related:** US-017, US-010, US-013
-
-### NFR-010 · draft · source: requirements:NFR-010
-
-Usability: every weekly view runs Monday to Sunday.
-
-- The start day cannot be changed in this version.
-- Target: week starts on Monday.
-- Applies to: US-013, US-016
-
-**Related:** US-013, US-016
-
-### NFR-011 · draft · source: requirements:NFR-011
-
-Usability: the interface is English-only.
-
-- All labels and messages are in English.
-- No other languages are supported in this version.
-- Applies to: US-018
-
-**Related:** US-018
-
-### NFR-012 · draft · source: requirements:NFR-012
-
-Compatibility: the layout is responsive for phone browsers.
-
-- The clock, timesheet and dashboard work without horizontal scrolling.
-- Controls are easy to tap.
-- There is no native mobile app.
-- Applies to: US-018, US-010, US-013, US-016
-
-**Related:** US-018, US-010, US-013, US-016
-
-### NFR-013 · draft · source: requirements:NFR-013
-
-Usability: rejected forms show clear validation messages.
-
-- Cases covered:
-  - Missing fields
-  - Duplicate emails
-  - Negative or non-numeric bill rates
-  - Hours outside 0 to 24
-  - End times before start times
-- Target: daily hours between 0 and 24.
-- Applies to: US-004, US-008, US-012, US-013
-
-**Related:** US-004, US-008, US-012, US-013
-
-### NFR-014 · draft · source: requirements:NFR-014
-
-Maintainability: data stays intact when records change.
-
-- Rate changes, archiving a client or task, and deactivating a user must not delete or alter existing time entries.
-- Existing entries must still display correctly.
-- Applies to: US-006, US-007, US-008, US-009
-
-**Related:** US-006, US-007, US-008, US-009
-
-### NFR-015 · draft · source: requirements:NFR-015
-
-Scalability: the product supports up to 500 users.
-
-- Includes the busy period around the weekly timesheet deadline.
-- Target: up to 500 users.
-- Applies to: whole system
-
-**Related:** REQ-STACK
-
-### NFR-016 · draft · source: requirements:NFR-016
-
-Maintainability: project, setup and user documentation are provided.
-
-- Project documentation covers the stack, setup, configuration (including email service settings) and the EU/UK hosting region.
-- User and admin guides are also provided.
-- Applies to: US-019
-
-**Related:** US-019, REQ-SERVICES
-
-### NFR-017 · draft · source: requirements:NFR-017
-
-Compliance: the bill rate is for reporting only.
-
-- No screen offers invoicing or payment functions.
-- Applies to: US-008
-
-**Related:** US-008
+Medium. The app needs an in-app user guide, an admin guide, a Manager section on the My team view, and developer/operator project documentation. CHG-001 extended the admin and Manager content.
+
+Acceptance criteria:
+- AC-049: From the help link, any signed-in user can read a guide covering:
+  - Clocking in and out
+  - Breaks
+  - The weekly timesheet
+  - Editing entries
+  - The dashboard
+- AC-050: The admin guide covers:
+  - Creating users and assigning managers
+  - Setting up clients, projects, tasks and bill rates
+  - That assigning a manager grants that manager read-only access to the user's timesheets in My team
+  - That reassigning the user moves that access to the new manager
+  - That deactivating the user, or changing the manager's role away from Manager, removes it
+- AC-065: The Manager help section on My team explains:
+  - Only Managers can see it
+  - It lists only their active direct reports
+  - It is read-only (no adding, editing or deleting entries)
+  - Times are shown in the report's own time zone
+  - No other role has team access
+- AC-051: The project documentation for developers and operators describes:
+  - The stack
+  - Setup
+  - Configuration, including the email service API key
+  - The EU/UK hosting region
+
+**Related:** EPIC-008, AC-049, AC-050, AC-065, AC-051, REQ-SERVICES, EPIC-009
+
+### US-020 · draft · source: requirements:US-020
+
+High. A Manager's My team view lists only the active users whose Manager field is set to them, with name and time zone. If there are none, an empty state is shown.
+
+Acceptance criteria:
+- AC-052: Active users whose Manager field is set to that Manager are listed with name and time zone; no other users are listed.
+- AC-053: Deactivated direct reports are not listed.
+- AC-054: With no active direct reports, an empty state says the Manager has no direct reports.
+
+**Related:** EPIC-009, CHG-001, AC-052, AC-053, AC-054, US-005
+
+### US-021 · draft · source: requirements:US-021
+
+High. A Manager views a direct report's Monday-to-Sunday timesheet read-only, with times in the report's labelled time zone. No edit controls are shown, and any change request returns 403.
+
+Acceptance criteria:
+- AC-055: The selected report's week runs Monday to Sunday and shows:
+  - The timesheet grid
+  - The entries list
+  - Daily and weekly totals
+  - The billable/non-billable split
+- AC-056: When time zones differ, entry times and day boundaries use the report's time zone, and that time zone is labelled on the view.
+- AC-057: No controls are offered to add, edit or delete entries or breaks, or to change clock state.
+- AC-058: Any UI or API request by a Manager to create, edit or delete another user's entries or breaks, or to clock them in or out, gets 403 with no data changed.
+
+**Related:** EPIC-009, CHG-001, AC-055, AC-056, AC-057, AC-058, US-017, US-013
+
+### US-022 · draft · source: requirements:US-022
+
+Critical. Team access is granted only by the recorded reporting line and is enforced on the server for every request. Access is re-evaluated on each request after reassignment, deactivation or role change.
+
+Acceptance criteria:
+- AC-059: A Manager requesting team endpoints for a user not assigned to them gets 403 with no data.
+- AC-060: Employee, Payroll Admin and System Admin roles get 403 on any team endpoint.
+- AC-061: After an employee is reassigned from Manager A to Manager B, A gets 403 for that employee and B can list and view them.
+- AC-062: Access follows the current state:
+  - A deactivated report is no longer listed or viewable.
+  - A Manager whose role changes away from Manager, or whose account is deactivated, gets 403.
+- AC-063: After release, Employees can still only see and change their own time entries.
+
+**Related:** EPIC-009, CHG-001, AC-059, AC-060, AC-061, AC-062, AC-063, AC-064, US-002, US-005, US-006
 <!-- sdlc:auto:end narrative -->
 
 <!-- sdlc:auto:start summary -->
-**Requirements version:** v1  
+**Requirements version:** v2  
 **Delivery scope:** lightweight  
-**Approved:** 2026-11-07
+**Approved:** 2026-11-09
 
 **Capabilities in scope:** Email and password sign-in, User accounts created by admins, Client, project and task setup, Hourly bill rate per project, Clock in and out with breaks, Weekly timesheet entry by day, Billable and non-billable marking per entry, Employee dashboard of weekly hours, Editing and deleting own time entries, Basic user and project documentation, Times stored in UTC and shown in the user's time zone, Week starts on Monday, English-only interface, Bill rate used for reporting only, no invoicing, Initial data entered manually, no SSO or HR-system sync
 
@@ -508,6 +500,7 @@ Email-and-password sign-in with role-restricted access for Employee, Manager, Pa
 | AC-004 | a user with the Employee role is signed in | they try to open an admin page or request admin data via the API | access is denied and no admin data is returned |
 | AC-005 | an Employee is signed in | they view time data | they can only see and change their own time entries |
 | AC-006 | a System Admin is signed in | they open user administration | they can view and change user accounts and roles |
+| AC-064 | a signed-in user requests another user's personal time data (time entries, breaks, timesheets) via the UI or API | the server handles the request | the server checks ownership or the recorded reporting line before returning anything: a Manager can read, but never create, edit or delete, the time data of users whose Manager field is set to them, and every other request for another user's time data, and every change request by a Manager, is refused with 403 with no data returned or changed |
 
 ### US-003: Reset a forgotten password
 
@@ -732,6 +725,50 @@ Short documentation so users and admins can use and set up the product.
 | ID | Given | When | Then |
 |---|---|---|---|
 | AC-049 | a signed-in user | they open the help link | they can read a guide covering clocking in and out, breaks, the weekly timesheet, editing entries and the dashboard |
-| AC-050 | a System Admin | they open the admin guide | it covers creating users, assigning managers and setting up clients, projects, tasks and bill rates |
+| AC-050 | a System Admin | they open the admin guide | it covers creating users, assigning managers and setting up clients, projects, tasks and bill rates, and explains that assigning a manager to a user is what grants that manager read-only access to the user's timesheets in the My team view, that reassigning the user moves that access to the new manager, and that deactivating the user or changing the manager's role away from Manager removes it |
+| AC-065 | a signed-in Manager | they open the help link | they can read a section of the user guide on the My team view explaining that only Managers can see it, that it lists only their active direct reports, that it is read-only so entries cannot be added, edited or deleted from it, that times are shown in the direct report's own time zone, and that no other role has team access |
 | AC-051 | a developer or operator | they open the project documentation | it describes the stack, setup, configuration including the email service API key, and the EU/UK hosting region |
+
+## EPIC-009: Manager team view (read-only)
+
+From change request CHG-001 (major, new version). A Manager can see the timesheets of their direct reports in a read-only "My team" view. Access is granted only by the recorded reporting line (the employee's Manager field) and is checked on the server for every request. Times are shown in the employee's own time zone and the week runs Monday to Sunday. Out of scope: approving or locking timesheets, reports, exports, notifications, indirect (skip-level) reports, and any team access for Payroll Admin or System Admin.
+
+### US-020: List my direct reports
+
+**Priority:** high
+
+> As a Manager, I want to see a list of the people who report directly to me, so that I can choose whose timesheet to look at.
+
+| ID | Given | When | Then |
+|---|---|---|---|
+| AC-052 | a Manager is signed in and active users exist whose Manager field is set to that Manager | they open the My team view | those users are listed with their name and time zone, and no other users are listed |
+| AC-053 | one of the Manager's direct reports has been deactivated | the Manager opens the My team view | the deactivated user is not listed |
+| AC-054 | a Manager has no active direct reports | they open the My team view | an empty state is shown saying they have no direct reports |
+
+### US-021: View a direct report's weekly timesheet (read-only)
+
+**Priority:** high
+
+> As a Manager, I want to view a direct report's weekly timesheet and entries without being able to change them, so that I can see what my team has recorded.
+
+| ID | Given | When | Then |
+|---|---|---|---|
+| AC-055 | a Manager has selected a direct report and a week | the timesheet is displayed | the week runs Monday to Sunday and shows that person's timesheet grid, entries list, daily and weekly totals, and the billable / non-billable split |
+| AC-056 | the direct report's profile time zone differs from the Manager's | the Manager views that person's week | entry times and day boundaries are shown in the direct report's time zone, and that time zone is labelled on the view |
+| AC-057 | a Manager is viewing a direct report's timesheet | the view is displayed | no controls to add, edit or delete entries or breaks, or to change clock state, are offered |
+| AC-058 | a Manager is signed in | they send any request via the UI or API to create, edit or delete another user's time entries or breaks, or to clock them in or out | the server responds 403 and no data is changed |
+
+### US-022: Team access restricted to the reporting line
+
+**Priority:** critical
+
+> As a System Admin, I want team timesheet access to be granted only by the recorded reporting line and enforced on the server, so that personal time data is only visible to the person's own manager.
+
+| ID | Given | When | Then |
+|---|---|---|---|
+| AC-059 | a Manager is signed in | they request the team endpoints for a user whose Manager field is not set to them | the server responds 403 and no data about that user is returned |
+| AC-060 | a user with the Employee, Payroll Admin or System Admin role is signed in | they call any team endpoint | the server responds 403 and no team data is returned |
+| AC-061 | an employee is reassigned from Manager A to Manager B | each manager makes their next team request | Manager A is refused with 403 for that employee and Manager B can list and view them |
+| AC-062 | a direct report is deactivated, or the Manager's own role is changed away from Manager or their account is deactivated | the next team request is made | access is decided by the new state: the deactivated report is no longer listed or viewable, and a former Manager is refused with 403 |
+| AC-063 | an Employee is signed in after this feature is released | they view or change time data | they can still only see and change their own time entries |
 <!-- sdlc:auto:end epics -->
