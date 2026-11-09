@@ -64,7 +64,24 @@ export default function Screen() {
 
   const project = projects.find((p) => String(p.id) === String(projectId));
   const onBreak = !!(entry && entry.on_break);
-  const stale = false;
+  const startLocal = entry ? DateTime.fromISO(entry.start_at, { zone: "utc" }).setZone(tz) : null;
+  const stale = !!(
+    startLocal && startLocal.startOf("day") < DateTime.fromMillis(now, { zone: tz }).startOf("day")
+  );
+  const INPUT_FMT = "yyyy-MM-dd'T'HH:mm";
+  const [endValue, setEndValue] = React.useState("");
+  const [endError, setEndError] = React.useState("");
+  const [saving, setSaving] = React.useState(false);
+  const staleId = stale ? entry.id : null;
+  React.useEffect(() => {
+    if (staleId === null) return;
+    const s = DateTime.fromISO(entry.start_at, { zone: "utc" }).setZone(tz);
+    let c = s.set({ hour: 17, minute: 0, second: 0, millisecond: 0 });
+    if (c <= s) c = s.plus({ hours: 1 });
+    setEndValue(c.toFormat(INPUT_FMT));
+    setEndError("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [staleId, tz]);
   const totalB = days.reduce((s, d) => s + d.b, 0);
   const totalN = days.reduce((s, d) => s + d.n, 0);
   const total = totalB + totalN;
@@ -157,6 +174,39 @@ export default function Screen() {
     } catch (err) {
       if (guard(err)) return;
       say("error", detailOf(err));
+    }
+  };
+
+  const saveEnd = async () => {
+    const end = DateTime.fromFormat(endValue, INPUT_FMT, { zone: tz });
+    if (!end.isValid) {
+      setEndError("Enter a valid end date and time.");
+      return;
+    }
+    if (end <= startLocal) {
+      setEndError("End time must be after the start time.");
+      return;
+    }
+    setEndError("");
+    setSaving(true);
+    try {
+      const r = await apiFetch(`/api/time-entries/${entry.id}/end`, {
+        method: "PATCH",
+        body: JSON.stringify({ end_at: end.toUTC().toISO({ suppressMilliseconds: true }) }),
+      });
+      setEntry(null);
+      const day = DateTime.fromISO(r.work_date, { zone: tz }).toFormat("ccc d LLL");
+      say("ok", `${fmtHM(r.duration_minutes)} h added to ${day}`);
+      try {
+        const status = await apiFetch("/api/clock/status");
+        setEntry(status.entry);
+      } catch (err) {
+        guard(err);
+      }
+    } catch (err) {
+      if (!guard(err)) setEndError(detailOf(err));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -285,6 +335,60 @@ export default function Screen() {
             Sign out
           </button>
         </div>
+
+        {stale && (
+          <section
+            role="alert"
+            aria-labelledby="stale-h"
+            className="col-span-12"
+            style={{ ...panel, borderColor: C.accent }}
+          >
+            <h2 id="stale-h" style={{ ...serif, fontSize: 20, fontWeight: 700, margin: 0 }}>
+              You are still clocked in
+            </h2>
+            <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.5 }}>
+              You are still clocked in since {startLocal.toFormat("ccc d LLL HH:mm")}. What was the
+              correct end time?
+            </p>
+            <div className="flex flex-wrap gap-3 items-end" style={{ marginTop: 16 }}>
+              <div style={{ flex: "1 1 220px", minWidth: 0 }}>
+                <Label
+                  htmlFor="stale-end"
+                  style={{ ...label, display: "block", marginBottom: 8 }}
+                >
+                  Correct end time
+                </Label>
+                <input
+                  id="stale-end"
+                  type="datetime-local"
+                  value={endValue}
+                  onChange={(e) => {
+                    setEndValue(e.target.value);
+                    setEndError("");
+                  }}
+                  aria-invalid={!!endError}
+                  aria-describedby={endError ? "stale-err" : undefined}
+                  style={{ ...field, colorScheme: "dark" }}
+                />
+              </div>
+              <button
+                type="button"
+                className="tt-btn"
+                data-primary="true"
+                disabled={saving}
+                style={{ ...actionBtn(true, saving), flex: "1 1 120px" }}
+                onClick={saveEnd}
+              >
+                Save
+              </button>
+            </div>
+            {endError && (
+              <p id="stale-err" style={{ margin: "12px 0 0", fontSize: 14 }}>
+                {endError}
+              </p>
+            )}
+          </section>
+        )}
 
         {/* Row 2 */}
         {/* Row 3 */}
@@ -573,7 +677,8 @@ export default function Screen() {
           </div>
           {stale && (
             <p style={{ margin: "16px 0 0", fontSize: 13, color: C.muted }}>
-              Thursday's running entry is not counted until you set its end time.
+              The running entry from {startLocal.toFormat("cccc")} is not counted until you set its
+              end time.
             </p>
           )}
         </section>
