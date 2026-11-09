@@ -5,11 +5,13 @@ PATCH /api/admin/tasks/{id} {is_archived, name} and GET /api/projects. Tests tha
 route that is not mounted yet skip as PENDING.
 """
 
+from datetime import UTC, datetime
+
 import pytest
 from sqlalchemy import inspect, text
 
 from app.main import app
-from app.models import Client, Project, Task, User, UserSession
+from app.models import Break, Client, Project, Task, TimeEntry, User, UserSession
 from app.security import hash_password
 
 H = {"X-Requested-With": "XMLHttpRequest"}
@@ -20,6 +22,8 @@ ADMIN_ROUTES = [
     ("patch", "/api/admin/clients/1"),
     ("post", "/api/admin/projects"),
     ("patch", "/api/admin/projects/1"),
+    ("post", "/api/admin/projects/1/tasks"),
+    ("patch", "/api/admin/tasks/1"),
 ]
 
 
@@ -29,6 +33,8 @@ def _has(path):
 
 @pytest.fixture(autouse=True)
 def _clean(db_session):
+    db_session.query(Break).delete()
+    db_session.query(TimeEntry).delete()
     db_session.query(Task).delete()
     db_session.query(Project).delete()
     db_session.query(Client).delete()
@@ -81,9 +87,7 @@ def new_project(client, adm, cid, name="Web", rate=100):
 
 
 def new_task(client, adm, pid, name="Design"):
-    if not _has("/api/admin/tasks"):
-        pytest.skip("PENDING: /api/admin/tasks not present yet")
-    r = client.post("/api/admin/tasks", json={"project_id": pid, "name": name}, headers=adm)
+    r = client.post(f"/api/admin/projects/{pid}/tasks", json={"name": name}, headers=adm)
     assert r.status_code == 201, r.text
     return r.json()
 
@@ -254,8 +258,9 @@ def test_ac021_rate_change_leaves_others_unchanged(client, adm, db_session):
 def test_ac022_no_invoice_or_payment_in_openapi_or_responses(client, adm):
     doc = client.get("/openapi.json").text.lower()
     paths = client.get("/openapi.json").json()["paths"]
-    catalogue = [p for p in paths if p.startswith("/api/admin/clients") or "project" in p
-                 or "task" in p]
+    catalogue = [
+        p for p in paths if p.startswith("/api/admin/clients") or "project" in p or "task" in p
+    ]
     for p in catalogue:
         assert "invoice" not in p.lower() and "payment" not in p.lower()
     c = new_client(client, adm)
@@ -283,7 +288,7 @@ def test_ac023_duplicate_task_name_409(client, adm, db_session):
     p = new_project(client, adm, c["id"])
     new_task(client, adm, p["id"], "Design")
     for n in ("Design", "DESIGN"):
-        r = client.post("/api/admin/tasks", json={"project_id": p["id"], "name": n}, headers=adm)
+        r = client.post(f"/api/admin/projects/{p['id']}/tasks", json={"name": n}, headers=adm)
         assert r.status_code == 409
     assert db_session.query(Task).count() == 1
 
@@ -364,5 +369,166 @@ def test_nfr013_422_bodies_have_field_level_english_messages(client, adm):
         assert isinstance(d[0]["msg"], str) and len(d[0]["msg"]) > 5
 
 
+def _tasks_url(pid):
+    return f"/api/admin/projects/{pid}/tasks"
+
+
+def test_ac023_task_created_201_body(client, adm):
+    c = new_client(client, adm)
+    p = new_project(client, adm, c["id"])
+    r = client.post(_tasks_url(p["id"]), json={"name": "  Build  "}, headers=adm)
+    assert r.status_code == 201
+    assert r.json()["name"] == "Build" and r.json()["is_archived"] is False
+
+
+def test_ac023_same_task_name_allowed_in_other_project(client, adm):
+    c = new_client(client, adm)
+    p1 = new_project(client, adm, c["id"], "P1")
+    p2 = new_project(client, adm, c["id"], "P2")
+    new_task(client, adm, p1["id"], "Design")
+    new_task(client, adm, p2["id"], "Design")
+
+
+@pytest.mark.parametrize("body", [{"name": ""}, {"name": "   "}, {}])
+def test_ac023_blank_task_name_422(client, adm, db_session, body):
+    c = new_client(client, adm)
+    p = new_project(client, adm, c["id"])
+    r = client.post(_tasks_url(p["id"]), json=body, headers=adm)
+    assert r.status_code == 422
+    assert r.json()["detail"][0]["loc"][-1] == "name" and r.json()["detail"][0]["msg"]
+    assert db_session.query(Task).count() == 0
+
+
+def test_ac023_unknown_project_404(client, adm, db_session):
+    r = client.post(_tasks_url(999999), json={"name": "X"}, headers=adm)
+    assert r.status_code == 404
+    assert db_session.query(Task).count() == 0
+
+
+def test_ac023_archived_client_409_no_task(client, adm, db_session):
+    c = new_client(client, adm)
+    p = new_project(client, adm, c["id"])
+    client.patch(f"/api/admin/clients/{c['id']}", json={"is_archived": True}, headers=adm)
+    r = client.post(_tasks_url(p["id"]), json={"name": "X"}, headers=adm)
+    assert r.status_code == 409
+    assert db_session.query(Task).count() == 0
+
+
+def test_ac024_unknown_task_patch_404(client, adm):
+    r = client.patch("/api/admin/tasks/999999", json={"is_archived": True}, headers=adm)
+    assert r.status_code == 404
+
+
+def test_ac024_public_list_omits_archived_and_bill_rate(client, adm):
+    c = new_client(client, adm, "Gone")
+    k = new_client(client, adm, "Kept")
+    gp = new_project(client, adm, c["id"], "GoneProj", 77.77)
+    kp = new_project(client, adm, k["id"], "KeptProj", 88.88)
+    t = new_task(client, adm, kp["id"], "Dead")
+    new_task(client, adm, kp["id"], "Alive")
+    new_task(client, adm, gp["id"], "GoneTask")
+    client.patch(f"/api/admin/tasks/{t['id']}", json={"is_archived": True}, headers=adm)
+    client.patch(f"/api/admin/clients/{c['id']}", json={"is_archived": True}, headers=adm)
+    r = client.get("/api/projects", headers=adm)
+    assert r.status_code == 200
+    data = r.json()
+    assert [p["name"] for p in data] == ["KeptProj"]
+    assert [x["name"] for x in data[0]["tasks"]] == ["Alive"]
+    assert "bill_rate" not in r.text and "77.77" not in r.text and "88.88" not in r.text
+    assert "Gone" not in r.text and "Dead" not in r.text
+
+
+def test_ac024_projects_401_without_session_has_no_data(client, adm):
+    c = new_client(client, adm, "Secret Co")
+    new_project(client, adm, c["id"], "SecretProj")
+    r = client.get("/api/projects")
+    assert r.status_code == 401 and "SecretProj" not in r.text
+
+
+@pytest.mark.parametrize("role", ["Employee", "Manager", "Payroll Admin"])
+def test_nfr007_every_catalog_route_403_no_data_and_nothing_changes(client, adm, db_session, role):
+    c = new_client(client, adm, "Secret Client")
+    p = new_project(client, adm, c["id"], "SecretProj")
+    t = new_task(client, adm, p["id"], "SecretTask")
+    mk(db_session, "cat.y@example.com", role)
+    hdr = sign_in(client, "cat.y@example.com")
+    for r in (
+        client.post(_tasks_url(p["id"]), json={"name": "Hack"}, headers=hdr),
+        client.patch(f"/api/admin/tasks/{t['id']}", json={"is_archived": True}, headers=hdr),
+        client.patch(f"/api/admin/projects/{p['id']}", json={"bill_rate": 1}, headers=hdr),
+        client.patch(f"/api/admin/clients/{c['id']}", json={"is_archived": True}, headers=hdr),
+        client.post("/api/admin/clients", json={"name": "Hack"}, headers=hdr),
+        client.post(
+            "/api/admin/projects",
+            json={"client_id": c["id"], "name": "Hack", "bill_rate": 1},
+            headers=hdr,
+        ),
+        client.get("/api/admin/clients", headers=hdr),
+    ):
+        assert r.status_code == 403
+        assert "Secret" not in r.text
+    db_session.expire_all()
+    assert db_session.query(Task).count() == 1
+    assert db_session.query(Client).count() == 1
+    assert db_session.query(Project).count() == 1
+    assert db_session.get(Task, t["id"]).is_archived is False
+    assert db_session.get(Client, c["id"]).is_archived is False
+    assert float(db_session.get(Project, p["id"]).bill_rate) == 100
+
+
+def _entries(db):
+    db.expire_all()
+    return (
+        db.execute(text("SELECT * FROM time_entries ORDER BY id")).all(),
+        db.execute(text("SELECT * FROM breaks ORDER BY id")).all(),
+    )
+
+
+def test_nfr014_rate_change_archive_task_and_client_keep_time_entries(client, adm, db_session):
+    c = new_client(client, adm)
+    p = new_project(client, adm, c["id"], "P", 100)
+    t = new_task(client, adm, p["id"], "T")
+    u = mk(db_session, "cat.worker@example.com")
+    e = TimeEntry(
+        user_id=u.id,
+        project_id=p["id"],
+        task_id=t["id"],
+        billable=True,
+        start_at=datetime(2026, 1, 13, 9, 0, tzinfo=UTC),
+        end_at=datetime(2026, 1, 13, 17, 0, tzinfo=UTC),
+    )
+    db_session.add(e)
+    db_session.flush()
+    db_session.add(
+        Break(
+            time_entry_id=e.id,
+            start_at=datetime(2026, 1, 13, 12, 0, tzinfo=UTC),
+            end_at=datetime(2026, 1, 13, 12, 30, tzinfo=UTC),
+        )
+    )
+    db_session.commit()
+    before = _entries(db_session)
+    assert len(before[0]) == 1 and len(before[1]) == 1
+
+    r = client.patch(f"/api/admin/projects/{p['id']}", json={"bill_rate": 250}, headers=adm)
+    assert r.status_code == 200
+    assert _entries(db_session) == before
+    r = client.patch(f"/api/admin/tasks/{t['id']}", json={"is_archived": True}, headers=adm)
+    assert r.status_code == 200
+    assert _entries(db_session) == before
+    r = client.patch(f"/api/admin/clients/{c['id']}", json={"is_archived": True}, headers=adm)
+    assert r.status_code == 200
+    assert _entries(db_session) == before
+
+    # Still displays: the project, task and client the entry points at remain readable.
+    row = next(x for x in listing(client, adm) if x["id"] == c["id"])
+    assert row["is_archived"] is True
+    assert row["projects"][0]["id"] == p["id"] and row["projects"][0]["bill_rate"] == "250.00"
+    assert row["projects"][0]["tasks"][0]["id"] == t["id"]
+    assert row["projects"][0]["tasks"][0]["is_archived"] is True
+    got = db_session.get(TimeEntry, e.id)
+    assert (got.project_id, got.task_id) == (p["id"], t["id"])
+
+
 # NFR-006 (EU hosting), NFR-008 (retention) and NFR-015 (500-user load) cannot be tested
-# here. NFR-014 is covered by AC-021 (time_entries table does not exist yet).
+# in this suite: they are deployment/configuration concerns.
