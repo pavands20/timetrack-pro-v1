@@ -11,7 +11,7 @@
 | password_hash | varchar(255) | False | — | True |
 | role | enum(employee, manager, payroll_admin, system_admin) | False | — | False |
 | time_zone | varchar(64) IANA | False | — | False |
-| manager_id | uuid | False | users.id | True |
+| manager_id | uuid (reporting line, grants read-only team access) | False | users.id | True |
 | is_active | boolean | False | — | False |
 | created_at | timestamptz | False | — | False |
 | updated_at | timestamptz | False | — | False |
@@ -76,7 +76,7 @@
 | task_id | uuid | False | tasks.id | False |
 | source | enum(clock, manual) | False | — | False |
 | billable | boolean | False | — | False |
-| work_date | date (user-local) | False | — | False |
+| work_date | date (owner-local) | False | — | False |
 | started_at | timestamptz (UTC), required when source=clock | False | — | True |
 | ended_at | timestamptz (UTC), null while running, check > started_at | False | — | True |
 | duration_minutes | integer check 0..1440, required when source=manual | False | — | True |
@@ -124,7 +124,7 @@ erDiagram
     varchar_255_ password_hash
     enum_employee__manager__payroll_admin__system_admin_ role
     varchar_64__IANA time_zone
-    uuid manager_id FK
+    uuid__reporting_line__grants_read_only_team_access_ manager_id FK
     boolean is_active
     timestamptz created_at
     timestamptz updated_at
@@ -171,7 +171,7 @@ erDiagram
     uuid task_id FK
     enum_clock__manual_ source
     boolean billable
-    date__user_local_ work_date
+    date__owner_local_ work_date
     timestamptz__UTC___required_when_source_clock started_at
     timestamptz__UTC___null_while_running__check___started_at ended_at
     integer_check_0__1440__required_when_source_manual duration_minutes

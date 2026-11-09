@@ -5,7 +5,7 @@
 <!-- sdlc:auto:start sprints -->
 ## Sprint 1: Sprint 1
 
-Secure sign-in, server-enforced roles, password reset by email, and admin creation of users with manager assignment
+Sign-in, role-restricted access, password reset, and user creation with manager assignment
 
 Capacity: 20 points · Committed: 18
 
@@ -19,7 +19,7 @@ Capacity: 20 points · Committed: 18
 
 ## Sprint 2: Sprint 2
 
-Complete user administration, set up clients, projects with bill rates and tasks, and let employees clock in and out
+User editing and deactivation, client/project/task setup with bill rates, and clock in/out
 
 Capacity: 20 points · Committed: 20
 
@@ -29,14 +29,11 @@ Capacity: 20 points · Committed: 20
 | US-007 | Story | Manage clients | 3 | backend-agent | US-002 |
 | US-008 | Story | Manage projects with an hourly bill rate | 3 | backend-agent | US-007 |
 | US-009 | Story | Manage tasks within a project | 3 | backend-agent | US-008 |
-| US-010 | Story | Clock in and out against a project and task | 8 | backend-agent | US-009 |
-| ↳ US-010-T1 | Task | Add time_entries migration | — | backend-agent | — |
-| ↳ US-010-T2 | Task | Implement clock status, in and out endpoints | — | backend-agent | — |
-| ↳ US-010-T3 | Task | Build clock page | — | frontend-agent | — |
+| US-010 | Story | Clock in and out against a project and task | 8 | backend-agent | US-009, US-004 |
 
 ## Sprint 3: Sprint 3
 
-Correct time-zone handling, breaks, recovery of forgotten clock-outs, the weekly timesheet and billable marking
+Breaks, running-entry recovery, weekly timesheet entry, billable marking and UTC/time-zone handling
 
 Capacity: 20 points · Committed: 19
 
@@ -44,25 +41,34 @@ Capacity: 20 points · Committed: 19
 |---|---|---|---|---|---|
 | US-011 | Story | Record breaks while clocked in | 3 | backend-agent | US-010 |
 | US-012 | Story | Recover an entry left running | 3 | backend-agent | US-010 |
-| US-013 | Story | Enter hours by day in a weekly timesheet | 8 | frontend-agent | US-010, US-017 |
-| ↳ US-013-T1 | Task | Implement timesheet week and cell endpoints | — | backend-agent | — |
-| ↳ US-013-T2 | Task | Build weekly timesheet grid | — | frontend-agent | — |
-| ↳ US-013-T3 | Task | Add timesheet API test suite | — | qa-agent | — |
-| US-014 | Story | Mark entries billable or non-billable | 2 | frontend-agent | US-013, US-008 |
+| US-013 | Story | Enter hours by day in a weekly timesheet | 8 | frontend-agent | US-009 |
+| US-014 | Story | Mark entries billable or non-billable | 2 | frontend-agent | US-013 |
 | US-017 | Story | Times stored in UTC and shown in my time zone | 3 | backend-agent | US-010 |
 
 ## Sprint 4: Sprint 4
 
-Edit and delete own entries, weekly hours dashboard, responsive English interface and user/admin/project documentation
+Editing own entries, employee dashboard, responsive English UI and documentation
 
 Capacity: 20 points · Committed: 12
 
 | Key | Type | Title | Points | Role | Depends on |
 |---|---|---|---|---|---|
-| US-015 | Story | Edit and delete my own time entries | 3 | backend-agent | US-013, US-002 |
+| US-015 | Story | Edit and delete my own time entries | 3 | backend-agent | US-013 |
 | US-016 | Story | See my weekly hours on a dashboard | 3 | frontend-agent | US-013, US-014 |
-| US-018 | Story | English-only, responsive interface | 3 | frontend-agent | US-016, US-015 |
-| US-019 | Story | User and admin guides | 3 | devops-agent | US-016, US-006, US-009 |
+| US-018 | Story | English-only, responsive interface | 3 | frontend-agent | US-013 |
+| US-019 | Story | User and admin guides | 3 | devops-agent | US-016 |
+
+## Sprint 5: Sprint 5
+
+Read-only Manager team view: reporting-line access enforced on the server, a direct-reports list, and a view of a report's weekly timesheet in their own time zone
+
+Capacity: 20 points · Committed: 13
+
+| Key | Type | Title | Points | Role | Depends on |
+|---|---|---|---|---|---|
+| US-020 | Story | List my direct reports | 3 | backend-agent | US-022 |
+| US-021 | Story | View a direct report's weekly timesheet (read-only) | 5 | frontend-agent | US-020, US-022, US-013, US-017 |
+| US-022 | Story | Team access restricted to the reporting line | 5 | security-agent | US-002, US-005, US-006 |
 
 ## Unscheduled
 

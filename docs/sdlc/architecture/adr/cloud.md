@@ -2,11 +2,11 @@
 # ADR-0004: Use AWS for Cloud
 
 Status: Accepted  
-Date: 2026-11-08
+Date: 2026-11-09
 
 ## Context and Problem Statement
 
-Which Cloud technology does the project use? Decided in architecture v2.
+Which Cloud technology does the project use? Decided in architecture v1.
 
 ## Considered Options
 

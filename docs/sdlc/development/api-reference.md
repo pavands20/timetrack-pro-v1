@@ -40,6 +40,8 @@
 
 - DELETE /api/time-entries/{id}
 - GET /api/projects
+- GET /api/team/members
+- GET /api/team/members/{user_id}/timesheets/{week_start}
 - PATCH /api/admin/clients/{id}
 - PATCH /api/admin/projects/{id}
 - PATCH /api/admin/tasks/{id}

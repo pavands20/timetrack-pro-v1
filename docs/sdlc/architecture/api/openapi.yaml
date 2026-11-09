@@ -2,7 +2,7 @@
 openapi: 3.1.0
 info:
   title: TimeTrack Pro V1
-  version: architecture-v2
+  version: architecture-v1
   description: Designed API from the approved architecture (not extracted from code).
 paths:
   /api/admin/clients:
@@ -173,9 +173,11 @@ paths:
   /api/admin/users/{id}:
     patch:
       summary: Edit name, role, manager or time zone (US-005, US-006). The manager
-        must be an active user with the manager role.
+        must be an active user with the manager role. Changi
       description: Edit name, role, manager or time zone (US-005, US-006). The manager
-        must be an active user with the manager role.
+        must be an active user with the manager role. Changing manager_id moves team
+        access to the new manager on the next request. Changing a manager's role away
+        from manager removes their team access (AC-061, AC-062).
       operationId: patch_api_admin_users_id
       parameters:
       - name: id
@@ -197,9 +199,9 @@ paths:
   /api/admin/users/{id}/deactivate:
     post:
       summary: Deactivate the user and revoke their sessions. Time entries are kept
-        (AC-016).
+        (AC-016). The user drops out of their manager's tea
       description: Deactivate the user and revoke their sessions. Time entries are
-        kept (AC-016).
+        kept (AC-016). The user drops out of their manager's team view (AC-053, AC-062).
       operationId: post_api_admin_users_id_deactivate
       parameters:
       - name: id
@@ -236,8 +238,8 @@ paths:
             session token, sent back as Authorization: Bearer)'
   /api/auth/logout:
     post:
-      summary: Revoke the current session, so its token stops working (AC-003).
-      description: Revoke the current session, so its token stops working (AC-003).
+      summary: Revoke the current session so its token stops working (AC-003).
+      description: Revoke the current session so its token stops working (AC-003).
       operationId: post_api_auth_logout
       parameters: []
       requestBody:
@@ -254,7 +256,9 @@ paths:
   /api/auth/me:
     get:
       summary: Return the current user and role for routing to the role home page.
+        The SPA shows the My team navigation only when the r
       description: Return the current user and role for routing to the role home page.
+        The SPA shows the My team navigation only when the role is manager.
       operationId: get_api_auth_me
       parameters: []
       responses:
@@ -299,8 +303,10 @@ paths:
           description: 202 {message}
   /api/clock/breaks/end:
     post:
-      summary: End the open break (AC-028).
-      description: End the open break (AC-028).
+      summary: End the caller's open break (AC-028). Another user cannot be targeted
+        (403).
+      description: End the caller's open break (AC-028). Another user cannot be targeted
+        (403).
       operationId: post_api_clock_breaks_end
       parameters: []
       requestBody:
@@ -316,10 +322,10 @@ paths:
       - bearerAuth: []
   /api/clock/breaks/start:
     post:
-      summary: Start a break on the running entry. Returns 409 if a break is already
-        open (AC-030).
-      description: Start a break on the running entry. Returns 409 if a break is already
-        open (AC-030).
+      summary: Start a break on the caller's running entry. Returns 409 if a break
+        is already open (AC-030). Another user cannot be tar
+      description: Start a break on the caller's running entry. Returns 409 if a break
+        is already open (AC-030). Another user cannot be targeted (403).
       operationId: post_api_clock_breaks_start
       parameters: []
       requestBody:
@@ -335,10 +341,11 @@ paths:
       - bearerAuth: []
   /api/clock/in:
     post:
-      summary: Start a running entry (AC-025). Returns 409 if one is already running
-        (AC-027).
-      description: Start a running entry (AC-025). Returns 409 if one is already running
-        (AC-027).
+      summary: Start a running entry for the caller only (AC-025). Returns 409 if
+        one is already running (AC-027). A body naming any ot
+      description: Start a running entry for the caller only (AC-025). Returns 409
+        if one is already running (AC-027). A body naming any other user_id is refused
+        with 403 (AC-058).
       operationId: post_api_clock_in
       parameters: []
       requestBody:
@@ -349,13 +356,15 @@ paths:
               description: '{project_id, task_id, billable?}'
       responses:
         '200':
-          description: 201 TimeEntry
+          description: 201 TimeEntry, or 403 if another user is targeted
       security:
       - bearerAuth: []
   /api/clock/out:
     post:
-      summary: Close any open break and the running entry (AC-026, AC-029).
-      description: Close any open break and the running entry (AC-026, AC-029).
+      summary: Close the caller's open break and running entry (AC-026, AC-029). Another
+        user cannot be targeted (403).
+      description: Close the caller's open break and running entry (AC-026, AC-029).
+        Another user cannot be targeted (403).
       operationId: post_api_clock_out
       parameters: []
       requestBody:
@@ -408,12 +417,57 @@ paths:
           description: '[{id, client_name, name, default_billable, tasks:[{id, name}]}]'
       security:
       - bearerAuth: []
+  /api/team/members:
+    get:
+      summary: 'NEW. List the caller''s active direct reports: users whose manager_id
+        is the caller and is_active is true (US-020, AC-052'
+      description: 'NEW. List the caller''s active direct reports: users whose manager_id
+        is the caller and is_active is true (US-020, AC-052 to AC-054). An empty list
+        drives the empty state. Other roles get 403 (AC-060).'
+      operationId: get_api_team_members
+      parameters: []
+      responses:
+        '200':
+          description: 200 [{id, full_name, time_zone}] sorted by name, or 403 with
+            no data
+      security:
+      - bearerAuth: []
+  /api/team/members/{user_id}/timesheets/{week_start}:
+    get:
+      summary: NEW. Read-only Monday-to-Sunday week of a direct report (US-021). Data
+        is grouped on the report's local work dates and l
+      description: NEW. Read-only Monday-to-Sunday week of a direct report (US-021).
+        Data is grouped on the report's local work dates and labelled with the report's
+        time zone (AC-055, AC-056). Returns 403 with no data if the caller is not
+        a manager, the user is not their active direct report, or the user does not
+        exist (AC-059 to AC-062). Returns 422 if week_start is not a Monday. No team
+        write endpoints exist.
+      operationId: get_api_team_members_user_id_timesheets_week_start
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: week_start
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 200 {user:{id, full_name, time_zone}, days[7], rows:[{project,
+            task, billable, cells[7]}], entries:[{id, work_date, project, task, billable,
+            source, started_at, ended_at, worked_minutes, breaks:[{started_at, ended_at}]}],
+            daily_totals[7], week_total, billable_hours, non_billable_hours}, or 403
+      security:
+      - bearerAuth: []
   /api/time-entries/{id}:
     patch:
       summary: Edit the day, hours, project, task, billable flag or times of an own
-        entry (AC-039).
+        entry (AC-039). Managers get 403 for their reports'
       description: Edit the day, hours, project, task, billable flag or times of an
-        own entry (AC-039).
+        own entry (AC-039). Managers get 403 for their reports' entries (AC-058).
       operationId: patch_api_time_entries_id
       parameters:
       - name: id
@@ -430,12 +484,14 @@ paths:
                 started_at?, ended_at?}'
       responses:
         '200':
-          description: 200 TimeEntry, or 403 if not the owner (AC-041)
+          description: 200 TimeEntry, or 403 if not the owner (AC-041, AC-064)
       security:
       - bearerAuth: []
     delete:
-      summary: Delete an own entry and its breaks (AC-040).
-      description: Delete an own entry and its breaks (AC-040).
+      summary: Delete an own entry and its breaks (AC-040). Managers get 403 for their
+        reports' entries (AC-058).
+      description: Delete an own entry and its breaks (AC-040). Managers get 403 for
+        their reports' entries (AC-058).
       operationId: delete_api_time_entries_id
       parameters:
       - name: id
@@ -451,9 +507,10 @@ paths:
   /api/time-entries/{id}/end:
     patch:
       summary: Set the end time of a forgotten running entry. Returns 422 if it is
-        before the start (AC-032).
+        before the start (AC-032). Returns 403 for any entry
       description: Set the end time of a forgotten running entry. Returns 422 if it
-        is before the start (AC-032).
+        is before the start (AC-032). Returns 403 for any entry not owned by the caller,
+        including a direct report's (AC-058, AC-064).
       operationId: patch_api_time_entries_id_end
       parameters:
       - name: id
@@ -469,14 +526,16 @@ paths:
               description: '{ended_at (ISO with offset)}'
       responses:
         '200':
-          description: 200 TimeEntry
+          description: 200 TimeEntry, or 403
       security:
       - bearerAuth: []
   /api/timesheets/cells:
     put:
-      summary: Upsert a manual hours cell (0 to 24 hours). Hours of 0 delete the cell.
-      description: Upsert a manual hours cell (0 to 24 hours). Hours of 0 delete the
-        cell.
+      summary: Upsert a manual hours cell (0 to 24 hours) for the caller only. Hours
+        of 0 delete the cell. A body naming another user_i
+      description: Upsert a manual hours cell (0 to 24 hours) for the caller only.
+        Hours of 0 delete the cell. A body naming another user_id is refused with
+        403 (AC-058, AC-064).
       operationId: put_api_timesheets_cells
       parameters: []
       requestBody:
@@ -487,15 +546,15 @@ paths:
               description: '{work_date, project_id, task_id, billable?, hours}'
       responses:
         '200':
-          description: 200 updated row and totals, or 422 validation message
+          description: 200 updated row and totals, 422 validation message, or 403
       security:
       - bearerAuth: []
   /api/timesheets/{week_start}:
     get:
-      summary: Monday-to-Sunday week view with manual and clocked entries and totals
-        (US-013). Returns 422 if week_start is not a Monda
-      description: Monday-to-Sunday week view with manual and clocked entries and
-        totals (US-013). Returns 422 if week_start is not a Monday.
+      summary: The caller's own Monday-to-Sunday week view with manual and clocked
+        entries and totals (US-013). Returns 422 if week_sta
+      description: The caller's own Monday-to-Sunday week view with manual and clocked
+        entries and totals (US-013). Returns 422 if week_start is not a Monday.
       operationId: get_api_timesheets_week_start
       parameters:
       - name: week_start
