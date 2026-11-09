@@ -14,6 +14,8 @@ from app.routers import admin_projects as admin_projects_router
 from app.routers import admin_users as admin_users_router
 from app.routers import auth as auth_router
 from app.routers import clock as clock_router
+from app.routers import time_entries as time_entries_router
+from app.routers import timesheets as timesheets_router
 
 
 @asynccontextmanager
@@ -89,3 +91,6 @@ app.include_router(auth_router.router)
 app.include_router(admin_users_router.router)
 app.include_router(admin_projects_router.router)
 app.include_router(admin_projects_router.catalog_router)
+app.include_router(timesheets_router.router)
+app.include_router(timesheets_router.entries_router)
+app.include_router(time_entries_router.router)
