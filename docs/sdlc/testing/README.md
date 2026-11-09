@@ -5,88 +5,36 @@
 <!-- sdlc:auto:start narrative -->
 ### TEST-CHECKS-1 · draft · source: testing:run_checks
 
-Automated project checks ran and succeeded with 6 of 6 checks passing. These checks were not tied to a specific ticket.
+The automated check run failed: 5 of 6 checks passed. The run was not tied to a specific ticket. The input does not say which check failed.
 
-- Step: run_checks
-- Ticket: none (project-wide)
-- Status: succeeded
-- Result: 6/6 checks passed
-- Not provided in input:
-  - which checks were run (e.g. lint, type check, build)
-  - run date
-  - who triggered the run
+- Activity: run_checks
+- Ticket: none (project-level run)
+- Status: failed
+- Result: 5/6 checks passed, 1 check failed
+- Not stated in input: name or type of the failing check, failure output, date, who ran it
+- Open item: identify and fix the failing check before release sign-off
 
-### TEST-WT-39f5caa1 · draft · source: testing:write_tests:39f5caa1-04b8-40cb-b6cc-cbd0e99af269
+### TEST-WRITE-1 · draft · source: testing:write_tests:91661125-8902-4c39-99c4-e242aba1d181
 
-Tests were written for ticket 39f5caa1, producing 3 test files. The input does not say which requirement this ticket covers or whether these tests pass.
+Test authoring succeeded for ticket 91661125-8902-4c39-99c4-e242aba1d181 and produced 2 test files. The input does not say which feature or requirement these tests cover.
 
-- Step: write_tests
-- Ticket: 39f5caa1-04b8-40cb-b6cc-cbd0e99af269
-- Status: succeeded
-- Output: 3 test file(s)
-- Not provided in input:
-  - ticket-to-requirement (US-xxx) mapping
-  - test file names
-  - test cases covered
-  - pass/fail results of these tests
-
-**Related:** 39f5caa1-04b8-40cb-b6cc-cbd0e99af269
-
-### TEST-WT-961f93a5 · draft · source: testing:write_tests:961f93a5-577a-49a2-9c12-17c793cb74d6
-
-Tests were written for ticket 961f93a5, producing 5 test files. The input does not say which requirement this ticket covers or whether these tests pass.
-
-- Step: write_tests
-- Ticket: 961f93a5-577a-49a2-9c12-17c793cb74d6
-- Status: succeeded
-- Output: 5 test file(s)
-- Not provided in input:
-  - ticket-to-requirement (US-xxx) mapping
-  - test file names
-  - test cases covered
-  - pass/fail results of these tests
-
-**Related:** 961f93a5-577a-49a2-9c12-17c793cb74d6
-
-### TEST-WT-ff7194f3 · draft · source: testing:write_tests:ff7194f3-46de-4aaf-8a65-05c124a9873f
-
-Tests were written for ticket ff7194f3, producing 2 test files. The input does not say which requirement this ticket covers or whether these tests pass.
-
-- Step: write_tests
-- Ticket: ff7194f3-46de-4aaf-8a65-05c124a9873f
+- Activity: write_tests
+- Ticket: 91661125-8902-4c39-99c4-e242aba1d181
 - Status: succeeded
 - Output: 2 test file(s)
-- Not provided in input:
-  - ticket-to-requirement (US-xxx) mapping
-  - test file names
-  - test cases covered
-  - pass/fail results of these tests
+- Not stated in input: file names, test cases, the features or requirement keys (US-xxx) covered, date
+- Traceability gap: no mapping from this ticket to a requirement key was provided
 
-**Related:** ff7194f3-46de-4aaf-8a65-05c124a9873f
+**Related:** 91661125-8902-4c39-99c4-e242aba1d181
 
-### TEST-E2E-LATEST · draft · source: testing:e2e:latest
+### TEST-E2E-1 · draft · source: testing:e2e:latest
 
-The latest end-to-end run against the sandbox target reports an overall status of 'passed', but only 12 of 70 tests passed. These two facts conflict and both are recorded here. The pass rate does not support treating the application as verified end to end.
+The latest end-to-end run against the sandbox is reported as 'passed', yet only 12 of 70 tests passed. These two facts conflict. Both are recorded here and need human review.
 
-- Target: sandbox
+- Target environment: sandbox
 - Reported run status: passed
-- Reported result: 12/70 passed
-  - 58 tests did not pass (failed, skipped or errored; the breakdown is not given)
-  - Pass rate is about 17%
-- CONFLICT:
-  - The run-level status says 'passed'.
-  - The test count shows 58 of 70 tests not passing.
-  - The input gives no explanation, such as a pass threshold, allowed failures, or skipped tests counted as non-failing.
-  - Needs human review before this run is treated as a quality gate.
-- Not provided in input:
-  - which E2E scenarios passed or failed
-  - failure reasons
-  - mapping of scenarios to requirements US-001 to US-019
-  - run date
-  - build/commit tested
-- Requirement coverage:
-  - Cannot be determined from this input.
-  - No requirement is marked as verified by this run.
-
-**Related:** TEST-WT-39f5caa1, TEST-WT-961f93a5, TEST-WT-ff7194f3
+- Reported results: 12/70 passed (about 17%); 58 tests did not pass
+- CONFLICT: the 'passed' status does not match the 12/70 pass count. The input gives no explanation, so neither value has been picked as correct.
+- Not stated in input: which tests failed or were skipped, failure causes, the requirements covered, date
+- Open item: reconcile the run status with the test counts and triage the 58 tests that did not pass
 <!-- sdlc:auto:end narrative -->
