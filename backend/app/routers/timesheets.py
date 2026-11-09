@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.auth_deps import get_current_user
 from app.database import get_db
 from app.models import Break, Client, Project, Task, TimeEntry, User
+from app.routers.clock import _aware
 
 router = APIRouter(prefix="/api/timesheets", tags=["timesheets"])
 entries_router = APIRouter(prefix="/api/time-entries", tags=["timesheets"])
@@ -31,10 +32,6 @@ def _err(loc: list[Any], msg: str) -> dict[str, Any]:
 
 def _unprocessable(errors: list[dict[str, Any]]) -> HTTPException:
     return HTTPException(status_code=422, detail=errors)
-
-
-def _aware(value: datetime) -> datetime:
-    return value if value.tzinfo else value.replace(tzinfo=UTC)
 
 
 def _parse_date(value: Any) -> date | None:
@@ -90,9 +87,7 @@ def _clocked(db: Session, user: User, monday: date) -> list[tuple[TimeEntry, dat
     )
     broken: dict[int, float] = {}
     if entries:
-        for b in db.scalars(
-            select(Break).where(Break.time_entry_id.in_([e.id for e in entries]))
-        ):
+        for b in db.scalars(select(Break).where(Break.time_entry_id.in_([e.id for e in entries]))):
             end = b.end_at or next(e.end_at for e in entries if e.id == b.time_entry_id)
             secs = (_aware(end) - _aware(b.start_at)).total_seconds()
             broken[b.time_entry_id] = broken.get(b.time_entry_id, 0.0) + max(0.0, secs)
@@ -259,8 +254,7 @@ def put_cells(body: CellsBody, user: Me, db: Db) -> dict[str, Any]:
     }
     new_keys = [k for k in cells if k not in existing]
     projects = {
-        p.id: p
-        for p in db.scalars(select(Project).where(Project.id.in_({k[0] for k in cells})))
+        p.id: p for p in db.scalars(select(Project).where(Project.id.in_({k[0] for k in cells})))
     }
     tasks = {t.id: t for t in db.scalars(select(Task).where(Task.id.in_({k[1] for k in cells})))}
     archived_clients = {
