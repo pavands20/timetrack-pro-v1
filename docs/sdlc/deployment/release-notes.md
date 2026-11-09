@@ -3,6 +3,15 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## 1737eb20f324 — 2026-11-09
+
+**Commit:** `1737eb2`
+
+**Delivered:**
+- US-020: List my direct reports
+- US-021: View a direct report's weekly timesheet (read-only)
+- US-022: Team access restricted to the reporting line
+
 ## 02fe7f260800 — 2026-11-09
 
 **Commit:** `02fe7f2`

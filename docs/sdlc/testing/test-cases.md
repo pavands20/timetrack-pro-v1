@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-408 tests · Passed 355 · Failed 0 · Skipped 53 · Not run 0
+537 tests · Passed 483 · Failed 1 · Skipped 53 · Not run 0
 
-Acceptance criteria covered: 50/65 · passing: 17/65
+Acceptance criteria covered: 61/65 · passing: 28/65
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -432,7 +432,7 @@ Acceptance criteria covered: 50/65 · passing: 17/65
 | AC-041 | test_ac041_401_without_session_and_nothing_changes | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
 | AC-041 | test_ac041_403_without_csrf_header_and_nothing_changes | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
 | AC-041 | test_ac041_nfr003_other_employee_gets_identical_404_and_entry_unchanged | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
-| AC-041 | test_ac041_nfr003_other_roles_get_no_extra_access[Manager] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-041 | test_ac041_nfr003_other_roles_get_no_extra_access[Manager] | Unit | Failed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
 | AC-041 | test_ac041_nfr003_other_roles_get_no_extra_access[Payroll Admin] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
 | AC-041 | test_ac041_nfr003_other_roles_get_no_extra_access[System Admin] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
 | AC-041 | test_ac041_other_users_clocked_and_running_entries_also_404 | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
@@ -475,6 +475,38 @@ Acceptance criteria covered: 50/65 · passing: 17/65
 | AC-051 | [AC-051] [NFR-016] [NFR-006] project documentation covers stack, setup, email API key and EU/UK region | E2E | Skipped | `frontend/e2e/help.spec.ts` |
 | — | [NFR-007] [NFR-008] [NFR-015] project documentation states GDPR, 6-year retention and 500 users | E2E | Skipped | `frontend/e2e/help.spec.ts` |
 
+## Sprint 5
+
+### US-020: List my direct reports
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-052 | test_ac052_lists_only_active_direct_reports_with_name_and_time_zone | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-053, AC-062 | test_ac053_ac062_deactivated_report_gone_from_list_and_403_on_timesheet | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-054 | test_ac054_manager_without_active_reports_gets_empty_list | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-055 | test_ac055_non_monday_week_start_422[2026-01-13] | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-055 | test_ac055_non_monday_week_start_422[2026-01-18] | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-055 | test_ac055_non_monday_week_start_422[garbage] | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-055 | test_ac055_week_shape_and_billable_split | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-056 | test_ac056_dst_week_follows_report_zone | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-056 | test_ac056_late_utc_sunday_entry_lands_in_next_local_week | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-056 | test_ac056_report_time_zone_drives_response_and_day_attribution | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-058 | test_ac058_manager_writes_to_foreign_entries_are_403_and_change_nothing | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-058 | test_ac058_no_write_method_under_api_team | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-059 | test_ac059_non_report_is_403_without_data[loner] | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-059 | test_ac059_non_report_is_403_without_data[mgr2] | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-059 | test_ac059_non_report_is_403_without_data[mgr] | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-059 | test_ac059_non_report_is_403_without_data[other] | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-059 | test_ac059_unknown_id_is_403 | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-060 | test_ac060_no_session_is_401 | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-060 | test_ac060_other_roles_get_403_on_both_team_endpoints[Employee] | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-060 | test_ac060_other_roles_get_403_on_both_team_endpoints[Payroll Admin] | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-060 | test_ac060_other_roles_get_403_on_both_team_endpoints[System Admin] | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-061 | test_ac061_reassignment_moves_access_with_same_sessions | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-062 | test_ac062_deactivated_manager_is_401_next_request | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-062 | test_ac062_role_change_away_from_manager_is_403_next_request | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+| AC-063 | test_ac063_employee_keeps_own_view_and_404_for_foreign_entry | Unit | Passed | `backend/tests/test_team_us020_qa.py` |
+
 ## Project setup
 
 | Criteria | Test | Level | Result | File |
@@ -486,6 +518,110 @@ Acceptance criteria covered: 50/65 · passing: 17/65
 | — | test_nfr007_patch_and_deactivate_no_session_401_and_non_admin_403_without_data | Unit | Passed | `backend/tests/test_admin_users_edit_gaps_us006.py` |
 | — | test_health_reports_ok | Unit | Passed | `backend/tests/test_health.py` |
 | — | test_the_openapi_document_builds | Unit | Passed | `backend/tests/test_health.py` |
+| — | test_a_session_cookie_is_not_a_way_in | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[DELETE-/api/time-entries/{entry_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[PATCH-/api/admin/clients/{client_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[PATCH-/api/admin/projects/{project_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[PATCH-/api/admin/tasks/{task_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[PATCH-/api/admin/users/{user_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[PATCH-/api/time-entries/{entry_id}/end] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[PATCH-/api/time-entries/{entry_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[POST-/api/admin/clients] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[POST-/api/admin/projects/{project_id}/tasks] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[POST-/api/admin/projects] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[POST-/api/admin/users/{user_id}/deactivate] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[POST-/api/admin/users] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[POST-/api/clock/breaks/end] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[POST-/api/clock/breaks/start] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[POST-/api/clock/in] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[POST-/api/clock/out] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_every_state_changing_route_refuses_a_call_without_the_csrf_header[PUT-/api/timesheets/cells] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[DELETE-/api/time-entries/{entry_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[GET-/api/admin/clients] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[GET-/api/admin/users] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[GET-/api/auth/me] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[GET-/api/clock/status] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[GET-/api/dashboard/week] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[GET-/api/projects] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[GET-/api/team/members/{user_id}/timesheets/{week_start}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[GET-/api/team/members] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[GET-/api/timesheets/{week_start}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[PATCH-/api/admin/clients/{client_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[PATCH-/api/admin/projects/{project_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[PATCH-/api/admin/tasks/{task_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[PATCH-/api/admin/users/{user_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[PATCH-/api/time-entries/{entry_id}/end] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[PATCH-/api/time-entries/{entry_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[POST-/api/admin/clients] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[POST-/api/admin/projects/{project_id}/tasks] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[POST-/api/admin/projects] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[POST-/api/admin/users/{user_id}/deactivate] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[POST-/api/admin/users] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[POST-/api/clock/breaks/end] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[POST-/api/clock/breaks/start] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[POST-/api/clock/in] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[POST-/api/clock/out] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_a_made_up_bearer_token_is_401[PUT-/api/timesheets/cells] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[GET-/api/admin/clients-Employee] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[GET-/api/admin/clients-Manager] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[GET-/api/admin/clients-Payroll Admin] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[GET-/api/admin/users-Employee] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[GET-/api/admin/users-Manager] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[GET-/api/admin/users-Payroll Admin] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[PATCH-/api/admin/clients/{client_id}-Employee] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[PATCH-/api/admin/clients/{client_id}-Manager] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[PATCH-/api/admin/clients/{client_id}-Payroll Admin] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[PATCH-/api/admin/projects/{project_id}-Employee] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[PATCH-/api/admin/projects/{project_id}-Manager] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[PATCH-/api/admin/projects/{project_id}-Payroll Admin] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[PATCH-/api/admin/tasks/{task_id}-Employee] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[PATCH-/api/admin/tasks/{task_id}-Manager] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[PATCH-/api/admin/tasks/{task_id}-Payroll Admin] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[PATCH-/api/admin/users/{user_id}-Employee] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[PATCH-/api/admin/users/{user_id}-Manager] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[PATCH-/api/admin/users/{user_id}-Payroll Admin] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/clients-Employee] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/clients-Manager] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/clients-Payroll Admin] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/projects-Employee] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/projects-Manager] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/projects-Payroll Admin] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/projects/{project_id}/tasks-Employee] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/projects/{project_id}/tasks-Manager] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/projects/{project_id}/tasks-Payroll Admin] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/users-Employee] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/users-Manager] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/users-Payroll Admin] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/users/{user_id}/deactivate-Employee] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/users/{user_id}/deactivate-Manager] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_admin_route_is_403_for_a_non_admin[POST-/api/admin/users/{user_id}/deactivate-Payroll Admin] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[DELETE-/api/time-entries/{entry_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[GET-/api/admin/clients] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[GET-/api/admin/users] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[GET-/api/auth/me] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[GET-/api/clock/status] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[GET-/api/dashboard/week] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[GET-/api/projects] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[GET-/api/team/members/{user_id}/timesheets/{week_start}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[GET-/api/team/members] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[GET-/api/timesheets/{week_start}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[PATCH-/api/admin/clients/{client_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[PATCH-/api/admin/projects/{project_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[PATCH-/api/admin/tasks/{task_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[PATCH-/api/admin/users/{user_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[PATCH-/api/time-entries/{entry_id}/end] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[PATCH-/api/time-entries/{entry_id}] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[POST-/api/admin/clients] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[POST-/api/admin/projects/{project_id}/tasks] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[POST-/api/admin/projects] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[POST-/api/admin/users/{user_id}/deactivate] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[POST-/api/admin/users] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[POST-/api/clock/breaks/end] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[POST-/api/clock/breaks/start] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[POST-/api/clock/in] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[POST-/api/clock/out] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_nfr003_every_protected_route_is_401_without_a_session[PUT-/api/timesheets/cells] | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
+| — | test_the_sweep_actually_sees_the_api | Unit | Passed | `backend/tests/test_route_access_sweep.py` |
 | AC-015 | [AC-015] an admin edits a user's role and time zone and sees the success banner | E2E | Skipped | `frontend/e2e/admin-users-edit-ui.spec.ts` |
 | AC-016 | [AC-016] deactivating through the confirm step marks the row Deactivated and removes the user from the Manager dropdown | E2E | Skipped | `frontend/e2e/admin-users-edit-ui.spec.ts` |
 | — | the app loads | E2E | Passed | `frontend/e2e/example.spec.ts` |

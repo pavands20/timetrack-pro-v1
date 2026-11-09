@@ -23,16 +23,18 @@
 | GET | /api/auth/me | me | `backend/app/routers/auth.py:81` | — |
 | POST | /api/auth/password-reset/confirm | confirm_password_reset | `backend/app/routers/auth.py:119` | — |
 | POST | /api/auth/password-reset/request | request_password_reset | `backend/app/routers/auth.py:106` | — |
-| POST | /api/clock/breaks/end | break_end | `backend/app/routers/clock.py:189` | — |
-| POST | /api/clock/breaks/start | break_start | `backend/app/routers/clock.py:168` | — |
-| POST | /api/clock/in | clock_in | `backend/app/routers/clock.py:129` | — |
-| POST | /api/clock/out | clock_out | `backend/app/routers/clock.py:200` | — |
-| GET | /api/clock/status | clock_status | `backend/app/routers/clock.py:123` | — |
+| POST | /api/clock/breaks/end | break_end | `backend/app/routers/clock.py:192` | — |
+| POST | /api/clock/breaks/start | break_start | `backend/app/routers/clock.py:171` | — |
+| POST | /api/clock/in | clock_in | `backend/app/routers/clock.py:131` | — |
+| POST | /api/clock/out | clock_out | `backend/app/routers/clock.py:203` | — |
+| GET | /api/clock/status | clock_status | `backend/app/routers/clock.py:125` | — |
 | GET | /api/dashboard/week | get_dashboard_week | `backend/app/routers/dashboard.py:20` | — |
-| PATCH | /api/time-entries/{entry_id}/end | end_entry | `backend/app/routers/time_entries.py:38` | — |
-| PUT | /api/timesheets/cells | put_cells | `backend/app/routers/timesheets.py:253` | — |
-| GET | /api/timesheets/{week_start} | get_week | `backend/app/routers/timesheets.py:189` | — |
-| GET | /health | health | `backend/app/main.py:84` | Liveness probe. |
+| GET | /api/team/members | list_members | `backend/app/routers/team.py:29` | — |
+| GET | /api/team/members/{user_id}/timesheets/{week_start} | member_week | `backend/app/routers/team.py:39` | — |
+| PATCH | /api/time-entries/{entry_id}/end | end_entry | `backend/app/routers/time_entries.py:39` | — |
+| PUT | /api/timesheets/cells | put_cells | `backend/app/routers/timesheets.py:255` | — |
+| GET | /api/timesheets/{week_start} | get_week | `backend/app/routers/timesheets.py:190` | — |
+| GET | /health | health | `backend/app/main.py:85` | Liveness probe. |
 <!-- sdlc:auto:end endpoints -->
 
 <!-- sdlc:auto:start drift -->
@@ -40,8 +42,6 @@
 
 - DELETE /api/time-entries/{id}
 - GET /api/projects
-- GET /api/team/members
-- GET /api/team/members/{user_id}/timesheets/{week_start}
 - PATCH /api/admin/clients/{id}
 - PATCH /api/admin/projects/{id}
 - PATCH /api/admin/tasks/{id}
@@ -65,5 +65,5 @@
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `9567a53`
+Generated from commit `1737eb2`
 <!-- sdlc:auto:end source -->
