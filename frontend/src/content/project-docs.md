@@ -19,23 +19,23 @@
 
 All settings are environment variables read in `backend/app/config.py`. Each has a local default.
 
-| Setting | Purpose |
-|---|---|
-| `DATABASE_URL` | SQLAlchemy URL of the PostgreSQL database, for example `postgresql+psycopg://USER:PASSWORD@HOST:5432/DB`. |
-| `ALLOWED_ORIGINS` | Comma-separated browser origins allowed to call the API (CORS). Defaults to local dev origins. |
-| `SECRET_KEY` | Application secret. Set a long random value outside development. |
-| `JWT_SECRET_KEY` | Signing secret for tokens. Set a long random value outside development. |
-| `MEDIA_ROOT` | Folder for stored media files. Default `./media`. |
-| `SMTP_HOST` | Mail server host (default `localhost`). |
-| `SMTP_PORT` | Mail server port (default `587`). STARTTLS is used on any port except 25. |
-| `SMTP_USER` | Mail server user name. Login is skipped when empty. |
-| `SMTP_PASSWORD` | Mail server password. |
-| `SMTP_FROM` | Sender address (default `no-reply@localhost`). |
-| `APP_URL` | Base URL used in emailed links. Defaults to the first allowed origin. |
-| `ENVIRONMENT` | `development` (default) or `production`. |
-| `SESSION_TTL_HOURS` | Session lifetime in hours (default `8`). |
-| `BOOTSTRAP_ADMIN_EMAIL` | Email of the first System Admin created by the seed script. |
-| `BOOTSTRAP_ADMIN_PASSWORD` | Password for that first admin. Use a strong value and never commit it. |
+| Setting                    | Purpose                                                                                                   |
+| -------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`             | SQLAlchemy URL of the PostgreSQL database, for example `postgresql+psycopg://USER:PASSWORD@HOST:5432/DB`. |
+| `ALLOWED_ORIGINS`          | Comma-separated browser origins allowed to call the API (CORS). Defaults to local dev origins.            |
+| `SECRET_KEY`               | Application secret. Set a long random value outside development.                                          |
+| `JWT_SECRET_KEY`           | Signing secret for tokens. Set a long random value outside development.                                   |
+| `MEDIA_ROOT`               | Folder for stored media files. Default `./media`.                                                         |
+| `SMTP_HOST`                | Mail server host (default `localhost`).                                                                   |
+| `SMTP_PORT`                | Mail server port (default `587`). STARTTLS is used on any port except 25.                                 |
+| `SMTP_USER`                | Mail server user name. Login is skipped when empty.                                                       |
+| `SMTP_PASSWORD`            | Mail server password.                                                                                     |
+| `SMTP_FROM`                | Sender address (default `no-reply@localhost`).                                                            |
+| `APP_URL`                  | Base URL used in emailed links. Defaults to the first allowed origin.                                     |
+| `ENVIRONMENT`              | `development` (default) or `production`.                                                                  |
+| `SESSION_TTL_HOURS`        | Session lifetime in hours (default `8`).                                                                  |
+| `BOOTSTRAP_ADMIN_EMAIL`    | Email of the first System Admin created by the seed script.                                               |
+| `BOOTSTRAP_ADMIN_PASSWORD` | Password for that first admin. Use a strong value and never commit it.                                    |
 
 ### Email service API key and SMTP
 
