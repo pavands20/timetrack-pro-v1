@@ -130,7 +130,7 @@ export default function Screen() {
       else say("error", detailOf(err));
     }
   };
-  const breakCall = async (path, word) => {
+  const breakCall = async (path) => {
     try {
       const e = await apiFetch(`/api/clock/breaks/${path}`, { method: "POST" });
       setEntry(e);
