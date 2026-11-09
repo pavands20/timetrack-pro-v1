@@ -113,7 +113,9 @@ class Task(Base):
 
 
 class TimeEntry(Base):
-    """A clock-in/clock-out record. Times are timestamptz (UTC). Never deleted by the app."""
+    """A clock-in/clock-out record. Times are timestamptz (UTC).
+
+    Users may delete their own entries."""
 
     __tablename__ = "time_entries"
     __table_args__ = (
