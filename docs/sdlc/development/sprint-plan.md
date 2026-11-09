@@ -68,7 +68,9 @@ Capacity: 20 points · Committed: 13
 |---|---|---|---|---|---|
 | US-020 | Story | List my direct reports | 3 | backend-agent | US-022 |
 | US-021 | Story | View a direct report's weekly timesheet (read-only) | 5 | frontend-agent | US-020, US-022, US-013, US-017 |
+| ↳ PIPER-e38e8a33 | Task | Update admin guide and add My team user-guide section (AC-050, AC-065) | 2 | devops-agent | — |
 | US-022 | Story | Team access restricted to the reporting line | 5 | security-agent | US-002, US-005, US-006 |
+| ↳ PIPER-0b110d7f | Task | Enforce server-side ownership and reporting-line checks on all time data (AC-064) | 3 | security-agent | — |
 
 ## Unscheduled
 
