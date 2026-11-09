@@ -3,105 +3,83 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### TEST-CHECKS-01 · draft · source: testing:run_checks
+### TEST-CHECKS-001 · draft · source: testing:run_checks
 
-Automated project checks ran with no specific ticket attached and all 6 passed. The input does not say what the 6 checks cover.
+An automated check run completed successfully with all 6 checks passing. It was not tied to any ticket.
 
-- Task: run_checks
-- Ticket: none
+- Activity: run_checks
+- Ticket: none (ticket=None)
 - Status: succeeded
 - Result: 6/6 checks passed
-- Not stated in input: which checks were run (for example lint, type-check or unit tests), when they ran, or which requirements they cover.
+- Not stated in input: which checks were run, their scope, the date, and who triggered or reviewed the run.
+- No requirement linkage is given, so related_ids is left empty.
 
-### TEST-c20459d5 · draft · source: testing:write_tests:c20459d5-fda9-4c33-b42a-e5287708677a
+### TEST-WT-39f5caa1 · draft · source: testing:write_tests:39f5caa1-04b8-40cb-b6cc-cbd0e99af269
 
-Tests were written for ticket c20459d5 and the task reported success with 2 test files. No test names, counts, results or acceptance-criteria coverage were given.
+Tests were written for ticket 39f5caa1, producing 3 test files. The task is reported as succeeded.
 
-- Task: write_tests
-- Ticket: c20459d5-fda9-4c33-b42a-e5287708677a
-- Status: succeeded
-- Output: 2 test file(s)
-- Not stated in input:
-  - file names
-  - number of tests
-  - pass/fail results
-  - covered acceptance criteria or user story
-- The ticket cannot be traced to a US key from the input provided.
-
-**Related:** c20459d5-fda9-4c33-b42a-e5287708677a
-
-### TEST-8213eca7 · draft · source: testing:write_tests:8213eca7-95a2-4dba-87c6-9fa89a56e8ba
-
-Break-related tests were added for AC-028, AC-029 and AC-030: a pytest backend file and a Playwright API spec. The pytest file gave 8 passed and 2 skipped, and ruff was clean. The Playwright spec was not run and was only type-checked.
-
-- Task: write_tests
-- Ticket: 8213eca7-95a2-4dba-87c6-9fa89a56e8ba
-- Status: succeeded
-- Acceptance criteria covered: AC-028, AC-029, AC-030
-- Files added:
-  - backend/tests/test_breaks_us011_qa.py: 10 pytest tests
-  - frontend/e2e/breaks.spec.ts: 4 Playwright API specs
-- Results:
-  - pytest: 8 passed, 2 skipped (the input gives no reason for the skips)
-  - ruff: clean
-  - Playwright: not run; tsc reported nothing for this file
-- Traceability: the link to US-011 comes from the test file name (test_breaks_us011_qa.py). The input does not state it directly, so a human should confirm it.
-- Gaps:
-  - The 2 skipped pytest tests are unexplained.
-  - The breaks e2e specs have no execution result.
-
-**Related:** 8213eca7-95a2-4dba-87c6-9fa89a56e8ba, US-011, AC-028, AC-029, AC-030
-
-### TEST-d38399fb · draft · source: testing:write_tests:d38399fb-fefc-45e4-91e5-71313a312b4d
-
-Tests for AC-045 and AC-046 were added at three levels: backend pytest on the clock and timesheet endpoints, Vitest on the Home screen, and a Playwright spec. All 9 backend tests and all 5 Vitest tests pass. The e2e specs were only listed by the check, not run, because they need E2E credentials.
-
-- Task: write_tests
-- Ticket: d38399fb-fefc-45e4-91e5-71313a312b4d
-- Status: succeeded
-- Acceptance criteria covered: AC-045, AC-046
-- Test levels and results:
-  - pytest on the clock and timesheet endpoints: 9 tests, passing
-  - Vitest on the Home screen: 5 tests, passing
-  - Playwright spec: listed by the check but not run, because it requires E2E credentials
-- Traceability: the input does not name the parent user story for AC-045 or AC-046, so no US key is linked.
-- Gap: no end-to-end execution result exists for this ticket.
-
-**Related:** d38399fb-fefc-45e4-91e5-71313a312b4d, AC-045, AC-046
-
-### TEST-385dceab · draft · source: testing:write_tests:385dceab-3ed3-4ca5-935d-22e13e5a632a
-
-Tests were written for ticket 385dceab and the task reported success with 3 test files. No test names, counts, results or acceptance-criteria coverage were given.
-
-- Task: write_tests
-- Ticket: 385dceab-3ed3-4ca5-935d-22e13e5a632a
+- Activity: write_tests
+- Ticket: 39f5caa1-04b8-40cb-b6cc-cbd0e99af269
 - Status: succeeded
 - Output: 3 test file(s)
-- Not stated in input:
-  - file names
-  - number of tests
-  - pass/fail results
-  - covered acceptance criteria or user story
-- The ticket cannot be traced to a US key from the input provided.
+- Not stated in input: which feature or requirement (US-xxx) this ticket covers, the test file names, whether these tests were executed, and their pass/fail results.
+- 'Succeeded' refers to writing the tests, not to the tests passing.
 
-**Related:** 385dceab-3ed3-4ca5-935d-22e13e5a632a
+**Related:** 39f5caa1-04b8-40cb-b6cc-cbd0e99af269
 
-### TEST-E2E-LATEST · draft · source: testing:e2e_run:latest
+### TEST-WT-961f93a5 · draft · source: testing:write_tests:961f93a5-577a-49a2-9c12-17c793cb74d6
 
-The latest end-to-end run targeted the sandbox environment. Its overall status is reported as 'passed', but only 12 of 53 tests passed. The two values conflict and both are recorded as given.
+Tests were written for ticket 961f93a5, producing 5 test files. The task is reported as succeeded.
 
+- Activity: write_tests
+- Ticket: 961f93a5-577a-49a2-9c12-17c793cb74d6
+- Status: succeeded
+- Output: 5 test file(s)
+- Not stated in input: which feature or requirement (US-xxx) this ticket covers, the test file names, whether these tests were executed, and their pass/fail results.
+- 'Succeeded' refers to writing the tests, not to the tests passing.
+
+**Related:** 961f93a5-577a-49a2-9c12-17c793cb74d6
+
+### TEST-WT-ff7194f3 · draft · source: testing:write_tests:ff7194f3-46de-4aaf-8a65-05c124a9873f
+
+Tests were written for ticket ff7194f3, producing 2 test files. The task is reported as succeeded.
+
+- Activity: write_tests
+- Ticket: ff7194f3-46de-4aaf-8a65-05c124a9873f
+- Status: succeeded
+- Output: 2 test file(s)
+- Not stated in input: which feature or requirement (US-xxx) this ticket covers, the test file names, whether these tests were executed, and their pass/fail results.
+- 'Succeeded' refers to writing the tests, not to the tests passing.
+
+**Related:** ff7194f3-46de-4aaf-8a65-05c124a9873f
+
+### TEST-E2E-001 · draft · source: testing:e2e:latest
+
+The latest end-to-end test run against the sandbox target reports conflicting results. Its overall status is 'passed', but only 12 of 70 tests passed. The run should not be treated as a clean pass until a human reconciles the two values.
+
+- Activity: latest E2E run
 - Target: sandbox
-- Reported overall status: passed
-- Reported count: 12/53 passed
-- Conflict:
-  - The 'passed' status does not match a 12 of 53 result, which implies 41 tests did not pass.
-  - The input does not say whether those 41 failed, were skipped, or were not executed.
-  - The input does not say whether a pass threshold applies.
-- Not stated in input:
-  - which specs were included
-  - whether breaks.spec.ts (ticket 8213eca7) or the AC-045/AC-046 Playwright spec (ticket d38399fb) were part of this run; both were reported as not run at write time
-  - the run date
-- Needs human review before this run is treated as a passing E2E gate.
+- CONFLICT, both values recorded as given:
+  - Version A, overall run status: passed
+  - Version B, test count: 12/70 passed (about 17%); 58 tests not reported as passed
+- Not stated in input: whether the 58 tests failed, were skipped, or errored; which tests or requirements they cover; the run date; who reviewed the run.
+- Action needed: a human reviewer should confirm the true outcome and the cause of the 58 non-passing tests before this phase is considered complete.
+- related_ids link to the test-writing entries from the same phase. The input does not confirm that the E2E suite contains those files.
 
-**Related:** TEST-8213eca7, TEST-d38399fb
+**Related:** TEST-WT-39f5caa1, TEST-WT-961f93a5, TEST-WT-ff7194f3
+
+### TEST-SUMMARY-001 · draft · source: testing:phase
+
+Rollup of the testing phase for TimeTrack Pro V1. Checks pass and 10 test files were written across 3 tickets. E2E results are inconsistent and unresolved.
+
+- Checks: 6/6 passed (run_checks succeeded)
+- Tests written: 10 files in total
+  - 3 files for ticket 39f5caa1
+  - 5 files for ticket 961f93a5
+  - 2 files for ticket ff7194f3
+- E2E (sandbox): status 'passed' vs. 12/70 passed. This is an open conflict; see TEST-E2E-001.
+- Requirement coverage: the input does not map tickets or tests to US-001 through US-019, so per-requirement test coverage cannot be documented.
+- Approvals and sign-off: none provided in input.
+
+**Related:** TEST-CHECKS-001, TEST-WT-39f5caa1, TEST-WT-961f93a5, TEST-WT-ff7194f3, TEST-E2E-001
 <!-- sdlc:auto:end narrative -->

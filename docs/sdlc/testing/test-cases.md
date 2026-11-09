@@ -3,7 +3,7 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-408 tests · Passed 355 · Failed 0 · Skipped 38 · Not run 15
+408 tests · Passed 355 · Failed 0 · Skipped 53 · Not run 0
 
 Acceptance criteria covered: 50/51 · passing: 17/51
 <!-- sdlc:auto:end summary -->
@@ -437,10 +437,10 @@ Acceptance criteria covered: 50/51 · passing: 17/51
 | AC-041 | test_ac041_nfr003_other_roles_get_no_extra_access[System Admin] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
 | AC-041 | test_ac041_other_users_clocked_and_running_entries_also_404 | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
 | — | test_existing_patch_billable_and_timesheet_still_work | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
-| AC-039 | [AC-039] a bad hours value shows a field-level message and keeps the entry | E2E | Not run yet | `frontend/e2e/time-entries-edit.spec.ts` |
-| AC-039 | [AC-039] edit an entry's day, hours and billable and see it change | E2E | Not run yet | `frontend/e2e/time-entries-edit.spec.ts` |
-| AC-040 | [AC-040] Cancel keeps the entry, Confirm removes it | E2E | Not run yet | `frontend/e2e/time-entries-edit.spec.ts` |
-| AC-041 | [AC-041] an API call against another user's entry id is refused | E2E | Not run yet | `frontend/e2e/time-entries-edit.spec.ts` |
+| AC-039 | [AC-039] a bad hours value shows a field-level message and keeps the entry | E2E | Skipped | `frontend/e2e/time-entries-edit.spec.ts` |
+| AC-039 | [AC-039] edit an entry's day, hours and billable and see it change | E2E | Skipped | `frontend/e2e/time-entries-edit.spec.ts` |
+| AC-040 | [AC-040] Cancel keeps the entry, Confirm removes it | E2E | Skipped | `frontend/e2e/time-entries-edit.spec.ts` |
+| AC-041 | [AC-041] an API call against another user's entry id is refused | E2E | Skipped | `frontend/e2e/time-entries-edit.spec.ts` |
 
 ### US-016: See my weekly hours on a dashboard
 
@@ -458,22 +458,22 @@ Acceptance criteria covered: 50/51 · passing: 17/51
 | AC-043 | test_ac043_empty_week_zeros_and_has_entries_false | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
 | — | test_nfr007_zero_minute_manual_cell_is_not_an_entry_and_no_leak | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
 | — | test_nfr010_week_is_monday_to_sunday_on_every_weekday | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
-| AC-042 | [AC-042] API returns Monday-first 7 days and 401 without a session | E2E | Not run yet | `frontend/e2e/dashboard.spec.ts` |
-| AC-043 | [AC-043] empty week shows 0.0 h with links to the clock and the timesheet | E2E | Not run yet | `frontend/e2e/dashboard.spec.ts` |
-| AC-044 | [AC-044] recording an entry changes the Home figures and deleting it drops them | E2E | Not run yet | `frontend/e2e/dashboard.spec.ts` |
-| AC-048 | [AC-048] Home, Timesheet and Help show English labels only | E2E | Not run yet | `frontend/e2e/dashboard.spec.ts` |
-| — | [NFR-010] Home and Timesheet weeks run Monday to Sunday | E2E | Not run yet | `frontend/e2e/dashboard.spec.ts` |
+| AC-042 | [AC-042] API returns Monday-first 7 days and 401 without a session | E2E | Skipped | `frontend/e2e/dashboard.spec.ts` |
+| AC-043 | [AC-043] empty week shows 0.0 h with links to the clock and the timesheet | E2E | Skipped | `frontend/e2e/dashboard.spec.ts` |
+| AC-044 | [AC-044] recording an entry changes the Home figures and deleting it drops them | E2E | Skipped | `frontend/e2e/dashboard.spec.ts` |
+| AC-048 | [AC-048] Home, Timesheet and Help show English labels only | E2E | Skipped | `frontend/e2e/dashboard.spec.ts` |
+| — | [NFR-010] Home and Timesheet weeks run Monday to Sunday | E2E | Skipped | `frontend/e2e/dashboard.spec.ts` |
 
 ### US-019: User and admin guides
 
 | Criteria | Test | Level | Result | File |
 |---|---|---|---|---|
-| AC-049 | [AC-049] an admin can still read the user guide | E2E | Not run yet | `frontend/e2e/help.spec.ts` |
-| AC-049 | [AC-049] the user guide covers clocking, breaks, timesheet, editing and dashboard | E2E | Not run yet | `frontend/e2e/help.spec.ts` |
-| AC-050 | [AC-050] an Employee sees no Admin guide tab or text | E2E | Not run yet | `frontend/e2e/help.spec.ts` |
-| AC-050 | [AC-050] the Admin guide covers users, managers, clients, projects, tasks and bill rates | E2E | Not run yet | `frontend/e2e/help.spec.ts` |
-| AC-051 | [AC-051] [NFR-016] [NFR-006] project documentation covers stack, setup, email API key and EU/UK region | E2E | Not run yet | `frontend/e2e/help.spec.ts` |
-| — | [NFR-007] [NFR-008] [NFR-015] project documentation states GDPR, 6-year retention and 500 users | E2E | Not run yet | `frontend/e2e/help.spec.ts` |
+| AC-049 | [AC-049] an admin can still read the user guide | E2E | Skipped | `frontend/e2e/help.spec.ts` |
+| AC-049 | [AC-049] the user guide covers clocking, breaks, timesheet, editing and dashboard | E2E | Skipped | `frontend/e2e/help.spec.ts` |
+| AC-050 | [AC-050] an Employee sees no Admin guide tab or text | E2E | Skipped | `frontend/e2e/help.spec.ts` |
+| AC-050 | [AC-050] the Admin guide covers users, managers, clients, projects, tasks and bill rates | E2E | Skipped | `frontend/e2e/help.spec.ts` |
+| AC-051 | [AC-051] [NFR-016] [NFR-006] project documentation covers stack, setup, email API key and EU/UK region | E2E | Skipped | `frontend/e2e/help.spec.ts` |
+| — | [NFR-007] [NFR-008] [NFR-015] project documentation states GDPR, 6-year retention and 500 users | E2E | Skipped | `frontend/e2e/help.spec.ts` |
 
 ## Project setup
 
