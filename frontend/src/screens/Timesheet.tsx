@@ -1,142 +1,21 @@
 // @ts-nocheck -- generated from the approved design under its JS runtime contract; not hand-written TypeScript.
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
+import { DateTime } from "luxon";
 
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import { useNavigate } from "@/lib/navigate";
+import { ApiError, apiFetch } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const { Home } = Icons;
-
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const DAY_MS = 86400000;
-const WEEK_START = { cur: Date.UTC(2026, 10, 2), prev: Date.UTC(2026, 9, 26) };
-const TODAY = Date.UTC(2026, 10, 7);
 
-const CATALOG = [
-  {
-    id: "c1",
-    name: "Northwind Logistics",
-    archived: false,
-    projects: [
-      {
-        id: "p1",
-        name: "Route optimisation",
-        defaultBillable: true,
-        archived: false,
-        tasks: [
-          { id: "t1", name: "Analysis", archived: false },
-          { id: "t2", name: "Development", archived: false },
-          { id: "t3", name: "Stakeholder reporting", archived: false },
-          { id: "t4", name: "Legacy import", archived: true },
-        ],
-      },
-    ],
-  },
-  {
-    id: "c2",
-    name: "Harbourline Studio",
-    archived: false,
-    projects: [
-      {
-        id: "p2",
-        name: "Brand site rebuild",
-        defaultBillable: true,
-        archived: false,
-        tasks: [
-          { id: "t5", name: "Design review", archived: false },
-          { id: "t6", name: "Front-end build", archived: false },
-          { id: "t7", name: "Content migration", archived: false },
-        ],
-      },
-    ],
-  },
-  {
-    id: "c3",
-    name: "Internal",
-    archived: false,
-    projects: [
-      {
-        id: "p3",
-        name: "Team operations",
-        defaultBillable: false,
-        archived: false,
-        tasks: [
-          { id: "t8", name: "Admin & planning", archived: false },
-          { id: "t9", name: "Training", archived: false },
-          { id: "t10", name: "Recruiting support", archived: false },
-        ],
-      },
-    ],
-  },
-];
-
-const INIT_CUR = [
-  {
-    id: "e1",
-    project: "p1",
-    task: "t1",
-    billable: true,
-    source: "manual",
-    note: "",
-    fresh: false,
-    hours: ["3", "3.5", "4", "", "", "", ""],
-  },
-  {
-    id: "e2",
-    project: "p1",
-    task: "t2",
-    billable: true,
-    source: "clock",
-    note: "Mon–Thu · latest Thu 09:04–12:04 GMT",
-    fresh: false,
-    hours: ["4", "4", "3", "3", "", "", ""],
-  },
-  {
-    id: "e3",
-    project: "p3",
-    task: "t8",
-    billable: false,
-    source: "manual",
-    note: "",
-    fresh: false,
-    hours: ["1", "", "1", "", "", "", ""],
-  },
-];
-const INIT_PREV = [
-  {
-    id: "e4",
-    project: "p1",
-    task: "t2",
-    billable: true,
-    source: "clock",
-    note: "Mon–Fri · latest Fri 08:58–14:58 GMT, 30 min break",
-    fresh: false,
-    hours: ["6", "6.5", "7", "6", "5.5", "", ""],
-  },
-  {
-    id: "e5",
-    project: "p2",
-    task: "t5",
-    billable: true,
-    source: "manual",
-    note: "",
-    fresh: false,
-    hours: ["2", "1.5", "1", "2", "1.5", "", ""],
-  },
-  {
-    id: "e6",
-    project: "p3",
-    task: "t9",
-    billable: false,
-    source: "manual",
-    note: "",
-    fresh: false,
-    hours: ["", "", "", "", "1", "", ""],
-  },
-];
+const CSS2 = `
+.ts-navs{display:flex;gap:8px}
+.ts-day .ts-note{text-align:center;overflow-wrap:anywhere}
+.ts-retry{margin-top:8px;width:auto}
+`;
 
 const CSS = `
 .ts-root{container-type:inline-size;display:grid;gap:24px;color:var(--ts-text);font-family:var(--ts-body);color-scheme:dark;font-size:14px;line-height:1.5}
@@ -259,161 +138,282 @@ function parseHours(v) {
   if (n > 24) return { ok: false, n: 0, msg: "a day can't have more than 24 hours." };
   return { ok: true, n };
 }
-const fmt = (n) => (n === 0 ? "0" : n.toFixed(1));
-const findProject = (id) => {
-  for (const c of CATALOG)
-    for (const p of c.projects) if (p.id === id) return { client: c, project: p };
-  return null;
-};
-const rowLabel = (r) => {
-  const f = findProject(r.project);
-  if (!f) return "";
-  const t = f.project.tasks.find((x) => x.id === r.task);
-  return `${f.project.name}${t ? " / " + t.name : ""}`;
-};
-const dayText = (ms) => {
-  const d = new Date(ms);
-  return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`;
+const toMinutes = (h) => Math.round(parseHours(h).n * 60);
+const toHours = (m) => (m ? String(Number((m / 60).toFixed(4))) : "");
+const fmt = (min) => (min === 0 ? "0" : (min / 60).toFixed(1));
+
+const rowsFrom = (week) =>
+  week.rows.map((r) => ({
+    key: `s${r.project_id}-${r.task_id}-${r.billable}`,
+    saved: true,
+    project: String(r.project_id),
+    task: String(r.task_id),
+    projectName: r.project_name,
+    taskName: r.task_name,
+    billable: r.billable,
+    origBillable: r.billable,
+    touched: true,
+    hours: r.days.map((d) => toHours(d.manual_minutes)),
+    orig: r.days.map((d) => d.manual_minutes),
+    clocked: r.days.map((d) => d.clocked_minutes),
+    entryIds: r.days.flatMap((d) => [d.manual_entry_id, ...d.clocked_entry_ids]).filter(Boolean),
+  }));
+
+const detailText = (err) => {
+  const d = err instanceof ApiError ? err.body?.detail : null;
+  if (typeof d === "string") return d;
+  if (Array.isArray(d) && d[0]?.msg) return d[0].msg;
+  return "";
 };
 
 export default function Screen() {
   const navigate = useNavigate();
-  const [weekKey, setWeekKey] = React.useState("cur");
-  const [weeks, setWeeks] = React.useState({ cur: INIT_CUR, prev: INIT_PREV });
-  const [saved, setSaved] = React.useState({ cur: INIT_CUR, prev: INIT_PREV });
+  const { user, loading: authLoading } = useAuth();
+  const tz = user?.time_zone || "UTC";
+  const [offset, setOffset] = React.useState(0);
+  const now = DateTime.now().setZone(tz);
+  const start = now.startOf("week").plus({ weeks: offset });
+  const weekStart = start.toISODate();
+  const dates = DAYS.map((_, i) => start.plus({ days: i }));
+  const todayIso = now.toISODate();
+
+  const [catalog, setCatalog] = React.useState([]);
+  const [rows, setRows] = React.useState([]);
+  const [serverWeek, setServerWeek] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [loadError, setLoadError] = React.useState(false);
   const [errors, setErrors] = React.useState([]);
-  const [confirmId, setConfirmId] = React.useState(null);
   const [saving, setSaving] = React.useState(false);
-  const [savedAt, setSavedAt] = React.useState("");
   const [notice, setNotice] = React.useState("");
-  const [focusId, setFocusId] = React.useState(null);
+  const [focusKey, setFocusKey] = React.useState(null);
   const counter = React.useRef(1);
   const alertRef = React.useRef(null);
+  const loadId = React.useRef(0);
 
-  const rows = weeks[weekKey];
-  const start = WEEK_START[weekKey];
-  const dates = DAYS.map((_, i) => start + i * DAY_MS);
-  const endYear = new Date(dates[6]).getUTCFullYear();
-  const title = `Timesheet: ${dayText(dates[0])} – ${dayText(dates[6])} ${endYear}`;
-
-  const dayTotals = DAYS.map((_, i) => rows.reduce((s, r) => s + parseHours(r.hours[i]).n, 0));
-  const weekTotal = dayTotals.reduce((a, b) => a + b, 0);
-  const rowTotal = (r) => r.hours.reduce((s, h) => s + parseHours(h).n, 0);
-  const dirty = JSON.stringify(rows) !== JSON.stringify(saved[weekKey]);
-  const invalid = (key) => errors.some((e) => e.key === key);
-
-  React.useEffect(() => {
-    if (!saving) return undefined;
-    const t = setTimeout(() => {
-      const clean = rows.map((r) => ({ ...r, fresh: false }));
-      setWeeks((w) => ({ ...w, [weekKey]: clean }));
-      setSaved((s) => ({ ...s, [weekKey]: clean }));
-      setSavedAt(
-        new Intl.DateTimeFormat("en-GB", {
-          timeZone: "Europe/London",
-          day: "numeric",
-          month: "short",
-          hour: "2-digit",
-          minute: "2-digit",
-        }).format(new Date()),
-      );
-      setNotice("Timesheet saved. Totals are up to date.");
-      setSaving(false);
-    }, 600);
-    return () => clearTimeout(t);
-  }, [saving]);
-
-  React.useEffect(() => {
-    if (focusId) {
-      const el = document.getElementById("proj-" + focusId);
-      if (el) el.focus();
-      setFocusId(null);
+  const guard = (err) => {
+    if (err instanceof ApiError && err.status === 401) {
+      navigate("/sign-in");
+      return true;
     }
-  }, [focusId]);
+    return false;
+  };
+
+  const load = React.useCallback(() => {
+    const id = ++loadId.current;
+    setLoading(true);
+    setLoadError(false);
+    setErrors([]);
+    setNotice("");
+    Promise.all([apiFetch("/api/projects"), apiFetch(`/api/timesheets/${weekStart}`)])
+      .then(([cat, week]) => {
+        if (id !== loadId.current) return;
+        if (!Array.isArray(cat) || !week || !Array.isArray(week.rows))
+          throw new Error("Unexpected response");
+        setCatalog(cat);
+        setServerWeek(week);
+        setRows(rowsFrom(week));
+      })
+      .catch((err) => {
+        if (id === loadId.current && !guard(err)) setLoadError(true);
+      })
+      .finally(() => {
+        if (id === loadId.current) setLoading(false);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weekStart]);
+
+  React.useEffect(() => {
+    if (!authLoading) load();
+  }, [authLoading, load]);
+
+  React.useEffect(() => {
+    if (focusKey) {
+      const el = document.getElementById("proj-" + focusKey);
+      if (el) el.focus();
+      setFocusKey(null);
+    }
+  }, [focusKey]);
 
   React.useEffect(() => {
     if (errors.length && alertRef.current) alertRef.current.focus();
   }, [errors]);
 
-  const patchRow = (id, patch, clearKeys) => {
-    setWeeks((w) => ({
-      ...w,
-      [weekKey]: w[weekKey].map((r) => (r.id === id ? { ...r, ...patch } : r)),
-    }));
+  const findProject = (id) => catalog.find((p) => String(p.id) === String(id));
+  const rowLabel = (r, ri) =>
+    r.projectName ? `${r.projectName} / ${r.taskName || "no task"}` : `Row ${ri + 1}`;
+
+  const dayTotals = DAYS.map((_, i) =>
+    rows.reduce((s, r) => s + toMinutes(r.hours[i]) + r.clocked[i], 0),
+  );
+  const weekTotal = dayTotals.reduce((a, b) => a + b, 0);
+  const rowTotal = (r) =>
+    r.hours.reduce((s, h) => s + toMinutes(h), 0) + r.clocked.reduce((a, b) => a + b, 0);
+  const invalid = (key) => errors.some((e) => e.key === key);
+
+  const patchRow = (key, patch, clearKeys) => {
+    setRows((l) => l.map((r) => (r.key === key ? { ...r, ...patch } : r)));
     if (clearKeys) setErrors((e) => e.filter((x) => !clearKeys.includes(x.key)));
     setNotice("");
   };
   const setHour = (r, i, val) => {
     const hours = r.hours.slice();
     hours[i] = val;
-    patchRow(r.id, { hours }, [`${r.id}:${i}`]);
+    patchRow(r.key, { hours }, [`${r.key}:${i}`]);
   };
   const changeProject = (r, pid) => {
-    const f = findProject(pid);
-    const first = f ? f.project.tasks.find((t) => !t.archived) : null;
+    const p = findProject(pid);
+    const first = p ? p.tasks[0] : null;
     patchRow(
-      r.id,
+      r.key,
       {
         project: pid,
-        task: first ? first.id : "",
-        billable: f && r.fresh ? f.project.defaultBillable : r.billable,
+        projectName: p ? p.name : "",
+        task: first ? String(first.id) : "",
+        taskName: first ? first.name : "",
+        billable: r.touched ? r.billable : p ? p.default_billable !== false : true,
       },
-      [`${r.id}:proj`],
+      [`${r.key}:proj`],
     );
   };
-  const addRow = () => {
-    const id = "n" + counter.current++;
-    const row = {
-      id,
-      project: "",
-      task: "",
-      billable: true,
-      source: "manual",
-      note: "",
-      fresh: true,
-      hours: ["", "", "", "", "", "", ""],
-    };
-    setWeeks((w) => ({ ...w, [weekKey]: [...w[weekKey], row] }));
-    setNotice("");
-    setFocusId(id);
+  const changeTask = (r, tid) => {
+    const p = findProject(r.project);
+    const t = p ? p.tasks.find((x) => String(x.id) === tid) : null;
+    patchRow(r.key, { task: tid, taskName: t ? t.name : "" }, [`${r.key}:proj`]);
   };
-  const deleteRow = (id) => {
-    setWeeks((w) => ({ ...w, [weekKey]: w[weekKey].filter((r) => r.id !== id) }));
-    setErrors((e) => e.filter((x) => !x.key.startsWith(id + ":")));
-    setConfirmId(null);
-    setNotice("Entry removed from this week. Totals updated.");
+  const addRow = () => {
+    const key = "n" + counter.current++;
+    setRows((l) => [
+      ...l,
+      {
+        key,
+        saved: false,
+        project: "",
+        task: "",
+        projectName: "",
+        taskName: "",
+        billable: true,
+        touched: false,
+        hours: ["", "", "", "", "", "", ""],
+        orig: [0, 0, 0, 0, 0, 0, 0],
+        clocked: [0, 0, 0, 0, 0, 0, 0],
+        entryIds: [],
+      },
+    ]);
+    setNotice("");
+    setFocusKey(key);
+  };
+  const removeRow = (key) => {
+    setRows((l) => l.filter((r) => r.key !== key));
+    setErrors((e) => e.filter((x) => !x.key.startsWith(key + ":")));
+    setNotice("Row removed. Totals updated.");
     const add = document.getElementById("ts-add");
     if (add) add.focus();
   };
-  const switchWeek = () => {
-    setWeekKey(weekKey === "cur" ? "prev" : "cur");
-    setErrors([]);
-    setConfirmId(null);
-    setNotice("");
-  };
-  const onSave = () => {
+
+  const onSave = async () => {
     const errs = [];
     rows.forEach((r, ri) => {
-      const label = rowLabel(r) || `Row ${ri + 1}`;
+      const label = rowLabel(r, ri);
       if (!r.project || !r.task)
-        errs.push({ key: `${r.id}:proj`, msg: `Row ${ri + 1}: choose a project and a task.` });
+        errs.push({ key: `${r.key}:proj`, msg: `Row ${ri + 1}: choose a project and a task.` });
       r.hours.forEach((h, i) => {
         const p = parseHours(h);
-        if (!p.ok) errs.push({ key: `${r.id}:${i}`, msg: `${label}, ${DAYS[i]}: ${p.msg}` });
+        if (!p.ok) errs.push({ key: `${r.key}:${i}`, msg: `${label}, ${DAYS[i]}: ${p.msg}` });
       });
     });
     DAYS.forEach((d, i) => {
-      if (dayTotals[i] > 24)
-        errs.push({ key: `day:${i}`, msg: `${d}: the day adds up to more than 24 hours.` });
+      if (dayTotals[i] > 1440)
+        errs.push({
+          key: `day:${i}`,
+          msg: `${d}: the day adds up to more than 24 hours, including clocked time.`,
+        });
     });
+    setNotice("");
     if (errs.length) {
       setErrors(errs);
-      setNotice("");
       return;
     }
     setErrors([]);
-    setNotice("");
+
+    const cells = [];
+    const meta = [];
+    rows.forEach((r, ri) => {
+      r.hours.forEach((h, i) => {
+        const minutes = toMinutes(h);
+        if (minutes === r.orig[i]) return;
+        cells.push({
+          project_id: Number(r.project),
+          task_id: Number(r.task),
+          billable: r.saved ? r.origBillable : r.billable,
+          date: dates[i].toISODate(),
+          minutes,
+        });
+        meta.push({ key: r.key, day: i, ri });
+      });
+    });
+
     setSaving(true);
+    try {
+      let week = serverWeek;
+      if (cells.length)
+        week = await apiFetch("/api/timesheets/cells", {
+          method: "PUT",
+          body: JSON.stringify({ week_start: weekStart, cells }),
+        });
+      let patched = false;
+      for (const r of rows) {
+        if (!r.saved || r.billable === r.origBillable) continue;
+        const sr = week.rows.find(
+          (x) =>
+            String(x.project_id) === r.project &&
+            String(x.task_id) === r.task &&
+            x.billable === r.origBillable,
+        );
+        const ids = sr
+          ? sr.days.flatMap((d) => [d.manual_entry_id, ...d.clocked_entry_ids]).filter(Boolean)
+          : [];
+        for (const id of ids) {
+          await apiFetch(`/api/time-entries/${id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ billable: r.billable }),
+          });
+          patched = true;
+        }
+      }
+      if (patched) week = await apiFetch(`/api/timesheets/${weekStart}`);
+      const keep = rows.filter((r) => !r.saved && r.hours.every((h) => h.trim() === ""));
+      setServerWeek(week);
+      setRows([...rowsFrom(week), ...keep]);
+      setNotice(
+        `Timesheet saved. Totals are up to date · ${DateTime.now().setZone(tz).toFormat("d LLL HH:mm")} ${tz}`,
+      );
+    } catch (err) {
+      if (guard(err)) return;
+      const d = err instanceof ApiError ? err.body?.detail : null;
+      const out = [];
+      if (err instanceof ApiError && err.status === 422 && Array.isArray(d)) {
+        for (const x of d) {
+          const loc = x.loc || [];
+          const m = loc[1] === "cells" ? meta[loc[2]] : null;
+          if (m) {
+            const field = loc[3];
+            const label = rowLabel(rows[m.ri], m.ri);
+            const isCell = field === "minutes" || field === "date";
+            out.push({
+              key: isCell ? `${m.key}:${m.day}` : `${m.key}:proj`,
+              msg: `${label}, ${DAYS[m.day]}: ${x.msg}`,
+            });
+          } else out.push({ key: `save:${out.length}`, msg: x.msg });
+        }
+      } else
+        out.push({
+          key: "save",
+          msg: detailText(err) || "Could not save the timesheet. Try again.",
+        });
+      setErrors(out);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const rootStyle = {
@@ -430,75 +430,80 @@ export default function Screen() {
     paddingBottom: 32,
   };
 
-  const projectOptions = CATALOG.filter((c) => !c.archived).map((c) => (
-    <optgroup key={c.id} label={c.name}>
-      {c.projects
-        .filter((p) => !p.archived)
+  const clients = [...new Set(catalog.map((p) => p.client_name))];
+  const projectOptions = clients.map((c) => (
+    <optgroup key={c} label={c}>
+      {catalog
+        .filter((p) => p.client_name === c)
         .map((p) => (
-          <option key={p.id} value={p.id}>
+          <option key={p.id} value={String(p.id)}>
             {p.name}
           </option>
         ))}
     </optgroup>
   ));
-  const taskOptions = (r) => {
-    const f = findProject(r.project);
-    if (!f) return [];
-    return f.project.tasks
-      .filter((t) => !t.archived || t.id === r.task)
-      .map((t) => (
-        <option key={t.id} value={t.id}>
-          {t.name}
-          {t.archived ? " (archived)" : ""}
-        </option>
-      ));
+
+  const title = `Timesheet: ${dates[0].toFormat("d LLL")} – ${dates[6].toFormat("d LLL yyyy")}`;
+  const onWeek = (n) => {
+    setOffset((o) => o + n);
   };
 
-  const statusNode = saving ? (
-    <span className="inline-flex items-center gap-2">
-      <Icons.Clock className="ts-ico" aria-hidden="true" /> Saving timesheet…
-    </span>
-  ) : dirty ? (
-    <span className="inline-flex items-center gap-2">
-      <Icons.Edit className="ts-ico" aria-hidden="true" /> Unsaved changes
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-2" style={{ color: brand.accentColor }}>
-      <Icons.CheckCircle className="ts-ico" aria-hidden="true" /> All changes saved
-      {savedAt ? ` · ${savedAt} GMT` : ""}
-    </span>
-  );
+  if (loading || loadError) {
+    return (
+      <div className="ts-root" style={rootStyle}>
+        <style>{CSS}</style>
+        <style>{CSS2}</style>
+        {loadError ? (
+          <div className="ts-alert" role="alert">
+            <div>
+              <p>Could not load the timesheet.</p>
+              <button type="button" className="ts-btn ts-btn-auto ts-retry" onClick={load}>
+                Try again
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p role="status">Loading timesheet…</p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="ts-root" style={rootStyle}>
       <style>{CSS}</style>
+      <style>{CSS2}</style>
 
       <div className="ts-top">
         <div className="ts-c-title" data-wf="b-0-0">
           <p className="ts-eyebrow" style={{ marginBottom: 12 }}>
-            Monday to Sunday · Europe/London
+            Monday to Sunday · {tz}
           </p>
           <h1 className="ts-title">{title}</h1>
           <span className="ts-rule" aria-hidden="true" />
         </div>
         <div className="ts-c-back">
-          <button
-            type="button"
-            className="ts-btn"
-            data-wf="b-0-1"
-            onClick={switchWeek}
-            aria-label={
-              weekKey === "cur"
-                ? "Go to last week, 26 Oct to 1 Nov"
-                : "Go to this week, 2 Nov to 8 Nov"
-            }
-          >
-            {weekKey === "cur" ? <Icons.ChevronLeft className="ts-ico" aria-hidden="true" /> : null}
-            {weekKey === "cur" ? "Last week" : "This week"}
-            {weekKey === "cur" ? null : (
+          <div className="ts-navs">
+            <button
+              type="button"
+              className="ts-btn"
+              data-wf="b-0-1"
+              onClick={() => onWeek(-1)}
+              aria-label="Previous week"
+            >
+              <Icons.ChevronLeft className="ts-ico" aria-hidden="true" />
+              Prev
+            </button>
+            <button
+              type="button"
+              className="ts-btn"
+              onClick={() => onWeek(1)}
+              aria-label="Next week"
+            >
+              Next
               <Icons.ChevronRight className="ts-ico" aria-hidden="true" />
-            )}
-          </button>
+            </button>
+          </div>
         </div>
         <div className="ts-c-add">
           <button
@@ -532,7 +537,7 @@ export default function Screen() {
             Week hours
           </h2>
           <p className="ts-note" style={{ margin: 0 }}>
-            Clocked entries are shown in Europe/London time and stored in UTC.
+            Dates and clocked entries are shown in {tz} time and stored in UTC.
           </p>
         </div>
         <table className="ts-table">
@@ -545,189 +550,169 @@ export default function Screen() {
                 Billable
               </th>
               {DAYS.map((d, i) => (
-                <th key={d} scope="col" className="ts-th" data-wf={`i-1-0-${i + 2}`}>
+                <th key={d} scope="col" className="ts-th">
                   {d}
-                  <small>{dayText(dates[i])}</small>
-                  {dates[i] === TODAY ? <span className="ts-today">Today</span> : null}
+                  <small>{dates[i].toFormat("d LLL")}</small>
+                  {dates[i].toISODate() === todayIso ? (
+                    <span className="ts-today">Today</span>
+                  ) : null}
                 </th>
               ))}
               <th scope="col" className="ts-th" data-wf="i-1-0-9">
                 Total
               </th>
               <th scope="col" className="ts-th" data-wf="i-1-0-10">
-                Delete
+                Remove
               </th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r, ri) => {
-              const f = findProject(r.project);
-              const label = rowLabel(r) || `row ${ri + 1}`;
+              const p = findProject(r.project);
+              const label = rowLabel(r, ri);
+              const hasClock = r.clocked.some((m) => m > 0);
               return (
-                <React.Fragment key={r.id}>
-                  <tr className="ts-row">
-                    <td className="ts-proj">
-                      <div className="ts-sel">
-                        <label htmlFor={`proj-${r.id}`} className="sr-only">
-                          Project for {label}
-                        </label>
-                        <select
-                          id={`proj-${r.id}`}
-                          className="ts-field"
-                          value={r.project}
-                          aria-invalid={invalid(`${r.id}:proj`) ? "true" : undefined}
-                          onChange={(e) => changeProject(r, e.target.value)}
-                        >
-                          <option value="">Choose a project</option>
-                          {projectOptions}
-                        </select>
-                      </div>
-                      <div className="ts-sel">
-                        <label htmlFor={`task-${r.id}`} className="sr-only">
-                          Task for {label}
-                        </label>
-                        <select
-                          id={`task-${r.id}`}
-                          className="ts-field"
-                          value={r.task}
-                          disabled={!f}
-                          aria-invalid={invalid(`${r.id}:proj`) ? "true" : undefined}
-                          onChange={(e) =>
-                            patchRow(r.id, { task: e.target.value }, [`${r.id}:proj`])
-                          }
-                        >
-                          <option value="">{f ? "Choose a task" : "Choose a project first"}</option>
-                          {taskOptions(r)}
-                        </select>
-                      </div>
-                      {r.source === "clock" ? (
-                        <>
-                          <span className="ts-src ts-src-clock">
-                            <Icons.Clock
-                              className="ts-ico"
-                              aria-hidden="true"
-                              style={{ width: 12, height: 12 }}
-                            />{" "}
-                            Clocked
-                          </span>
-                          <p className="ts-note">{r.note}</p>
-                        </>
-                      ) : (
-                        <span className="ts-src">
-                          <Icons.Edit
-                            className="ts-ico"
-                            aria-hidden="true"
-                            style={{ width: 12, height: 12 }}
-                          />{" "}
-                          {r.fresh ? "New row" : "Entered by hand"}
-                        </span>
-                      )}
-                    </td>
-                    <td className="ts-bill">
-                      <label className="ts-check" htmlFor={`bill-${r.id}`}>
-                        <input
-                          id={`bill-${r.id}`}
-                          type="checkbox"
-                          checked={r.billable}
-                          onChange={(e) => patchRow(r.id, { billable: e.target.checked })}
-                        />
-                        <span>{r.billable ? "Billable" : "Non-billable"}</span>
+                <tr className="ts-row" key={r.key}>
+                  <td className="ts-proj">
+                    <div className="ts-sel">
+                      <label htmlFor={`proj-${r.key}`} className="sr-only">
+                        Project for {label}
                       </label>
-                    </td>
-                    {DAYS.map((d, i) => (
-                      <td key={d} className="ts-day">
-                        <label
-                          htmlFor={`h-${r.id}-${i}`}
-                          className="ts-daylabel"
+                      <select
+                        id={`proj-${r.key}`}
+                        className="ts-field"
+                        value={r.project}
+                        disabled={r.saved}
+                        aria-invalid={invalid(`${r.key}:proj`) ? "true" : undefined}
+                        onChange={(e) => changeProject(r, e.target.value)}
+                      >
+                        {r.saved ? (
+                          <option value={r.project}>{r.projectName}</option>
+                        ) : (
+                          <>
+                            <option value="">Choose a project</option>
+                            {projectOptions}
+                          </>
+                        )}
+                      </select>
+                    </div>
+                    <div className="ts-sel">
+                      <label htmlFor={`task-${r.key}`} className="sr-only">
+                        Task for {label}
+                      </label>
+                      <select
+                        id={`task-${r.key}`}
+                        className="ts-field"
+                        value={r.task}
+                        disabled={r.saved || !p}
+                        aria-invalid={invalid(`${r.key}:proj`) ? "true" : undefined}
+                        onChange={(e) => changeTask(r, e.target.value)}
+                      >
+                        {r.saved ? (
+                          <option value={r.task}>{r.taskName}</option>
+                        ) : (
+                          <>
+                            <option value="">
+                              {p ? "Choose a task" : "Choose a project first"}
+                            </option>
+                            {(p ? p.tasks : []).map((t) => (
+                              <option key={t.id} value={String(t.id)}>
+                                {t.name}
+                              </option>
+                            ))}
+                          </>
+                        )}
+                      </select>
+                    </div>
+                    {hasClock ? (
+                      <span className="ts-src ts-src-clock">
+                        <Icons.Clock
+                          className="ts-ico"
                           aria-hidden="true"
-                        >
-                          {d}
-                        </label>
-                        <span className="sr-only">
-                          Hours on {d} {dayText(dates[i])} for {label}
-                        </span>
-                        <input
-                          id={`h-${r.id}-${i}`}
-                          className="ts-field ts-hours"
-                          type="text"
-                          inputMode="decimal"
-                          autoComplete="off"
-                          placeholder="–"
-                          value={r.hours[i]}
-                          aria-invalid={invalid(`${r.id}:${i}`) ? "true" : undefined}
-                          aria-describedby={`hint-${r.id}-${i}`}
-                          onChange={(e) => setHour(r, i, e.target.value)}
-                        />
-                        <span id={`hint-${r.id}-${i}`} className="sr-only">
-                          {invalid(`${r.id}:${i}`)
-                            ? "Invalid hours. Use a number from 0 to 24."
-                            : "Hours from 0 to 24."}
-                        </span>
-                      </td>
-                    ))}
-                    <td className="ts-total">
-                      <span className="ts-narrow-only ts-eyebrow" style={{ marginRight: 8 }}>
-                        Row total
+                          style={{ width: 12, height: 12 }}
+                        />{" "}
+                        Clocked
                       </span>
-                      <span className="ts-totalfig">{fmt(rowTotal(r))}</span>
-                      <span className="ts-narrow-only ts-num" style={{ color: "var(--ts-muted)" }}>
-                        {" "}
-                        h
+                    ) : (
+                      <span className="ts-src">
+                        <Icons.Edit
+                          className="ts-ico"
+                          aria-hidden="true"
+                          style={{ width: 12, height: 12 }}
+                        />{" "}
+                        {r.saved ? "Entered by hand" : "New row"}
                       </span>
+                    )}
+                  </td>
+                  <td className="ts-bill">
+                    <label className="ts-check" htmlFor={`bill-${r.key}`}>
+                      <input
+                        id={`bill-${r.key}`}
+                        type="checkbox"
+                        checked={r.billable}
+                        onChange={(e) =>
+                          patchRow(r.key, { billable: e.target.checked, touched: true })
+                        }
+                      />
+                      <span>{r.billable ? "Billable" : "Non-billable"}</span>
+                      <span className="sr-only"> for {label}</span>
+                    </label>
+                  </td>
+                  {DAYS.map((d, i) => (
+                    <td key={d} className="ts-day">
+                      <span className="ts-daylabel" aria-hidden="true">
+                        {d}
+                      </span>
+                      <label htmlFor={`h-${r.key}-${i}`} className="sr-only">
+                        Hours on {d} {dates[i].toFormat("d LLL")} for {label}
+                      </label>
+                      <input
+                        id={`h-${r.key}-${i}`}
+                        className="ts-field ts-hours"
+                        type="text"
+                        inputMode="decimal"
+                        autoComplete="off"
+                        placeholder="–"
+                        value={r.hours[i]}
+                        aria-invalid={invalid(`${r.key}:${i}`) ? "true" : undefined}
+                        aria-describedby={`hint-${r.key}-${i}`}
+                        onChange={(e) => setHour(r, i, e.target.value)}
+                      />
+                      <span id={`hint-${r.key}-${i}`} className="sr-only">
+                        {invalid(`${r.key}:${i}`)
+                          ? "Invalid hours. Use a number from 0 to 24."
+                          : "Hours from 0 to 24."}
+                      </span>
+                      {r.clocked[i] > 0 ? (
+                        <span className="ts-note">+ {fmt(r.clocked[i])} h clocked</span>
+                      ) : null}
                     </td>
-                    <td className="ts-del">
+                  ))}
+                  <td className="ts-total">
+                    <span className="ts-narrow-only ts-eyebrow" style={{ marginRight: 8 }}>
+                      Row total
+                    </span>
+                    <span className="ts-totalfig">{fmt(rowTotal(r))}</span>
+                    <span className="ts-narrow-only ts-num" style={{ color: "var(--ts-muted)" }}>
+                      {" "}
+                      h
+                    </span>
+                  </td>
+                  <td className="ts-del">
+                    {r.saved ? null : (
                       <button
                         type="button"
                         className="ts-delbtn"
-                        aria-label={`Delete ${label}`}
-                        title="Delete this row"
-                        onClick={() => setConfirmId(r.id)}
+                        aria-label={`Remove ${label}`}
+                        title="Remove this row"
+                        onClick={() => removeRow(r.key)}
                       >
                         <Icons.X className="ts-ico" aria-hidden="true" />
-                        <span className="ts-narrow-only">Delete</span>
+                        <span className="ts-narrow-only">Remove</span>
                       </button>
-                    </td>
-                  </tr>
-                  {confirmId === r.id ? (
-                    <tr
-                      className="ts-confirm"
-                      onKeyDown={(e) => {
-                        if (e.key === "Escape") setConfirmId(null);
-                      }}
-                    >
-                      <td colSpan={11}>
-                        <div
-                          className="ts-confirm-body"
-                          role="group"
-                          aria-label={`Confirm deleting ${label}`}
-                        >
-                          <p style={{ maxWidth: "60ch" }}>
-                            Delete <strong>{label}</strong> and its{" "}
-                            <span className="ts-num">{fmt(rowTotal(r))} h</span> from this week?
-                            This can’t be undone.
-                          </p>
-                          <div className="ts-confirm-actions">
-                            <button
-                              type="button"
-                              className="ts-btn ts-btn-auto"
-                              autoFocus
-                              onClick={() => setConfirmId(null)}
-                            >
-                              Keep entry
-                            </button>
-                            <button
-                              type="button"
-                              className="ts-btn ts-btn-danger"
-                              onClick={() => deleteRow(r.id)}
-                            >
-                              <Icons.Trash className="ts-ico" aria-hidden="true" /> Delete entry
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : null}
-                </React.Fragment>
+                    )}
+                  </td>
+                </tr>
               );
             })}
           </tbody>
@@ -781,7 +766,7 @@ export default function Screen() {
                 {errors.length === 1 ? "this" : `these ${errors.length}`} and save again:
                 <ul>
                   {errors.map((e) => (
-                    <li key={e.key}>{e.msg}</li>
+                    <li key={e.key + e.msg}>{e.msg}</li>
                   ))}
                 </ul>
               </div>
@@ -800,8 +785,7 @@ export default function Screen() {
             {saving ? "Saving…" : "Save timesheet"}
           </button>
           <p role="status" className="ts-note" style={{ marginTop: 12, fontSize: 13 }}>
-            {statusNode}
-            {notice ? <span style={{ display: "block", marginTop: 4 }}>{notice}</span> : null}
+            {notice}
           </p>
         </div>
       </div>

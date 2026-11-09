@@ -1,11 +1,12 @@
 """SQLAlchemy models: users and server-side sessions."""
 
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
     ForeignKey,
     Index,
@@ -121,9 +122,25 @@ class TimeEntry(Base):
             "user_id",
             unique=True,
             postgresql_where=text("end_at IS NULL"),
+            sqlite_where=text("end_at IS NULL"),
         ),
+        Index(
+            "ux_time_entries_manual_cell",
+            "user_id",
+            "project_id",
+            "task_id",
+            "work_date",
+            "billable",
+            unique=True,
+            postgresql_where=text("source = 'manual'"),
+            sqlite_where=text("source = 'manual'"),
+        ),
+        Index("ix_time_entries_user_start", "user_id", "start_at"),
     )
 
+    source: Mapped[str] = mapped_column(String(10), default="clock", server_default="clock")
+    work_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    duration_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="RESTRICT"))
