@@ -93,15 +93,17 @@ def stored_utc(db, entry_id, column="start_at"):
 
 
 def local_hhmm(iso: str, tz: str) -> str:
-    return datetime.fromisoformat(iso.replace("Z", "+00:00")).astimezone(ZoneInfo(tz)).strftime("%H:%M")
+    return (
+        datetime.fromisoformat(iso.replace("Z", "+00:00"))
+        .astimezone(ZoneInfo(tz))
+        .strftime("%H:%M")
+    )
 
 
 # ---------- AC-045 ----------
 
 
-def test_ac045_summer_0900_london_is_stored_as_0800_utc_and_displays_0900(
-    client, db_session, at
-):
+def test_ac045_summer_0900_london_is_stored_as_0800_utc_and_displays_0900(client, db_session, at):
     u, h, b = mk_world(client, db_session)
     at(utc(2026, 7, 1, 8, 0))  # 09:00 BST
     r = client.post("/api/clock/in", json=b, headers=h)
