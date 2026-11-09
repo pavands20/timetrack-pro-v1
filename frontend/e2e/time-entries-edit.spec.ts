@@ -78,10 +78,7 @@ async function signIn(page: Page) {
 }
 
 test.describe("time entries edit and delete", () => {
-  test.skip(
-    !A.e || !A.p || !U.e || !U.p,
-    "needs E2E_ADMIN_* and E2E_EMPLOYEE_* credentials",
-  );
+  test.skip(!A.e || !A.p || !U.e || !U.p, "needs E2E_ADMIN_* and E2E_EMPLOYEE_* credentials");
 
   test("[AC-039] edit an entry's day, hours and billable and see it change", async ({ page }) => {
     const { project, task, w } = await seedEntry(120);
@@ -106,7 +103,12 @@ test.describe("time entries edit and delete", () => {
     await page.getByRole("button", { name: new RegExp(`^Edit ${project} / ${task}`) }).click();
     await page.locator("#ee-hours").fill("25");
     await page.getByRole("button", { name: "Save entry" }).click();
-    await expect(page.getByRole("alert").filter({ hasText: /\w{5,}/ }).first()).toBeVisible();
+    await expect(
+      page
+        .getByRole("alert")
+        .filter({ hasText: /\w{5,}/ })
+        .first(),
+    ).toBeVisible();
     await page.getByRole("button", { name: "Cancel" }).first().click();
     await expect(page.getByRole("listitem").filter({ hasText: task })).toContainText("1.00 h");
   });
