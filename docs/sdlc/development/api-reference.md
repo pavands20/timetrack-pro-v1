@@ -28,17 +28,17 @@
 | POST | /api/clock/in | clock_in | `backend/app/routers/clock.py:129` | — |
 | POST | /api/clock/out | clock_out | `backend/app/routers/clock.py:200` | — |
 | GET | /api/clock/status | clock_status | `backend/app/routers/clock.py:123` | — |
+| GET | /api/dashboard/week | get_dashboard_week | `backend/app/routers/dashboard.py:20` | — |
 | PATCH | /api/time-entries/{entry_id}/end | end_entry | `backend/app/routers/time_entries.py:38` | — |
-| PUT | /api/timesheets/cells | put_cells | `backend/app/routers/timesheets.py:236` | — |
-| GET | /api/timesheets/{week_start} | get_week | `backend/app/routers/timesheets.py:172` | — |
-| GET | /health | health | `backend/app/main.py:83` | Liveness probe. |
+| PUT | /api/timesheets/cells | put_cells | `backend/app/routers/timesheets.py:253` | — |
+| GET | /api/timesheets/{week_start} | get_week | `backend/app/routers/timesheets.py:189` | — |
+| GET | /health | health | `backend/app/main.py:84` | Liveness probe. |
 <!-- sdlc:auto:end endpoints -->
 
 <!-- sdlc:auto:start drift -->
 **Designed but missing:**
 
 - DELETE /api/time-entries/{id}
-- GET /api/dashboard/week
 - GET /api/projects
 - PATCH /api/admin/clients/{id}
 - PATCH /api/admin/projects/{id}
@@ -63,5 +63,5 @@
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `c1c419c`
+Generated from commit `02fe7f2`
 <!-- sdlc:auto:end source -->

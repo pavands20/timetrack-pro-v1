@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-344 tests · Passed 306 · Failed 0 · Skipped 38 · Not run 0
+408 tests · Passed 355 · Failed 0 · Skipped 38 · Not run 15
 
-Acceptance criteria covered: 40/51 · passing: 17/51
+Acceptance criteria covered: 50/51 · passing: 17/51
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -393,6 +393,87 @@ Acceptance criteria covered: 40/51 · passing: 17/51
 | AC-045 | [AC-045] times endpoints refuse a request with no session | E2E | Skipped | `frontend/e2e/timezone.spec.ts` |
 | AC-046 | [AC-046] a clock-in spanning a real daylight-saving change cannot be driven end to end: the live server clock cannot be set (covered in backend/tests/test_timezone_us017_qa.py) | E2E | Skipped | `frontend/e2e/timezone.spec.ts` |
 | AC-046 | [AC-046] the weekly timesheet reports its zone and puts a clocked entry on its local day with its elapsed minutes | E2E | Skipped | `frontend/e2e/timezone.spec.ts` |
+
+## Sprint 4
+
+### US-015: Edit and delete my own time entries
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-039 | test_ac039_archived_task_and_client_422 | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_bad_values_422_field_level_nothing_changed[body0-minutes] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_bad_values_422_field_level_nothing_changed[body1-minutes] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_bad_values_422_field_level_nothing_changed[body2-minutes] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_bad_values_422_field_level_nothing_changed[body3-work_date] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_bad_values_422_field_level_nothing_changed[body4-billable] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_bad_values_422_field_level_nothing_changed[body5-project_id] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_bad_values_422_field_level_nothing_changed[body6-task_id] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_boundaries_0_and_1440_accepted | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_cell_collision_409_nothing_changed | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_clocked_entry_422_on_date_or_minutes[body0-work_date] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_clocked_entry_422_on_date_or_minutes[body1-minutes] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_clocked_entry_accepts_project_task_billable | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_day_over_24h_422_nothing_changed | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_empty_body_422 | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_move_to_another_week | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_patch_hours_and_day_recalculate_totals | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_patch_project_task_billable | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_running_entry_409[minutes] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_running_entry_409[project_id] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_running_entry_409[task_id] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_running_entry_409[work_date] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_running_entry_accepts_billable | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | test_ac039_task_of_other_project_422 | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-040 | test_ac040_delete_clocked_entry_removes_its_breaks | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-040 | test_ac040_delete_manual_204_totals_and_entries_update | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-040 | test_ac040_running_entry_409_nothing_deleted | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-040 | test_ac040_second_delete_404 | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-040 | test_ac040_unknown_id_404_for_patch_and_delete | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-041 | test_ac041_401_without_session_and_nothing_changes | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-041 | test_ac041_403_without_csrf_header_and_nothing_changes | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-041 | test_ac041_nfr003_other_employee_gets_identical_404_and_entry_unchanged | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-041 | test_ac041_nfr003_other_roles_get_no_extra_access[Manager] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-041 | test_ac041_nfr003_other_roles_get_no_extra_access[Payroll Admin] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-041 | test_ac041_nfr003_other_roles_get_no_extra_access[System Admin] | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-041 | test_ac041_other_users_clocked_and_running_entries_also_404 | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| — | test_existing_patch_billable_and_timesheet_still_work | Unit | Passed | `backend/tests/test_time_entries_edit_delete_us015_qa.py` |
+| AC-039 | [AC-039] a bad hours value shows a field-level message and keeps the entry | E2E | Not run yet | `frontend/e2e/time-entries-edit.spec.ts` |
+| AC-039 | [AC-039] edit an entry's day, hours and billable and see it change | E2E | Not run yet | `frontend/e2e/time-entries-edit.spec.ts` |
+| AC-040 | [AC-040] Cancel keeps the entry, Confirm removes it | E2E | Not run yet | `frontend/e2e/time-entries-edit.spec.ts` |
+| AC-041 | [AC-041] an API call against another user's entry id is refused | E2E | Not run yet | `frontend/e2e/time-entries-edit.spec.ts` |
+
+### US-016: See my weekly hours on a dashboard
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-042 | test_ac042_401_without_session | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
+| AC-042 | test_ac042_autumn_change_week | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
+| AC-042 | test_ac042_dst_late_utc_entry_lands_on_next_local_week | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
+| AC-042 | test_ac042_mixed_manual_and_clocked_totals_split_and_monday_first | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
+| AC-042 | test_ac042_other_users_hours_excluded | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
+| AC-042 | test_ac042_previous_and_next_week_excluded | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
+| AC-042 | test_ac042_running_entry_excluded | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
+| AC-042 | test_ac042_spring_forward_week | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
+| AC-042 | test_ac042_week_boundary_uses_user_time_zone | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
+| AC-043 | test_ac043_empty_week_zeros_and_has_entries_false | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
+| — | test_nfr007_zero_minute_manual_cell_is_not_an_entry_and_no_leak | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
+| — | test_nfr010_week_is_monday_to_sunday_on_every_weekday | Unit | Passed | `backend/tests/test_dashboard_us016_qa.py` |
+| AC-042 | [AC-042] API returns Monday-first 7 days and 401 without a session | E2E | Not run yet | `frontend/e2e/dashboard.spec.ts` |
+| AC-043 | [AC-043] empty week shows 0.0 h with links to the clock and the timesheet | E2E | Not run yet | `frontend/e2e/dashboard.spec.ts` |
+| AC-044 | [AC-044] recording an entry changes the Home figures and deleting it drops them | E2E | Not run yet | `frontend/e2e/dashboard.spec.ts` |
+| AC-048 | [AC-048] Home, Timesheet and Help show English labels only | E2E | Not run yet | `frontend/e2e/dashboard.spec.ts` |
+| — | [NFR-010] Home and Timesheet weeks run Monday to Sunday | E2E | Not run yet | `frontend/e2e/dashboard.spec.ts` |
+
+### US-019: User and admin guides
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-049 | [AC-049] an admin can still read the user guide | E2E | Not run yet | `frontend/e2e/help.spec.ts` |
+| AC-049 | [AC-049] the user guide covers clocking, breaks, timesheet, editing and dashboard | E2E | Not run yet | `frontend/e2e/help.spec.ts` |
+| AC-050 | [AC-050] an Employee sees no Admin guide tab or text | E2E | Not run yet | `frontend/e2e/help.spec.ts` |
+| AC-050 | [AC-050] the Admin guide covers users, managers, clients, projects, tasks and bill rates | E2E | Not run yet | `frontend/e2e/help.spec.ts` |
+| AC-051 | [AC-051] [NFR-016] [NFR-006] project documentation covers stack, setup, email API key and EU/UK region | E2E | Not run yet | `frontend/e2e/help.spec.ts` |
+| — | [NFR-007] [NFR-008] [NFR-015] project documentation states GDPR, 6-year retention and 500 users | E2E | Not run yet | `frontend/e2e/help.spec.ts` |
 
 ## Project setup
 

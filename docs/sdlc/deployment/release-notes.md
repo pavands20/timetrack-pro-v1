@@ -3,6 +3,16 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## 02fe7f260800 — 2026-11-09
+
+**Commit:** `02fe7f2`
+
+**Delivered:**
+- US-015: Edit and delete my own time entries
+- US-016: See my weekly hours on a dashboard
+- US-018: English-only, responsive interface
+- US-019: User and admin guides
+
 ## c1c419c58ca4 — 2026-11-09
 
 **Commit:** `c1c419c`
