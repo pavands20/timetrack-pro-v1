@@ -211,13 +211,34 @@ def test_ac039_clocked_entry_422_on_date_or_minutes(client, world, db_session, b
     assert rows(db_session) == before
 
 
-def test_ac039_running_entry_409(client, world, db_session):
+@pytest.mark.parametrize("field", ["work_date", "minutes", "project_id", "task_id"])
+def test_ac039_running_entry_409(client, world, db_session, field):
     u, h, c, p, t = world
+    t2 = Task(project_id=p.id, name="ED Task R")
+    db_session.add(t2)
+    db_session.commit()
     e = clocked(db_session, u, p, t, utc(2026, 1, 13, 9, 0), None, open_=True)
     before = rows(db_session)
-    r = patch(client, h, e.id, {"billable": False})
-    assert r.status_code == 409 and isinstance(r.json()["detail"], str)
+    body = {
+        "work_date": {"work_date": "2026-01-14"},
+        "minutes": {"minutes": 30},
+        "project_id": {"project_id": p.id},
+        "task_id": {"task_id": t2.id},
+    }[field]
+    r = patch(client, h, e.id, body)
+    assert r.status_code == 409
+    assert r.json() == {"detail": "Clock out before editing this entry."}
     assert rows(db_session) == before
+
+
+def test_ac039_running_entry_accepts_billable(client, world, db_session):
+    u, h, c, p, t = world
+    e = clocked(db_session, u, p, t, utc(2026, 1, 13, 9, 0), None, open_=True)
+    r = patch(client, h, e.id, {"billable": False})
+    assert r.status_code == 200, r.text
+    assert r.json()["billable"] is False
+    db_session.expire_all()
+    assert db_session.get(TimeEntry, e.id).billable is False
 
 
 @pytest.mark.parametrize(
