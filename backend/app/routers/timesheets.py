@@ -369,7 +369,7 @@ def _entry_json(db: Session, user: User, entry: TimeEntry) -> dict[str, Any]:
     else:
         day = _aware(entry.start_at).astimezone(ZoneInfo(user.time_zone)).date()
         monday = day - timedelta(days=day.weekday())
-        minutes = next(m for e, _, m in _clocked(db, user, monday) if e.id == entry.id)
+        minutes = next((m for e, _, m in _clocked(db, user, monday) if e.id == entry.id), 0)
     return {
         "id": entry.id,
         "project_id": entry.project_id,
