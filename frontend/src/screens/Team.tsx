@@ -42,7 +42,10 @@ export default function Screen() {
       ) : (
         <ul style={{ listStyle: "none", margin: 0, padding: 0, maxWidth: 640 }}>
           {members.map((m) => (
-            <li key={m.id} style={{ borderTop: `1px solid ${brand.neutralColor}`, padding: "12px 0" }}>
+            <li
+              key={m.id}
+              style={{ borderTop: `1px solid ${brand.neutralColor}`, padding: "12px 0" }}
+            >
               <Link
                 to={`/team/${m.id}`}
                 style={{ color: brand.accentColor, textDecoration: "underline" }}
