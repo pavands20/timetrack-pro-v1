@@ -5,108 +5,81 @@ import React from "react";
 import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
+import { useNavigate } from "react-router-dom";
+import { ApiError, apiFetch } from "@/lib/api";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { Input, Label, Select, Table, THead, TBody, TR, TH, TD, Empty } = UI;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const { Edit } = Icons;
 
-const INITIAL_CLIENTS = [
-  { id: "c1", ref: "CL-001", name: "Acme Ltd", archived: false },
-  { id: "c2", ref: "CL-002", name: "Northwind", archived: false },
-  { id: "c3", ref: "CL-003", name: "Tidewater Partners", archived: false },
-  { id: "c4", ref: "CL-004", name: "Harrow & Finch", archived: true },
-];
-
-const INITIAL_PROJECTS = [
-  {
-    id: "p1",
-    ref: "PR-2041",
-    clientId: "c1",
-    name: "Website Redesign",
-    rate: "145.00",
-    defaultBillable: true,
-  },
-  {
-    id: "p2",
-    ref: "PR-2042",
-    clientId: "c1",
-    name: "Brand Guidelines 2027",
-    rate: "120.00",
-    defaultBillable: true,
-  },
-  {
-    id: "p3",
-    ref: "PR-2043",
-    clientId: "c1",
-    name: "Internal Tooling",
-    rate: "0.00",
-    defaultBillable: false,
-  },
-  {
-    id: "p4",
-    ref: "PR-2051",
-    clientId: "c2",
-    name: "Q4 Logistics Dashboard",
-    rate: "160.00",
-    defaultBillable: true,
-  },
-  {
-    id: "p5",
-    ref: "PR-2052",
-    clientId: "c2",
-    name: "Customer Portal Migration",
-    rate: "175.00",
-    defaultBillable: true,
-  },
-  {
-    id: "p6",
-    ref: "PR-2061",
-    clientId: "c3",
-    name: "Fund Reporting Pack",
-    rate: "135.50",
-    defaultBillable: true,
-  },
-  {
-    id: "p7",
-    ref: "PR-1998",
-    clientId: "c4",
-    name: "Annual Accounts Portal",
-    rate: "110.00",
-    defaultBillable: true,
-  },
-];
-
-const INITIAL_TASKS = [
-  { id: "t1", projectId: "p1", name: "Design", archived: false },
-  { id: "t2", projectId: "p1", name: "Development", archived: false },
-  { id: "t3", projectId: "p1", name: "Content migration", archived: false },
-  { id: "t4", projectId: "p1", name: "Discovery workshop", archived: true },
-  { id: "t5", projectId: "p2", name: "Logo refinement", archived: false },
-  { id: "t6", projectId: "p2", name: "Typography system", archived: false },
-  { id: "t7", projectId: "p3", name: "Admin and housekeeping", archived: false },
-  { id: "t8", projectId: "p4", name: "Data modelling", archived: false },
-  { id: "t9", projectId: "p4", name: "Chart build", archived: false },
-  { id: "t10", projectId: "p5", name: "Account mapping", archived: false },
-  { id: "t11", projectId: "p6", name: "Quarterly pack", archived: false },
-  { id: "t12", projectId: "p7", name: "Release support", archived: true },
-];
+const pad = (n, w) => String(n).padStart(w, "0");
+const toClient = (c) => ({
+  id: c.id,
+  ref: "CL-" + pad(c.id, 3),
+  name: c.name,
+  archived: c.is_archived,
+});
+const toProject = (p) => ({
+  id: p.id,
+  ref: "PR-" + pad(p.id, 4),
+  clientId: p.client_id,
+  name: p.name,
+  rate: p.bill_rate,
+  defaultBillable: p.default_billable,
+});
+const toTask = (k) => ({
+  id: k.id,
+  projectId: k.project_id,
+  name: k.name,
+  archived: k.is_archived,
+});
+const flatten = (data) => {
+  const clients = [];
+  const projects = [];
+  const tasks = [];
+  for (const c of data) {
+    clients.push(toClient(c));
+    for (const p of c.projects || []) {
+      projects.push(toProject({ ...p, client_id: c.id }));
+      for (const k of p.tasks || []) tasks.push(toTask({ ...k, project_id: p.id }));
+    }
+  }
+  return { clients, projects, tasks };
+};
+const upsert = (list, item) =>
+  list.some((x) => x.id === item.id)
+    ? list.map((x) => (x.id === item.id ? item : x))
+    : [...list, item];
+const detailOf = (err, fallback) => {
+  const d = err instanceof ApiError ? err.body?.detail : null;
+  if (typeof d === "string") return d;
+  if (Array.isArray(d) && d[0]?.msg) return d[0].msg;
+  return fallback;
+};
+const fieldErrors = (err, map) => {
+  const out = {};
+  const d = err instanceof ApiError ? err.body?.detail : null;
+  if (Array.isArray(d))
+    for (const x of d) {
+      const key = map[x.loc?.[x.loc.length - 1]];
+      if (key && !out[key]) out[key] = x.msg;
+    }
+  return out;
+};
 
 export default function Screen() {
-  const { Table, THead, TBody, TR, TH, TD, Input, Label, Empty } = UI;
+  const navigate = useNavigate();
+  const [clients, setClients] = React.useState([]);
+  const [projects, setProjects] = React.useState([]);
+  const [tasks, setTasks] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [loadError, setLoadError] = React.useState(false);
+  const [denied, setDenied] = React.useState(false);
+  const [clientId, setClientId] = React.useState(null);
+  const [projectId, setProjectId] = React.useState(null);
+  const [editingId, setEditingId] = React.useState(null);
 
-  const [clients, setClients] = React.useState(INITIAL_CLIENTS);
-  const [projects, setProjects] = React.useState(INITIAL_PROJECTS);
-  const [tasks, setTasks] = React.useState(INITIAL_TASKS);
-  const [clientId, setClientId] = React.useState("c1");
-  const [projectId, setProjectId] = React.useState("p1");
-  const [editingId, setEditingId] = React.useState("p1");
-
-  const [form, setForm] = React.useState({
-    name: "Website Redesign",
-    rate: "145.00",
-    defaultBillable: true,
-  });
+  const [form, setForm] = React.useState({ name: "", rate: "", defaultBillable: true });
   const [formErrors, setFormErrors] = React.useState({});
   const [notice, setNotice] = React.useState("");
 
@@ -119,11 +92,44 @@ export default function Screen() {
   const [taskError, setTaskError] = React.useState("");
   const [archiveTaskId, setArchiveTaskId] = React.useState(null);
 
-  const counter = React.useRef(100);
-  const nextId = (p) => {
-    counter.current += 1;
-    return p + counter.current;
+  const guard = (err) => {
+    if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+      setDenied(true);
+      if (err.status === 401) navigate("/sign-in");
+      return true;
+    }
+    return false;
   };
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  const load = React.useCallback(() => {
+    setLoading(true);
+    setLoadError(false);
+    apiFetch("/api/admin/clients")
+      .then((data) => {
+        const f = flatten(data);
+        setClients(f.clients);
+        setProjects(f.projects);
+        setTasks(f.tasks);
+        const c = f.clients[0];
+        const p = c ? f.projects.find((x) => x.clientId === c.id) : null;
+        setClientId(c ? c.id : null);
+        setProjectId(p ? p.id : null);
+        setEditingId(p ? p.id : null);
+        setForm(
+          p
+            ? { name: p.name, rate: p.rate, defaultBillable: p.defaultBillable }
+            : { name: "", rate: "", defaultBillable: true },
+        );
+      })
+      .catch((err) => {
+        if (!guard(err)) setLoadError(true);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+  React.useEffect(() => {
+    load();
+  }, [load]);
 
   const client = clients.find((c) => c.id === clientId);
   const clientProjects = projects.filter((p) => p.clientId === clientId);
@@ -256,53 +262,60 @@ export default function Screen() {
     setNotice("");
   };
 
-  const createClient = (e) => {
+  const createClient = async (e) => {
     e.preventDefault();
     const name = clientName.trim();
     if (!name) {
       setClientError("Give the client a name.");
       return;
     }
-    if (clients.some((c) => c.name.toLowerCase() === name.toLowerCase())) {
-      setClientError(`A client called “${name}” already exists. Client names must be unique.`);
-      return;
+    try {
+      const c = await apiFetch("/api/admin/clients", {
+        method: "POST",
+        body: JSON.stringify({ name }),
+      });
+      setClients((l) => upsert(l, toClient(c)));
+      setClientName("");
+      setClientError("");
+      setClientPanel(false);
+      setClientId(c.id);
+      setProjectId(null);
+      startNewProject();
+      setNotice(`Client “${c.name}” created. Add its first project below.`);
+    } catch (err) {
+      if (guard(err)) return;
+      setClientError(
+        fieldErrors(err, { name: "name" }).name ||
+          detailOf(err, "The client could not be saved. Try again."),
+      );
     }
-    const n = clients.length + 1;
-    const c = { id: nextId("c"), ref: "CL-" + String(n).padStart(3, "0"), name, archived: false };
-    setClients([...clients, c]);
-    setClientName("");
-    setClientError("");
-    setClientPanel(false);
-    setClientId(c.id);
-    setProjectId(null);
-    startNewProject();
-    setNotice(`Client “${name}” created. Add its first project below.`);
   };
 
-  const archiveClient = () => {
-    setClients(clients.map((c) => (c.id === clientId ? { ...c, archived: true } : c)));
-    setConfirmArchive(false);
-    setNotice(
-      `${client.name} archived. Its projects no longer accept new time entries; existing entries stay visible.`,
-    );
+  const archiveClient = async () => {
+    try {
+      await apiFetch(`/api/admin/clients/${clientId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ is_archived: true }),
+      });
+      setClients((l) => l.map((c) => (c.id === clientId ? { ...c, archived: true } : c)));
+      setConfirmArchive(false);
+      setNotice(
+        `${client.name} archived. Its projects no longer accept new time entries; existing entries stay visible.`,
+      );
+    } catch (err) {
+      if (guard(err)) return;
+      setConfirmArchive(false);
+      setNotice(detailOf(err, "The client could not be archived. Try again."));
+    }
   };
 
-  const saveProject = (e) => {
+  const saveProject = async (e) => {
     e.preventDefault();
     if (clientLocked) return;
     const errs = {};
     const name = form.name.trim();
     const rate = String(form.rate).trim();
     if (!name) errs.name = "Give the project a name.";
-    else if (
-      projects.some(
-        (p) =>
-          p.clientId === clientId &&
-          p.id !== editingId &&
-          p.name.toLowerCase() === name.toLowerCase(),
-      )
-    )
-      errs.name = `${client.name} already has a project called “${name}”.`;
     if (!rate) errs.rate = "Enter an hourly bill rate. Use 0 if the work is not charged.";
     else if (!/^\d+(\.\d{1,2})?$/.test(rate))
       errs.rate =
@@ -312,37 +325,50 @@ export default function Screen() {
       setNotice("");
       return;
     }
-    const normalised = Number(rate).toFixed(2);
-    if (editingId) {
-      setProjects(
-        projects.map((p) =>
-          p.id === editingId
-            ? { ...p, name, rate: normalised, defaultBillable: form.defaultBillable }
-            : p,
-        ),
+    const creating = !editingId;
+    try {
+      const body = creating
+        ? { client_id: clientId, name, bill_rate: rate, default_billable: form.defaultBillable }
+        : { name, bill_rate: rate, default_billable: form.defaultBillable };
+      const p = await apiFetch(
+        creating ? "/api/admin/projects" : `/api/admin/projects/${editingId}`,
+        {
+          method: creating ? "POST" : "PATCH",
+          body: JSON.stringify(body),
+        },
       );
-      setForm({ ...form, name, rate: normalised });
-      setNotice(
-        `Saved “${name}”. The new rate applies to reporting only; recorded time is unchanged.`,
-      );
-    } else {
-      const p = {
-        id: nextId("p"),
-        ref: "PR-" + (2100 + projects.length),
-        clientId,
-        name,
-        rate: normalised,
-        defaultBillable: form.defaultBillable,
-      };
-      setProjects([...projects, p]);
+      setProjects((l) => upsert(l, toProject({ ...p, client_id: p.client_id ?? clientId })));
       setProjectId(p.id);
       setEditingId(p.id);
-      setForm({ name, rate: normalised, defaultBillable: form.defaultBillable });
-      setNotice(`Project “${name}” created under ${client.name} at ${money(normalised)} per hour.`);
+      setForm({ name: p.name, rate: p.bill_rate, defaultBillable: p.default_billable });
+      setNotice(
+        creating
+          ? `Project “${p.name}” created under ${client.name} at ${money(p.bill_rate)} per hour.`
+          : `Saved “${p.name}”. The new rate applies to reporting only; recorded time is unchanged.`,
+      );
+    } catch (err) {
+      if (guard(err)) return;
+      const mapped = fieldErrors(err, {
+        name: "name",
+        bill_rate: "rate",
+        default_billable: "rate",
+        client_id: "name",
+      });
+      setFormErrors(
+        Object.keys(mapped).length
+          ? mapped
+          : {
+              [err instanceof ApiError && err.status === 409 ? "name" : "rate"]: detailOf(
+                err,
+                "The project could not be saved. Try again.",
+              ),
+            },
+      );
+      setNotice("");
     }
   };
 
-  const addTask = (e) => {
+  const addTask = async (e) => {
     e.preventDefault();
     const name = taskName.trim();
     if (!project || clientLocked) return;
@@ -350,18 +376,36 @@ export default function Screen() {
       setTaskError("Give the task a name.");
       return;
     }
-    if (projectTasks.some((t) => t.name.toLowerCase() === name.toLowerCase())) {
-      setTaskError(`“${name}” is already a task on this project.`);
-      return;
+    try {
+      const k = await apiFetch(`/api/admin/projects/${projectId}/tasks`, {
+        method: "POST",
+        body: JSON.stringify({ name }),
+      });
+      setTasks((l) => upsert(l, toTask({ ...k, project_id: k.project_id ?? projectId })));
+      setTaskName("");
+      setTaskError("");
+    } catch (err) {
+      if (guard(err)) return;
+      setTaskError(
+        fieldErrors(err, { name: "name" }).name ||
+          detailOf(err, "The task could not be saved. Try again."),
+      );
     }
-    setTasks([...tasks, { id: nextId("t"), projectId, name, archived: false }]);
-    setTaskName("");
-    setTaskError("");
   };
 
-  const archiveTask = (id) => {
-    setTasks(tasks.map((t) => (t.id === id ? { ...t, archived: true } : t)));
-    setArchiveTaskId(null);
+  const archiveTask = async (id) => {
+    try {
+      await apiFetch(`/api/admin/tasks/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ is_archived: true }),
+      });
+      setTasks((l) => l.map((t) => (t.id === id ? { ...t, archived: true } : t)));
+      setArchiveTaskId(null);
+    } catch (err) {
+      if (guard(err)) return;
+      setArchiveTaskId(null);
+      setTaskError(detailOf(err, "The task could not be archived. Try again."));
+    }
   };
 
   const statusTag = (archived, label) => (
@@ -403,6 +447,25 @@ export default function Screen() {
 
   const projectsHeading = `Projects of ${client ? client.name : "no client"}`;
   const tasksHeading = `Tasks of ${project ? project.name : "no project"}`;
+
+  if (denied || loading || loadError) {
+    return (
+      <div style={s.page} className="p-4 md:p-8 min-h-full">
+        {denied ? (
+          <p role="alert">Access denied. You do not have access to this resource.</p>
+        ) : loading ? (
+          <p role="status">Loading clients…</p>
+        ) : (
+          <div role="alert">
+            <p>Could not load clients.</p>
+            <button type="button" style={btn("outline")} onClick={load}>
+              Try again
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div style={s.page} className="p-4 md:p-8 min-h-full">

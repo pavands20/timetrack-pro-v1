@@ -10,8 +10,10 @@ from fastapi.responses import JSONResponse
 
 from app import models  # noqa: F401 -- imported so every table registers on the metadata
 from app.config import settings
+from app.routers import admin_projects as admin_projects_router
 from app.routers import admin_users as admin_users_router
 from app.routers import auth as auth_router
+from app.routers import clock as clock_router
 
 
 @asynccontextmanager
@@ -82,5 +84,7 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+app.include_router(clock_router.router)
 app.include_router(auth_router.router)
 app.include_router(admin_users_router.router)
+app.include_router(admin_projects_router.router)
