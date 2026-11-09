@@ -1,4 +1,4 @@
-import type * as React from "react";
+import * as React from "react";
 import { NavLink, Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 
 import { Icons } from "@/lib/icons";
@@ -12,7 +12,7 @@ import Help from "@/screens/Help";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   [
-    "flex items-center gap-2 rounded-[var(--brand-radius)] px-3 py-2 text-sm font-medium transition-colors",
+    "flex min-h-11 items-center gap-2 rounded-[var(--brand-radius)] px-3 py-2 text-sm font-medium transition-colors",
     isActive ? "bg-[var(--brand-hover)] text-[var(--brand-fg)]" : "text-[var(--brand-fg-muted)]",
   ].join(" ");
 
@@ -20,6 +20,7 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 function AppShellLayout() {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = React.useState(false);
   if (loading)
     return (
       <p role="status" className="p-8">
@@ -36,21 +37,38 @@ function AppShellLayout() {
     }
   };
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen flex-col md:flex-row">
       <aside
-        className="w-56 shrink-0 border-r p-4"
+        className="w-full shrink-0 border-b p-2 md:w-56 md:border-b-0 md:border-r md:p-4"
         style={{
           backgroundColor: "var(--brand-surface)",
           borderColor: "var(--brand-border)",
         }}
       >
-        <p
-          className="mb-4 px-3 text-sm font-semibold"
-          style={{ fontFamily: "var(--brand-font-heading)" }}
+        <div className="flex items-center justify-between md:mb-4">
+          <p
+            className="px-3 text-sm font-semibold"
+            style={{ fontFamily: "var(--brand-font-heading)" }}
+          >
+            {"TimeTrack Pro"}
+          </p>
+          <button
+            type="button"
+            className="inline-flex h-11 min-w-11 items-center justify-center md:hidden"
+            aria-expanded={menuOpen}
+            aria-controls="app-menu"
+            aria-label="Toggle menu"
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            <Icons.Menu size={20} />
+          </button>
+        </div>
+        <nav
+          id="app-menu"
+          aria-label="App menu"
+          className={`${menuOpen ? "flex" : "hidden"} flex-col gap-1 md:flex`}
+          onClick={() => setMenuOpen(false)}
         >
-          {"TimeTrack Pro"}
-        </p>
-        <nav aria-label="App menu" className="flex flex-col gap-1">
           <NavLink to="/home" className={navLinkClass}>
             <Icons.Home size={16} />
             {"Home"}
@@ -77,13 +95,13 @@ function AppShellLayout() {
           <button
             type="button"
             onClick={signOut}
-            className="flex items-center gap-2 rounded-[var(--brand-radius)] px-3 py-2 text-left text-sm font-medium text-[var(--brand-fg-muted)]"
+            className="flex min-h-11 items-center gap-2 rounded-[var(--brand-radius)] px-3 py-2 text-left text-sm font-medium text-[var(--brand-fg-muted)]"
           >
             {"Sign out"}
           </button>
         </nav>
       </aside>
-      <main className="flex-1 overflow-auto">
+      <main className="min-w-0 flex-1 overflow-auto">
         <Outlet />
       </main>
     </div>

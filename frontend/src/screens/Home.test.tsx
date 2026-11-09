@@ -15,6 +15,16 @@ const me = {
   time_zone: "Europe/London",
   home_path: "/home",
 };
+const WEEK = {
+  week_start: "2026-06-29",
+  week_end: "2026-07-05",
+  time_zone: "Europe/London",
+  total_minutes: 0,
+  billable_minutes: 0,
+  non_billable_minutes: 0,
+  has_entries: false,
+  days: [],
+};
 const PROJECTS = [
   {
     id: 1,
@@ -58,6 +68,7 @@ function setup(handlers: Record<string, () => Response>) {
 const base = {
   "GET /api/auth/me": () => json(me),
   "GET /api/projects": () => json(PROJECTS),
+  "GET /api/dashboard/week": () => json(WEEK),
 };
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-07-01T12:00:00Z") });
