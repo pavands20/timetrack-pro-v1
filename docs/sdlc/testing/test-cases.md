@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-201 tests · Passed 167 · Failed 0 · Skipped 21 · Not run 13
+243 tests · Passed 213 · Failed 0 · Skipped 12 · Not run 18
 
-Acceptance criteria covered: 27/51 · passing: 14/51
+Acceptance criteria covered: 27/51 · passing: 11/51
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -131,6 +131,11 @@ Acceptance criteria covered: 27/51 · passing: 14/51
 | — | test_nfr007_non_admins_cannot_edit_or_deactivate[Employee] | Unit | Passed | `backend/tests/test_admin_users_edit_us006.py` |
 | — | test_nfr007_non_admins_cannot_edit_or_deactivate[Manager] | Unit | Passed | `backend/tests/test_admin_users_edit_us006.py` |
 | — | test_nfr007_non_admins_cannot_edit_or_deactivate[Payroll Admin] | Unit | Passed | `backend/tests/test_admin_users_edit_us006.py` |
+| AC-015 | test_ac015_manager_change_applies_on_next_request_and_keeps_time_entries | Unit | Passed | `backend/tests/test_admin_users_time_entries_us006_qa.py` |
+| AC-015 | test_ac015_nfr014_editing_name_role_and_time_zone_keeps_time_entries | Unit | Passed | `backend/tests/test_admin_users_time_entries_us006_qa.py` |
+| AC-016 | test_ac016_deactivated_user_cannot_use_old_token_or_sign_in_but_entries_remain | Unit | Passed | `backend/tests/test_admin_users_time_entries_us006_qa.py` |
+| AC-016 | test_ac016_deactivating_one_user_leaves_another_users_entries_alone | Unit | Passed | `backend/tests/test_admin_users_time_entries_us006_qa.py` |
+| AC-016 | test_ac016_nfr014_deactivating_keeps_every_time_entry_and_break_unchanged | Unit | Passed | `backend/tests/test_admin_users_time_entries_us006_qa.py` |
 | AC-015 | [AC-015] an invalid time zone or manager is rejected 422 with field-level messages | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
 | AC-015 | [AC-015] editing a user without a session is refused with 401 | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
 | AC-015 | [AC-015] editing or deactivating an unknown user returns 404 | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
@@ -154,7 +159,7 @@ Acceptance criteria covered: 27/51 · passing: 14/51
 | AC-017 | test_ac017_unique_client_appears_in_list | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | AC-018 | test_ac018_archive_keeps_projects_and_tasks_in_admin_list | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | AC-018 | test_ac018_project_under_archived_client_409 | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
-| AC-018 | test_ac018_public_list_omits_archived_clients_projects | Unit | Skipped | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-018 | test_ac018_public_list_omits_archived_clients_projects | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | AC-019 | test_ac019_project_saved_under_client_with_rate[0-0.00] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | AC-019 | test_ac019_project_saved_under_client_with_rate[135.5-135.50] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | AC-019 | test_ac019_project_saved_under_client_with_rate[135.50-135.50] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
@@ -173,13 +178,25 @@ Acceptance criteria covered: 27/51 · passing: 14/51
 | AC-020 | test_ac020_missing_rate_key_422 | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | AC-021 | test_ac021_rate_change_leaves_others_unchanged | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | AC-022 | test_ac022_no_invoice_or_payment_in_openapi_or_responses | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
-| AC-023 | test_ac023_duplicate_task_name_409 | Unit | Skipped | `backend/tests/test_admin_catalog_us007_qa.py` |
-| AC-023 | test_ac023_task_listed_for_project_in_admin_and_public | Unit | Skipped | `backend/tests/test_admin_catalog_us007_qa.py` |
-| AC-024 | test_ac024_archived_task_hidden_publicly_kept_in_admin | Unit | Skipped | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-023 | test_ac023_archived_client_409_no_task | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-023 | test_ac023_blank_task_name_422[body0] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-023 | test_ac023_blank_task_name_422[body1] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-023 | test_ac023_blank_task_name_422[body2] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-023 | test_ac023_duplicate_task_name_409 | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-023 | test_ac023_same_task_name_allowed_in_other_project | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-023 | test_ac023_task_created_201_body | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-023 | test_ac023_task_listed_for_project_in_admin_and_public | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-023 | test_ac023_unknown_project_404 | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-024 | test_ac024_archived_task_hidden_publicly_kept_in_admin | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-024 | test_ac024_projects_401_without_session_has_no_data | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-024 | test_ac024_public_list_omits_archived_and_bill_rate | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-024 | test_ac024_unknown_task_patch_404 | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_401_without_session[get-/api/admin/clients] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_401_without_session[patch-/api/admin/clients/1] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_401_without_session[patch-/api/admin/projects/1] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_admin_routes_401_without_session[patch-/api/admin/tasks/1] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_401_without_session[post-/api/admin/clients] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_admin_routes_401_without_session[post-/api/admin/projects/1/tasks] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_401_without_session[post-/api/admin/projects] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_403_for_non_admin_no_data[get-/api/admin/clients-Employee] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_403_for_non_admin_no_data[get-/api/admin/clients-Manager] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
@@ -190,18 +207,31 @@ Acceptance criteria covered: 27/51 · passing: 14/51
 | — | test_nfr007_admin_routes_403_for_non_admin_no_data[patch-/api/admin/projects/1-Employee] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_403_for_non_admin_no_data[patch-/api/admin/projects/1-Manager] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_403_for_non_admin_no_data[patch-/api/admin/projects/1-Payroll Admin] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_admin_routes_403_for_non_admin_no_data[patch-/api/admin/tasks/1-Employee] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_admin_routes_403_for_non_admin_no_data[patch-/api/admin/tasks/1-Manager] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_admin_routes_403_for_non_admin_no_data[patch-/api/admin/tasks/1-Payroll Admin] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_403_for_non_admin_no_data[post-/api/admin/clients-Employee] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_403_for_non_admin_no_data[post-/api/admin/clients-Manager] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_403_for_non_admin_no_data[post-/api/admin/clients-Payroll Admin] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_403_for_non_admin_no_data[post-/api/admin/projects-Employee] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_403_for_non_admin_no_data[post-/api/admin/projects-Manager] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr007_admin_routes_403_for_non_admin_no_data[post-/api/admin/projects-Payroll Admin] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
-| — | test_nfr007_any_role_reads_projects_without_bill_rate[Employee] | Unit | Skipped | `backend/tests/test_admin_catalog_us007_qa.py` |
-| — | test_nfr007_any_role_reads_projects_without_bill_rate[Manager] | Unit | Skipped | `backend/tests/test_admin_catalog_us007_qa.py` |
-| — | test_nfr007_any_role_reads_projects_without_bill_rate[Payroll Admin] | Unit | Skipped | `backend/tests/test_admin_catalog_us007_qa.py` |
-| — | test_nfr007_any_role_reads_projects_without_bill_rate[System Admin] | Unit | Skipped | `backend/tests/test_admin_catalog_us007_qa.py` |
-| — | test_nfr007_projects_401_without_session | Unit | Skipped | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_admin_routes_403_for_non_admin_no_data[post-/api/admin/projects/1/tasks-Employee] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_admin_routes_403_for_non_admin_no_data[post-/api/admin/projects/1/tasks-Manager] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_admin_routes_403_for_non_admin_no_data[post-/api/admin/projects/1/tasks-Payroll Admin] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_any_role_reads_projects_without_bill_rate[Employee] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_any_role_reads_projects_without_bill_rate[Manager] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_any_role_reads_projects_without_bill_rate[Payroll Admin] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_any_role_reads_projects_without_bill_rate[System Admin] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_every_catalog_route_403_no_data_and_nothing_changes[Employee] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_every_catalog_route_403_no_data_and_nothing_changes[Manager] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_every_catalog_route_403_no_data_and_nothing_changes[Payroll Admin] | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr007_projects_401_without_session | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr013_422_bodies_have_field_level_english_messages | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| — | test_nfr014_rate_change_archive_task_and_client_keep_time_entries | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
+| AC-019 | [AC-019] admin creates a client and a project with a rate, adds a task and archives it | E2E | Not run yet | `frontend/e2e/admin-projects.spec.ts` |
+| AC-020 | [AC-020] an invalid rate (-5 and abc) shows the clear validation message | E2E | Not run yet | `frontend/e2e/admin-projects.spec.ts` |
+| AC-022 | [AC-022] no invoice or payment control is visible | E2E | Not run yet | `frontend/e2e/admin-projects.spec.ts` |
 
 ### US-010: Clock in and out against a project and task
 
@@ -212,22 +242,34 @@ Acceptance criteria covered: 27/51 · passing: 14/51
 | AC-025 | test_ac025_clock_in_creates_running_entry_and_status_returns_it | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | AC-025 | test_ac025_status_idle_is_entry_null | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | AC-025 | test_ac025_unknown_project_and_mismatched_task_422_no_row | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
+| AC-026 | test_ac026_break_start_and_end_create_and_close_break_row | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | AC-026 | test_ac026_clock_out_nets_break_time | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | AC-026 | test_ac026_open_break_is_closed_at_clock_out | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | AC-026 | test_ac026_work_date_is_start_date_in_user_time_zone | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
+| AC-027 | test_ac027_break_end_without_open_break_409 | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
+| AC-027 | test_ac027_break_start_without_entry_409 | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | AC-027 | test_ac027_clock_out_with_nothing_running_409 | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
+| AC-027 | test_ac027_concurrent_break_starts_leave_one_open_break | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | AC-027 | test_ac027_concurrent_clock_ins_leave_one_open_entry | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
+| AC-027 | test_ac027_double_break_start_409_one_open | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | AC-027 | test_ac027_message_uses_users_local_time | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | AC-027 | test_ac027_second_clock_in_409_leaves_one_open_entry | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | AC-027 | test_ac027_second_clock_out_409 | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
+| — | test_nfr007_break_routes_401_without_session[/api/clock/breaks/end] | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
+| — | test_nfr007_break_routes_401_without_session[/api/clock/breaks/start] | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | — | test_nfr007_every_clock_route_401_without_session[get-/api/clock/status] | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | — | test_nfr007_every_clock_route_401_without_session[post-/api/clock/in] | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | — | test_nfr007_every_clock_route_401_without_session[post-/api/clock/out] | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
+| — | test_nfr007_user_cannot_start_or_end_another_users_break | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | — | test_nfr007_user_never_sees_or_closes_another_users_entry | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
+| — | test_nfr009_autumn_change_local_date_and_duration_with_break | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
+| — | test_nfr009_break_across_spring_forward_nets_elapsed_utc | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | — | test_nfr009_duration_across_autumn_change | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | — | test_nfr009_duration_across_spring_forward_is_elapsed_utc_time | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | — | test_nfr009_summer_late_utc_entry_has_next_local_work_date | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | — | test_nfr014_deactivating_user_keeps_time_entries | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
+| AC-025, AC-026, AC-027 | [AC-025] [AC-026] [AC-027] clock in, refused second clock-in, break, clock out nets the break | E2E | Not run yet | `frontend/e2e/clock.spec.ts` |
+| — | [NFR-012] the clock panel has no horizontal scroll at 375px | E2E | Not run yet | `frontend/e2e/clock.spec.ts` |
 
 ## Project setup
 
