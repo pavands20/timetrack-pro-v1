@@ -3,7 +3,7 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-344 tests · Passed 303 · Failed 0 · Skipped 12 · Not run 29
+344 tests · Passed 306 · Failed 0 · Skipped 38 · Not run 0
 
 Acceptance criteria covered: 40/51 · passing: 17/51
 <!-- sdlc:auto:end summary -->
@@ -136,17 +136,17 @@ Acceptance criteria covered: 40/51 · passing: 17/51
 | AC-016 | test_ac016_deactivated_user_cannot_use_old_token_or_sign_in_but_entries_remain | Unit | Passed | `backend/tests/test_admin_users_time_entries_us006_qa.py` |
 | AC-016 | test_ac016_deactivating_one_user_leaves_another_users_entries_alone | Unit | Passed | `backend/tests/test_admin_users_time_entries_us006_qa.py` |
 | AC-016 | test_ac016_nfr014_deactivating_keeps_every_time_entry_and_break_unchanged | Unit | Passed | `backend/tests/test_admin_users_time_entries_us006_qa.py` |
-| AC-015 | [AC-015] an invalid time zone or manager is rejected 422 with field-level messages | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
-| AC-015 | [AC-015] editing a user without a session is refused with 401 | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
-| AC-015 | [AC-015] editing or deactivating an unknown user returns 404 | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
-| AC-015 | [AC-015] name, role, manager and time zone are stored and returned by the list | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
-| AC-015 | [AC-015] the admin edits a user's name and time zone and the API confirms it | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
-| AC-016 | [AC-016] a deactivated user cannot sign in (generic refusal) | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
-| AC-016 | [AC-016] a deactivated user is listed as inactive and cannot be made a manager | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
-| AC-016 | [AC-016] an admin cannot deactivate their own account | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
-| AC-016 | [AC-016] deactivating a user without a session is refused with 401 | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
-| AC-016 | [AC-016] deactivating without X-Requested-With is refused | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
-| AC-016 | [AC-016] the admin deactivates a user after confirming, and the API shows them inactive | E2E | Not run yet | `frontend/e2e/admin-users-edit.spec.ts` |
+| AC-015 | [AC-015] an invalid time zone or manager is rejected 422 with field-level messages | E2E | Skipped | `frontend/e2e/admin-users-edit.spec.ts` |
+| AC-015 | [AC-015] editing a user without a session is refused with 401 | E2E | Passed | `frontend/e2e/admin-users-edit.spec.ts` |
+| AC-015 | [AC-015] editing or deactivating an unknown user returns 404 | E2E | Skipped | `frontend/e2e/admin-users-edit.spec.ts` |
+| AC-015 | [AC-015] name, role, manager and time zone are stored and returned by the list | E2E | Skipped | `frontend/e2e/admin-users-edit.spec.ts` |
+| AC-015 | [AC-015] the admin edits a user's name and time zone and the API confirms it | E2E | Skipped | `frontend/e2e/admin-users-edit.spec.ts` |
+| AC-016 | [AC-016] a deactivated user cannot sign in (generic refusal) | E2E | Skipped | `frontend/e2e/admin-users-edit.spec.ts` |
+| AC-016 | [AC-016] a deactivated user is listed as inactive and cannot be made a manager | E2E | Skipped | `frontend/e2e/admin-users-edit.spec.ts` |
+| AC-016 | [AC-016] an admin cannot deactivate their own account | E2E | Skipped | `frontend/e2e/admin-users-edit.spec.ts` |
+| AC-016 | [AC-016] deactivating a user without a session is refused with 401 | E2E | Passed | `frontend/e2e/admin-users-edit.spec.ts` |
+| AC-016 | [AC-016] deactivating without X-Requested-With is refused | E2E | Passed | `frontend/e2e/admin-users-edit.spec.ts` |
+| AC-016 | [AC-016] the admin deactivates a user after confirming, and the API shows them inactive | E2E | Skipped | `frontend/e2e/admin-users-edit.spec.ts` |
 
 ### US-007: Manage clients
 
@@ -229,9 +229,9 @@ Acceptance criteria covered: 40/51 · passing: 17/51
 | — | test_nfr007_projects_401_without_session | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr013_422_bodies_have_field_level_english_messages | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
 | — | test_nfr014_rate_change_archive_task_and_client_keep_time_entries | Unit | Passed | `backend/tests/test_admin_catalog_us007_qa.py` |
-| AC-019 | [AC-019] admin creates a client and a project with a rate, adds a task and archives it | E2E | Not run yet | `frontend/e2e/admin-projects.spec.ts` |
-| AC-020 | [AC-020] an invalid rate (-5 and abc) shows the clear validation message | E2E | Not run yet | `frontend/e2e/admin-projects.spec.ts` |
-| AC-022 | [AC-022] no invoice or payment control is visible | E2E | Not run yet | `frontend/e2e/admin-projects.spec.ts` |
+| AC-019 | [AC-019] admin creates a client and a project with a rate, adds a task and archives it | E2E | Skipped | `frontend/e2e/admin-projects.spec.ts` |
+| AC-020 | [AC-020] an invalid rate (-5 and abc) shows the clear validation message | E2E | Skipped | `frontend/e2e/admin-projects.spec.ts` |
+| AC-022 | [AC-022] no invoice or payment control is visible | E2E | Skipped | `frontend/e2e/admin-projects.spec.ts` |
 
 ### US-010: Clock in and out against a project and task
 
@@ -268,8 +268,8 @@ Acceptance criteria covered: 40/51 · passing: 17/51
 | — | test_nfr009_duration_across_spring_forward_is_elapsed_utc_time | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | — | test_nfr009_summer_late_utc_entry_has_next_local_work_date | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | — | test_nfr014_deactivating_user_keeps_time_entries | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
-| AC-025, AC-026, AC-027 | [AC-025] [AC-026] [AC-027] clock in, refused second clock-in, break, clock out nets the break | E2E | Not run yet | `frontend/e2e/clock.spec.ts` |
-| — | [NFR-012] the clock panel has no horizontal scroll at 375px | E2E | Not run yet | `frontend/e2e/clock.spec.ts` |
+| AC-025, AC-026, AC-027 | [AC-025] [AC-026] [AC-027] clock in, refused second clock-in, break, clock out nets the break | E2E | Skipped | `frontend/e2e/clock.spec.ts` |
+| — | [NFR-012] the clock panel has no horizontal scroll at 375px | E2E | Skipped | `frontend/e2e/clock.spec.ts` |
 
 ## Sprint 3
 
@@ -287,10 +287,10 @@ Acceptance criteria covered: 40/51 · passing: 17/51
 | AC-030 | test_ac030_refusal_does_not_stop_break_being_ended_normally | Unit | Passed | `backend/tests/test_breaks_us011_qa.py` |
 | AC-030 | test_ac030_second_start_while_on_break_refused_and_original_kept | Unit | Passed | `backend/tests/test_breaks_us011_qa.py` |
 | AC-030 | test_ac030_start_break_without_running_entry_refused | Unit | Passed | `backend/tests/test_breaks_us011_qa.py` |
-| AC-028 | [AC-028] a break started and ended is recorded and subtracted from the entry | E2E | Not run yet | `frontend/e2e/breaks.spec.ts` |
-| AC-029 | [AC-029] clocking out while on a break closes the break and the entry | E2E | Not run yet | `frontend/e2e/breaks.spec.ts` |
-| AC-030 | [AC-030] break endpoints require a session | E2E | Not run yet | `frontend/e2e/breaks.spec.ts` |
-| AC-030 | [AC-030] starting a second break while on one is refused with 409 | E2E | Not run yet | `frontend/e2e/breaks.spec.ts` |
+| AC-028 | [AC-028] a break started and ended is recorded and subtracted from the entry | E2E | Skipped | `frontend/e2e/breaks.spec.ts` |
+| AC-029 | [AC-029] clocking out while on a break closes the break and the entry | E2E | Skipped | `frontend/e2e/breaks.spec.ts` |
+| AC-030 | [AC-030] break endpoints require a session | E2E | Skipped | `frontend/e2e/breaks.spec.ts` |
+| AC-030 | [AC-030] starting a second break while on one is refused with 409 | E2E | Skipped | `frontend/e2e/breaks.spec.ts` |
 
 ### US-012: Recover an entry left running
 
@@ -323,8 +323,8 @@ Acceptance criteria covered: 40/51 · passing: 17/51
 | — | test_nfr009_late_utc_start_gets_next_local_work_date_in_summer | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
 | — | test_nfr009_spring_forward_recovery_local_times_and_duration | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
 | — | test_nfr013_messages_are_field_level_english | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
-| AC-031 | [AC-031] the alert is shown, the user sets an end time, saves, and the alert goes away | E2E | Not run yet | `frontend/e2e/recover-entry.spec.ts` |
-| AC-032 | [AC-032] an end time before the start shows the message and the entry stays running | E2E | Not run yet | `frontend/e2e/recover-entry.spec.ts` |
+| AC-031 | [AC-031] the alert is shown, the user sets an end time, saves, and the alert goes away | E2E | Skipped | `frontend/e2e/recover-entry.spec.ts` |
+| AC-032 | [AC-032] an end time before the start shows the message and the entry stays running | E2E | Skipped | `frontend/e2e/recover-entry.spec.ts` |
 
 ### US-013: Enter hours by day in a weekly timesheet
 
@@ -388,11 +388,11 @@ Acceptance criteria covered: 40/51 · passing: 17/51
 | AC-046 | test_ac046_entry_across_spring_forward_shows_correct_duration_and_local_times | Unit | Passed | `backend/tests/test_timezone_us017_qa.py` |
 | AC-046 | test_ac046_entry_starting_after_the_change_lands_on_the_sunday | Unit | Passed | `backend/tests/test_timezone_us017_qa.py` |
 | AC-046 | test_ac046_timesheet_places_a_late_utc_entry_on_the_next_local_day | Unit | Passed | `backend/tests/test_timezone_us017_qa.py` |
-| AC-045 | [AC-045] the API stores and returns UTC instants and the profile carries the IANA zone | E2E | Not run yet | `frontend/e2e/timezone.spec.ts` |
-| AC-045 | [AC-045] the clock screen shows the clock-in time in the profile zone, not UTC | E2E | Not run yet | `frontend/e2e/timezone.spec.ts` |
-| AC-045 | [AC-045] times endpoints refuse a request with no session | E2E | Not run yet | `frontend/e2e/timezone.spec.ts` |
-| AC-046 | [AC-046] a clock-in spanning a real daylight-saving change cannot be driven end to end: the live server clock cannot be set (covered in backend/tests/test_timezone_us017_qa.py) | E2E | Not run yet | `frontend/e2e/timezone.spec.ts` |
-| AC-046 | [AC-046] the weekly timesheet reports its zone and puts a clocked entry on its local day with its elapsed minutes | E2E | Not run yet | `frontend/e2e/timezone.spec.ts` |
+| AC-045 | [AC-045] the API stores and returns UTC instants and the profile carries the IANA zone | E2E | Skipped | `frontend/e2e/timezone.spec.ts` |
+| AC-045 | [AC-045] the clock screen shows the clock-in time in the profile zone, not UTC | E2E | Skipped | `frontend/e2e/timezone.spec.ts` |
+| AC-045 | [AC-045] times endpoints refuse a request with no session | E2E | Skipped | `frontend/e2e/timezone.spec.ts` |
+| AC-046 | [AC-046] a clock-in spanning a real daylight-saving change cannot be driven end to end: the live server clock cannot be set (covered in backend/tests/test_timezone_us017_qa.py) | E2E | Skipped | `frontend/e2e/timezone.spec.ts` |
+| AC-046 | [AC-046] the weekly timesheet reports its zone and puts a clocked entry on its local day with its elapsed minutes | E2E | Skipped | `frontend/e2e/timezone.spec.ts` |
 
 ## Project setup
 
@@ -405,7 +405,7 @@ Acceptance criteria covered: 40/51 · passing: 17/51
 | — | test_nfr007_patch_and_deactivate_no_session_401_and_non_admin_403_without_data | Unit | Passed | `backend/tests/test_admin_users_edit_gaps_us006.py` |
 | — | test_health_reports_ok | Unit | Passed | `backend/tests/test_health.py` |
 | — | test_the_openapi_document_builds | Unit | Passed | `backend/tests/test_health.py` |
-| AC-015 | [AC-015] an admin edits a user's role and time zone and sees the success banner | E2E | Not run yet | `frontend/e2e/admin-users-edit-ui.spec.ts` |
-| AC-016 | [AC-016] deactivating through the confirm step marks the row Deactivated and removes the user from the Manager dropdown | E2E | Not run yet | `frontend/e2e/admin-users-edit-ui.spec.ts` |
+| AC-015 | [AC-015] an admin edits a user's role and time zone and sees the success banner | E2E | Skipped | `frontend/e2e/admin-users-edit-ui.spec.ts` |
+| AC-016 | [AC-016] deactivating through the confirm step marks the row Deactivated and removes the user from the Manager dropdown | E2E | Skipped | `frontend/e2e/admin-users-edit-ui.spec.ts` |
 | — | the app loads | E2E | Passed | `frontend/e2e/example.spec.ts` |
 <!-- sdlc:auto:end tests -->
