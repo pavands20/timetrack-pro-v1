@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.access import forbid_foreign_entry
 from app.auth_deps import get_current_user
 from app.database import get_db
 from app.models import TimeEntry, User
@@ -44,6 +45,7 @@ def end_entry(entry_id: int, body: EndBody, user: Me, db: Db) -> ClockOutOut:
         .with_for_update()
     )
     if entry is None:
+        forbid_foreign_entry(db, user, entry_id)
         raise HTTPException(status_code=404, detail="Time entry not found.")
     if entry.end_at is not None:
         raise HTTPException(status_code=409, detail="This entry already has an end time.")

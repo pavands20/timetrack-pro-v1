@@ -10,6 +10,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.access import forbid_foreign_entry, forbid_foreign_user_id
 from app.auth_deps import get_current_user
 from app.database import get_db
 from app.models import Break, Client, Project, Task, TimeEntry, User
@@ -194,6 +195,7 @@ def get_week(week_start: str, user: Me, db: Db) -> dict[str, Any]:
 class CellsBody(BaseModel):
     week_start: Any = None
     cells: Any = None
+    user_id: Any = None
 
 
 def _check_cell(cell: Any, i: int, monday: date, errors: list[dict[str, Any]]) -> dict | None:
@@ -252,6 +254,7 @@ def _check_cell(cell: Any, i: int, monday: date, errors: list[dict[str, Any]]) -
 
 @router.put("/cells")
 def put_cells(body: CellsBody, user: Me, db: Db) -> dict[str, Any]:
+    forbid_foreign_user_id(user, body.user_id)
     monday = _monday(body.week_start, ["body", "week_start"])
     if body.cells is None:
         raise _unprocessable([_err(["body", "cells"], REQUIRED)])
@@ -388,6 +391,7 @@ def _own_entry(db: Session, user: User, entry_id: int) -> TimeEntry:
         .with_for_update()
     )
     if entry is None:
+        forbid_foreign_entry(db, user, entry_id)
         raise HTTPException(status_code=404, detail="Time entry not found.")
     return entry
 

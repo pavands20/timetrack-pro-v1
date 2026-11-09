@@ -1,7 +1,7 @@
 """Clock in, clock out and status. A user only ever sees their own entry."""
 
 from datetime import UTC, datetime
-from typing import Annotated
+from typing import Annotated, Any
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.access import forbid_foreign_user_id
 from app.auth_deps import get_current_user
 from app.database import get_db
 from app.models import Break, Client, Project, Task, TimeEntry, User
@@ -43,6 +44,7 @@ class ClockInBody(BaseModel):
     project_id: int
     task_id: int
     billable: bool
+    user_id: Any = None
 
 
 class ClockOutOut(BaseModel):
@@ -128,6 +130,7 @@ def clock_status(user: Me, db: Db) -> StatusOut:
 
 @router.post("/in", response_model=EntryOut, status_code=201)
 def clock_in(body: ClockInBody, user: Me, db: Db) -> EntryOut:
+    forbid_foreign_user_id(user, body.user_id)
     running = _running(db, user)
     if running is not None:
         raise _already(running, user)

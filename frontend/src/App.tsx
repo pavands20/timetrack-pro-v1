@@ -9,6 +9,8 @@ import Timesheet from "@/screens/Timesheet";
 import AdminUsers from "@/screens/AdminUsers";
 import AdminProjects from "@/screens/AdminProjects";
 import Help from "@/screens/Help";
+import Team from "@/screens/Team";
+import TeamMember from "@/screens/TeamMember";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   [
@@ -29,6 +31,7 @@ function AppShellLayout() {
     );
   if (!user) return <Navigate to="/sign-in" replace />;
   const isAdmin = user.role === "System Admin";
+  const isManager = user.role === "Manager";
   const signOut = async () => {
     try {
       await logout();
@@ -77,6 +80,12 @@ function AppShellLayout() {
             <Icons.Menu size={16} />
             {"Timesheet"}
           </NavLink>
+          {isManager && (
+            <NavLink to="/team" className={navLinkClass}>
+              <Icons.Users size={16} />
+              {"My team"}
+            </NavLink>
+          )}
           {isAdmin && (
             <NavLink to="/admin-users" className={navLinkClass}>
               <Icons.User size={16} />
@@ -113,6 +122,11 @@ function AdminOnly({ children }: { children: React.ReactElement }) {
   return user?.role === "System Admin" ? children : <Navigate to="/home" replace />;
 }
 
+function ManagerOnly({ children }: { children: React.ReactElement }) {
+  const { user } = useAuth();
+  return user?.role === "Manager" ? children : <Navigate to="/home" replace />;
+}
+
 export default function App() {
   return (
     <Routes>
@@ -133,6 +147,22 @@ export default function App() {
             <AdminOnly>
               <AdminProjects />
             </AdminOnly>
+          }
+        />
+        <Route
+          path="/team"
+          element={
+            <ManagerOnly>
+              <Team />
+            </ManagerOnly>
+          }
+        />
+        <Route
+          path="/team/:userId"
+          element={
+            <ManagerOnly>
+              <TeamMember />
+            </ManagerOnly>
           }
         />
         <Route path="/help" element={<Help />} />

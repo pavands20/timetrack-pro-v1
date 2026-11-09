@@ -15,6 +15,7 @@ from app.routers import admin_users as admin_users_router
 from app.routers import auth as auth_router
 from app.routers import clock as clock_router
 from app.routers import dashboard as dashboard_router
+from app.routers import team as team_router
 from app.routers import time_entries as time_entries_router
 from app.routers import timesheets as timesheets_router
 
@@ -96,3 +97,4 @@ app.include_router(timesheets_router.router)
 app.include_router(timesheets_router.entries_router)
 app.include_router(time_entries_router.router)
 app.include_router(dashboard_router.router)
+app.include_router(team_router.router)

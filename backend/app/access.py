@@ -1,8 +1,10 @@
 """Record-level access: who may see or change records owned by a user."""
 
 from fastapi import HTTPException
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-from app.models import User
+from app.models import TimeEntry, User
 
 
 def can_access_own_records(actor: User, owner_id: int) -> bool:
@@ -11,3 +13,15 @@ def can_access_own_records(actor: User, owner_id: int) -> bool:
     if actor.role == "Employee" and actor.id != owner_id:
         raise HTTPException(status_code=403, detail="You do not have access to this resource.")
     return True
+
+
+def forbid_foreign_user_id(actor: User, body_user_id: object) -> None:
+    """A Manager's write body may not name another user."""
+    if actor.role == "Manager" and body_user_id is not None and body_user_id != actor.id:
+        raise HTTPException(status_code=403, detail="You do not have access to this resource.")
+
+
+def forbid_foreign_entry(db: Session, actor: User, entry_id: int) -> None:
+    """A Manager writing to an existing entry owned by someone else gets 403, not 404."""
+    if actor.role == "Manager" and db.scalar(select(TimeEntry.id).where(TimeEntry.id == entry_id)):
+        raise HTTPException(status_code=403, detail="You do not have access to this resource.")
