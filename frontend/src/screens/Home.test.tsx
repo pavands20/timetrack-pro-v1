@@ -119,7 +119,10 @@ describe("Home stale entry (US-012)", () => {
       ...base,
       "GET /api/clock/status": () => json({ entry: STALE }),
       "PATCH /api/time-entries/9/end": () =>
-        json({ detail: [{ loc: ["body", "end_at"], msg: "End time cannot be in the future." }] }, 422),
+        json(
+          { detail: [{ loc: ["body", "end_at"], msg: "End time cannot be in the future." }] },
+          422,
+        ),
     });
     await screen.findByText(/still clocked in since/);
     await userEvent.click(screen.getByRole("button", { name: "Save" }));

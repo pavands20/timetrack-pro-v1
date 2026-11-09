@@ -352,10 +352,7 @@ export default function Screen() {
             </p>
             <div className="flex flex-wrap gap-3 items-end" style={{ marginTop: 16 }}>
               <div style={{ flex: "1 1 220px", minWidth: 0 }}>
-                <Label
-                  htmlFor="stale-end"
-                  style={{ ...label, display: "block", marginBottom: 8 }}
-                >
+                <Label htmlFor="stale-end" style={{ ...label, display: "block", marginBottom: 8 }}>
                   Correct end time
                 </Label>
                 <input
