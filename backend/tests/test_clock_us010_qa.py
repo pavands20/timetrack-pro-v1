@@ -439,3 +439,142 @@ def test_ac025_unknown_project_and_mismatched_task_422_no_row(client, db_session
 
 
 _ = timedelta
+
+
+# ---------- breaks (AC-026, AC-027, NFR-007, NFR-009) ----------
+
+
+def _start(client, h):
+    return client.post("/api/clock/breaks/start", headers=h)
+
+
+def _end(client, h):
+    return client.post("/api/clock/breaks/end", headers=h)
+
+
+def test_ac026_break_start_and_end_create_and_close_break_row(client, db_session, world, at):
+    u, h, c, p, t = world
+    at(utc(2026, 1, 15, 9, 0))
+    client.post("/api/clock/in", json=body(p, t), headers=h)
+    at(utc(2026, 1, 15, 10, 0))
+    r = _start(client, h)
+    assert r.status_code == 200, r.text
+    assert r.json()["on_break"] is True
+    rows = db_session.query(Break).all()
+    assert len(rows) == 1 and rows[0].end_at is None
+    at(utc(2026, 1, 15, 10, 20))
+    r = _end(client, h)
+    assert r.status_code == 200 and r.json()["on_break"] is False
+    db_session.expire_all()
+    b = db_session.query(Break).one()
+    assert b.end_at is not None and b.end_at.astimezone(UTC) == utc(2026, 1, 15, 10, 20)
+    at(utc(2026, 1, 15, 11, 0))
+    out = client.post("/api/clock/out", headers=h)
+    assert out.json()["duration_minutes"] == 100  # 120 minus 20 of break
+
+
+def test_ac027_break_start_without_entry_409(client, db_session, world):
+    assert _start(client, world[1]).status_code == 409
+    assert db_session.query(Break).count() == 0
+
+
+def test_ac027_double_break_start_409_one_open(client, db_session, world, at):
+    u, h, c, p, t = world
+    client.post("/api/clock/in", json=body(p, t), headers=h)
+    assert _start(client, h).status_code == 200
+    assert _start(client, h).status_code == 409
+    assert db_session.query(Break).filter(Break.end_at.is_(None)).count() == 1
+
+
+def test_ac027_break_end_without_open_break_409(client, db_session, world):
+    u, h, c, p, t = world
+    assert _end(client, h).status_code == 409
+    client.post("/api/clock/in", json=body(p, t), headers=h)
+    assert _end(client, h).status_code == 409
+    assert db_session.query(Break).count() == 0
+
+
+def test_ac027_concurrent_break_starts_leave_one_open_break():
+    with Session(engine) as s:
+        u = mk_user(s, "clk.brace@example.com")
+        c, p, t = catalogue(s, "brace")
+        ids = (u.id, c.id, p.id, t.id)
+    try:
+        h = sign_in(TestClient(app), "clk.brace@example.com")
+        first = TestClient(app).post("/api/clock/in", json=body(p, t), headers=h)
+        assert first.status_code == 201
+        results = []
+        barrier = threading.Barrier(2)
+
+        def go():
+            cl = TestClient(app)
+            barrier.wait()
+            results.append(cl.post("/api/clock/breaks/start", headers=h).status_code)
+
+        threads = [threading.Thread(target=go) for _ in range(2)]
+        for th in threads:
+            th.start()
+        for th in threads:
+            th.join()
+        assert sorted(results) == [200, 409], results
+        with Session(engine) as s:
+            assert s.query(Break).filter(Break.end_at.is_(None)).count() == 1
+    finally:
+        with Session(engine) as s:
+            ents = [e.id for e in s.query(TimeEntry).filter_by(user_id=ids[0])]
+            s.query(Break).filter(Break.time_entry_id.in_(ents)).delete()
+            s.query(TimeEntry).filter_by(user_id=ids[0]).delete()
+            s.query(UserSession).filter_by(user_id=ids[0]).delete()
+            s.query(Task).filter_by(id=ids[3]).delete()
+            s.query(Project).filter_by(id=ids[2]).delete()
+            s.query(Client).filter_by(id=ids[1]).delete()
+            s.query(User).filter_by(id=ids[0]).delete()
+            s.commit()
+
+
+@pytest.mark.parametrize("path", ["/api/clock/breaks/start", "/api/clock/breaks/end"])
+def test_nfr007_break_routes_401_without_session(client, db_session, world, path):
+    u, h, c, p, t = world
+    client.post("/api/clock/in", json=body(p, t), headers=h)
+    r = client.post(path, headers=H)
+    assert r.status_code == 401
+    assert db_session.query(Break).count() == 0
+
+
+def test_nfr007_user_cannot_start_or_end_another_users_break(client, db_session, world, at):
+    a, ha, c, p, t = world
+    b = mk_user(db_session, "clk.other2@example.com")
+    hb = sign_in(client, b.email)
+    client.post("/api/clock/in", json=body(p, t), headers=ha)
+    assert _start(client, hb).status_code == 409  # B has no entry
+    assert db_session.query(Break).count() == 0
+    assert _start(client, ha).status_code == 200
+    assert _end(client, hb).status_code == 409
+    assert client.get("/api/clock/status", headers=hb).json() == {"entry": None}
+    assert db_session.query(Break).filter(Break.end_at.is_(None)).count() == 1
+
+
+def test_nfr009_break_across_spring_forward_nets_elapsed_utc(client, world, at):
+    u, h, c, p, t = world
+    at(utc(2026, 3, 29, 0, 0))
+    client.post("/api/clock/in", json=body(p, t), headers=h)
+    at(utc(2026, 3, 29, 0, 30))
+    _start(client, h)
+    at(utc(2026, 3, 29, 1, 0))  # London clocks jump here
+    _end(client, h)
+    at(utc(2026, 3, 29, 2, 0))
+    r = client.post("/api/clock/out", headers=h)
+    assert r.json()["duration_minutes"] == 90 and r.json()["work_date"] == "2026-03-29"
+
+
+def test_nfr009_autumn_change_local_date_and_duration_with_break(client, world, at):
+    u, h, c, p, t = world
+    at(utc(2026, 10, 25, 0, 30))  # 01:30 BST, first pass
+    client.post("/api/clock/in", json=body(p, t), headers=h)
+    at(utc(2026, 10, 25, 1, 0))
+    _start(client, h)
+    at(utc(2026, 10, 25, 1, 30))
+    _end(client, h)
+    at(utc(2026, 10, 25, 2, 30))
+    r = client.post("/api/clock/out", headers=h)
+    assert r.json()["duration_minutes"] == 90 and r.json()["work_date"] == "2026-10-25"

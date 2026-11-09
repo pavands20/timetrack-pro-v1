@@ -31,6 +31,7 @@ class EntryOut(BaseModel):
     billable: bool
     start_at: str
     on_break: bool
+    break_started_at: str | None
     break_minutes: int
 
 
@@ -90,6 +91,7 @@ def _entry_out(db: Session, entry: TimeEntry) -> EntryOut:
     task = db.get(Task, entry.task_id)
     breaks = _breaks(db, entry)
     now = datetime.now(UTC)
+    open_break = next((b for b in breaks if b.end_at is None), None)
     return EntryOut(
         id=entry.id,
         project_id=project.id,
@@ -99,7 +101,8 @@ def _entry_out(db: Session, entry: TimeEntry) -> EntryOut:
         task_name=task.name,
         billable=entry.billable,
         start_at=utc_iso(entry.start_at),
-        on_break=any(b.end_at is None for b in breaks),
+        on_break=open_break is not None,
+        break_started_at=utc_iso(open_break.start_at) if open_break else None,
         break_minutes=int(_break_seconds(breaks, now) // 60),
     )
 
@@ -155,6 +158,42 @@ def clock_in(body: ClockInBody, user: Me, db: Db) -> EntryOut:
         if other is None:
             raise
         raise _already(other, user) from exc
+    return _entry_out(db, entry)
+
+
+def _open_break(db: Session, entry: TimeEntry) -> Break | None:
+    return db.scalar(select(Break).where(Break.time_entry_id == entry.id, Break.end_at.is_(None)))
+
+
+@router.post("/breaks/start", response_model=EntryOut)
+def break_start(user: Me, db: Db) -> EntryOut:
+    entry = _running(db, user, lock=True)  # the row lock serialises concurrent starts
+    if entry is None:
+        raise HTTPException(status_code=409, detail="Clock in first, then start a break.")
+    existing = _open_break(db, entry)
+    if existing is not None:
+        at = local(existing.start_at, user).strftime("%H:%M")
+        raise HTTPException(
+            status_code=409,
+            detail=f"You are already on a break since {at}. End it before starting another.",
+        )
+    db.add(Break(time_entry_id=entry.id, start_at=datetime.now(UTC)))
+    try:
+        db.commit()
+    except IntegrityError as exc:  # unique index: another start won
+        db.rollback()
+        raise HTTPException(status_code=409, detail="You are already on a break.") from exc
+    return _entry_out(db, entry)
+
+
+@router.post("/breaks/end", response_model=EntryOut)
+def break_end(user: Me, db: Db) -> EntryOut:
+    entry = _running(db, user, lock=True)
+    current = _open_break(db, entry) if entry else None
+    if entry is None or current is None:
+        raise HTTPException(status_code=409, detail="You are not on a break.")
+    current.end_at = datetime.now(UTC)
+    db.commit()
     return _entry_out(db, entry)
 
 

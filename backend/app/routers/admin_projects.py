@@ -9,7 +9,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.auth_deps import require_role
+from app.auth_deps import get_current_user, require_role
 from app.database import get_db
 from app.models import Client, Project, Task, User
 
@@ -229,6 +229,71 @@ def create_project(body: ProjectCreate, _: Admin, db: Db) -> ProjectOut:
     db.add(project)
     _commit(db, _project_dup(client, name))
     return _project_out(project, [])
+
+
+class TaskCreate(BaseModel):
+    name: Any = None
+
+
+@router.post("/projects/{project_id}/tasks", response_model=TaskOut, status_code=201)
+def create_task(project_id: int, body: TaskCreate, _: Admin, db: Db) -> Task:
+    name = _name(body.name)
+    project = db.get(Project, project_id)
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found.")
+    if db.get(Client, project.client_id).is_archived:
+        raise HTTPException(status_code=409, detail=ARCHIVED)
+    dup = HTTPException(status_code=409, detail=f"This project already has a task called “{name}”.")
+    if db.scalar(
+        select(Task.id).where(Task.project_id == project.id, func.lower(Task.name) == name.lower())
+    ):
+        raise dup
+    task = Task(project_id=project.id, name=name, is_archived=False)
+    db.add(task)
+    _commit(db, dup)
+    return task
+
+
+class CatalogTask(BaseModel):
+    id: int
+    name: str
+
+
+class CatalogProject(BaseModel):
+    id: int
+    client_id: int
+    client_name: str
+    name: str
+    default_billable: bool
+    tasks: list[CatalogTask]
+
+
+catalog_router = APIRouter(prefix="/api", tags=["catalog"])
+
+
+@catalog_router.get("/projects", response_model=list[CatalogProject])
+def list_catalog(_: Annotated[User, Depends(get_current_user)], db: Db) -> list[CatalogProject]:
+    """Active projects and tasks for the pickers. No bill rate."""
+    tasks: dict[int, list[CatalogTask]] = {}
+    for task in db.scalars(select(Task).where(Task.is_archived.is_(False)).order_by(Task.name)):
+        tasks.setdefault(task.project_id, []).append(CatalogTask(id=task.id, name=task.name))
+    rows = db.execute(
+        select(Project, Client.name)
+        .join(Client, Client.id == Project.client_id)
+        .where(Client.is_archived.is_(False))
+        .order_by(func.lower(Client.name), Project.name, Project.id)
+    )
+    return [
+        CatalogProject(
+            id=p.id,
+            client_id=p.client_id,
+            client_name=cname,
+            name=p.name,
+            default_billable=p.default_billable,
+            tasks=tasks.get(p.id, []),
+        )
+        for p, cname in rows
+    ]
 
 
 class TaskUpdate(BaseModel):
