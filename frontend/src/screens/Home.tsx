@@ -56,7 +56,6 @@ export default function Screen() {
   const [days] = React.useState(INITIAL_DAYS);
   const [projects, setProjects] = React.useState([]);
   const [entry, setEntry] = React.useState(null);
-  const [breaks, setBreaks] = React.useState([]);
   const [projectId, setProjectId] = React.useState("");
   const [taskId, setTaskId] = React.useState("");
   const [billable, setBillable] = React.useState("billable");
@@ -64,7 +63,7 @@ export default function Screen() {
   const [notice, setNotice] = React.useState(null);
 
   const project = projects.find((p) => String(p.id) === String(projectId));
-  const onBreak = !!(entry && breaks.length && !breaks[breaks.length - 1].end);
+  const onBreak = !!(entry && entry.on_break);
   const stale = false;
   const totalB = days.reduce((s, d) => s + d.b, 0);
   const totalN = days.reduce((s, d) => s + d.n, 0);
@@ -124,7 +123,6 @@ export default function Screen() {
         }),
       });
       setEntry(e);
-      setBreaks([]);
       say("ok", `Clocked in at ${fmtTime(msOf(e.start_at))} on ${e.project_name}, ${e.task_name}.`);
     } catch (err) {
       if (guard(err)) return;
@@ -132,29 +130,28 @@ export default function Screen() {
       else say("error", detailOf(err));
     }
   };
-  const startBreak = () => {
-    if (!entry) return say("error", "Clock in first. A break needs a running entry.");
-    if (onBreak)
-      return say(
-        "error",
-        `You are already on a break since ${fmtTime(breaks[breaks.length - 1].start)}. End it before starting another.`,
-      );
-    const t = Date.now();
-    setBreaks([...breaks, { start: t, end: null }]);
-    say("ok", `Break started at ${fmtTime(t)}. It will not count towards your hours.`);
+  const breakCall = async (path, word) => {
+    try {
+      const e = await apiFetch(`/api/clock/breaks/${path}`, { method: "POST" });
+      setEntry(e);
+      if (path === "start")
+        say(
+          "ok",
+          `Break started at ${fmtTime(msOf(e.break_started_at))}. It will not count towards your hours.`,
+        );
+      else say("ok", `Break ended at ${fmtTime(Date.now())}. Back on the clock.`);
+    } catch (err) {
+      if (guard(err)) return;
+      say("error", detailOf(err));
+    }
   };
-  const endBreak = () => {
-    if (!onBreak) return say("error", "There is no break running to end.");
-    const t = Date.now();
-    setBreaks(breaks.map((b, i) => (i === breaks.length - 1 ? { ...b, end: t } : b)));
-    say("ok", `Break ended at ${fmtTime(t)}. Back on the clock.`);
-  };
+  const startBreak = () => breakCall("start");
+  const endBreak = () => breakCall("end");
   const clockOut = async () => {
     setClockError("");
     try {
       const r = await apiFetch("/api/clock/out", { method: "POST" });
       setEntry(null);
-      setBreaks([]);
       const day = DateTime.fromISO(r.work_date, { zone: tz }).toFormat("ccc d LLL");
       say("ok", `${fmtHM(r.duration_minutes)} h added to ${day}`);
     } catch (err) {
@@ -219,7 +216,15 @@ export default function Screen() {
   if (!entry) {
     statusLine = <>Not clocked in. Pick a project and task, then clock in.</>;
   } else {
-    statusLine = (
+    statusLine = onBreak ? (
+      <>
+        On a break since{" "}
+        <strong style={{ ...num, color: C.accent, fontWeight: 600 }}>
+          {fmtTime(msOf(entry.break_started_at))}
+        </strong>
+        .
+      </>
+    ) : (
       <>
         In progress since{" "}
         <strong style={{ ...num, color: C.accent, fontWeight: 600 }}>
@@ -692,11 +697,6 @@ export default function Screen() {
           <p role="status" style={{ ...serif, fontSize: 20, lineHeight: 1.4, margin: "16px 0 0" }}>
             Status: {statusLine}
           </p>
-          {onBreak && (
-            <p style={{ margin: "12px 0 0", fontSize: 14, color: C.accent }}>
-              On a break since <span style={num}>{fmtTime(breaks[breaks.length - 1].start)}</span>.
-            </p>
-          )}
           {entry && !stale && (
             <p style={{ margin: "12px 0 0", fontSize: 14, color: C.muted, ...num }}>
               Worked so far: {fmtHM(Math.max(0, Math.round((now - msOf(entry.start_at)) / 60000)))}
@@ -721,7 +721,7 @@ export default function Screen() {
           type="button"
           className="tt-btn col-span-6 lg:col-span-3"
           data-primary="false"
-          aria-disabled={!entry || onBreak || stale}
+          disabled={!entry || onBreak || stale}
           style={actionBtn(false, !entry || onBreak || stale)}
           onClick={startBreak}
         >
@@ -732,7 +732,7 @@ export default function Screen() {
           type="button"
           className="tt-btn col-span-6 lg:col-span-3"
           data-primary={primaryAction === "endbreak"}
-          aria-disabled={!onBreak}
+          disabled={!onBreak}
           style={actionBtn(primaryAction === "endbreak", !onBreak)}
           onClick={endBreak}
         >

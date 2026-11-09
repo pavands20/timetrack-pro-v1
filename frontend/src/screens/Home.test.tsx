@@ -124,4 +124,31 @@ describe("Home clock", () => {
     setup({ "GET /api/auth/me": () => json(me) });
     expect(await screen.findByText("sign in page")).toBeInTheDocument();
   });
+
+  it("[AC-025] reload during a break shows break start and button states", async () => {
+    setup({
+      ...base,
+      "GET /api/clock/status": () =>
+        json({ entry: { ...ENTRY, on_break: true, break_started_at: "2026-07-01T10:00:00Z" } }),
+    });
+    expect(await screen.findByText(/On a break since/)).toBeInTheDocument();
+    expect(screen.getByText("11:00")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Start break" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "End break" })).toBeEnabled();
+  });
+
+  it("[AC-025] start break calls the endpoint; 409 shows server message", async () => {
+    setup({
+      ...base,
+      "GET /api/clock/status": () => json({ entry: ENTRY }),
+      "POST /api/clock/breaks/start": () =>
+        json({ ...ENTRY, on_break: true, break_started_at: "2026-07-01T10:00:00Z" }),
+      "POST /api/clock/breaks/end": () => json({ detail: "No break is open." }, 409),
+    });
+    await screen.findByText(/In progress since/);
+    await userEvent.click(screen.getByRole("button", { name: "Start break" }));
+    expect(await screen.findByText(/Break started at 11:00/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "End break" }));
+    expect(await screen.findByText(/No break is open\./)).toBeInTheDocument();
+  });
 });

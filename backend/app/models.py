@@ -136,6 +136,14 @@ class TimeEntry(Base):
 
 class Break(Base):
     __tablename__ = "breaks"
+    __table_args__ = (
+        Index(
+            "ux_breaks_one_open_per_entry",
+            "time_entry_id",
+            unique=True,
+            postgresql_where=text("end_at IS NULL"),
+        ),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     time_entry_id: Mapped[int] = mapped_column(
