@@ -29,7 +29,14 @@ const detailOf = (err) => {
 
 export default function Screen() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const signOut = async () => {
+    try {
+      await logout();
+    } finally {
+      navigate("sign-in");
+    }
+  };
   const tz = user?.time_zone || "UTC";
   const fmtTime = (ms) => DateTime.fromMillis(ms, { zone: tz }).toFormat("HH:mm");
 
@@ -340,7 +347,7 @@ export default function Screen() {
             type="button"
             className="tt-btn"
             style={actionBtn(false)}
-            onClick={() => navigate("sign-in")}
+            onClick={signOut}
           >
             Sign out
           </button>

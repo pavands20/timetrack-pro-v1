@@ -283,6 +283,8 @@ export function Tabs({
         return (
           <button
             key={tab.key}
+            type="button"
+            aria-pressed={selected}
             onClick={() => onChange?.(tab.key)}
             className={cx(
               "-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors",
