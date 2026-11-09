@@ -95,12 +95,13 @@ test.describe("dashboard", () => {
     await expect(panel).toContainText("0.0");
     await expect(panel).toContainText(/nothing recorded/i);
     // A control that leads to the clock, and one that leads to the timesheet.
-    await expect(panel.getByRole("link", { name: /clock/i }).or(
-      panel.getByRole("button", { name: /clock/i }),
-    )).toBeVisible();
-    await panel.getByRole("button", { name: /timesheet/i }).or(
-      panel.getByRole("link", { name: /timesheet/i }),
-    ).click();
+    await expect(
+      panel.getByRole("link", { name: /clock/i }).or(panel.getByRole("button", { name: /clock/i })),
+    ).toBeVisible();
+    await panel
+      .getByRole("button", { name: /timesheet/i })
+      .or(panel.getByRole("link", { name: /timesheet/i }))
+      .click();
     await expect(page).toHaveURL(/\/timesheet$/);
   });
 
@@ -128,8 +129,12 @@ test.describe("dashboard", () => {
 
     // Delete it through the timesheet screen.
     await page.goto("/timesheet");
-    await page.getByRole("button", { name: /^Delete /i }).first().click();
-    await page.getByRole("alertdialog", { name: /confirm delete/i })
+    await page
+      .getByRole("button", { name: /^Delete /i })
+      .first()
+      .click();
+    await page
+      .getByRole("alertdialog", { name: /confirm delete/i })
       .getByRole("button", { name: /delete/i })
       .click();
     await expect(page.getByRole("alertdialog")).toHaveCount(0);
@@ -197,9 +202,9 @@ test.describe("dashboard", () => {
 
   test("[NFR-010] Home and Timesheet weeks run Monday to Sunday", async () => {
     const w = await weekOf(U);
-    expect(w.days.map((d: { date: string }) => new Date(`${d.date}T12:00:00Z`).getUTCDay())).toEqual(
-      [1, 2, 3, 4, 5, 6, 0],
-    );
+    expect(
+      w.days.map((d: { date: string }) => new Date(`${d.date}T12:00:00Z`).getUTCDay()),
+    ).toEqual([1, 2, 3, 4, 5, 6, 0]);
   });
 });
 

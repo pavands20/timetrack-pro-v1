@@ -145,7 +145,12 @@ def test_ac042_mixed_manual_and_clocked_totals_split_and_monday_first(
     at(utc(2026, 1, 14, 12, 0))
     manual(client, h, p, t, "2026-01-12", [("2026-01-12", 120, True), ("2026-01-14", 60, False)])
     clocked(
-        db_session, u, p, t, utc(2026, 1, 13, 9, 0), utc(2026, 1, 13, 17, 0),
+        db_session,
+        u,
+        p,
+        t,
+        utc(2026, 1, 13, 9, 0),
+        utc(2026, 1, 13, 17, 0),
         breaks=[(utc(2026, 1, 13, 12, 0), utc(2026, 1, 13, 12, 30))],
     )  # 480 - 30 = 450 billable
     j = get(client, h)
@@ -264,6 +269,12 @@ def test_nfr007_zero_minute_manual_cell_is_not_an_entry_and_no_leak(client, worl
     _, h, *_ = world
     j = get(client, h)
     assert set(j) == {
-        "week_start", "week_end", "time_zone", "total_minutes", "billable_minutes",
-        "non_billable_minutes", "has_entries", "days",
+        "week_start",
+        "week_end",
+        "time_zone",
+        "total_minutes",
+        "billable_minutes",
+        "non_billable_minutes",
+        "has_entries",
+        "days",
     }

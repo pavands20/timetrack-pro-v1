@@ -330,7 +330,8 @@ export default function Screen() {
             Home
           </h1>
           <p style={{ color: C.muted, margin: "8px 0 0", fontSize: 15 }}>
-            {week ? `Week of ${weekRange} · ` : ""}{fmtTime(now)} in {tz}
+            {week ? `Week of ${weekRange} · ` : ""}
+            {fmtTime(now)} in {tz}
           </p>
         </div>
         <div className="col-span-12 sm:col-span-4 flex sm:justify-end items-start">
@@ -423,7 +424,12 @@ export default function Screen() {
           {weekError ? (
             <div role="alert" style={{ marginTop: 16, fontSize: 14, color: C.muted }}>
               <p style={{ margin: "0 0 8px" }}>Could not load your weekly hours.</p>
-              <button type="button" className="tt-btn" style={actionBtn(false, false)} onClick={loadWeek}>
+              <button
+                type="button"
+                className="tt-btn"
+                style={actionBtn(false, false)}
+                onClick={loadWeek}
+              >
                 Try again
               </button>
             </div>
@@ -608,8 +614,8 @@ export default function Screen() {
                     }}
                   >
                     <span className="sr-only">
-                      {DAY_FULL[i]} {d.date}: {fmtH(tot)} hours, {fmtH(d.b)} billable,{" "}
-                      {fmtH(d.n)} non-billable{runningDay ? ", entry still running" : ""}
+                      {DAY_FULL[i]} {d.date}: {fmtH(tot)} hours, {fmtH(d.b)} billable, {fmtH(d.n)}{" "}
+                      non-billable{runningDay ? ", entry still running" : ""}
                       {d.date === todayIso ? ", today" : ""}
                     </span>
                     <div
