@@ -3,6 +3,17 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## c1c419c58ca4 — 2026-11-09
+
+**Commit:** `c1c419c`
+
+**Delivered:**
+- US-011: Record breaks while clocked in
+- US-012: Recover an entry left running
+- US-013: Enter hours by day in a weekly timesheet
+- US-014: Mark entries billable or non-billable
+- US-017: Times stored in UTC and shown in my time zone
+
 ## 93a8d3622727 — 2026-11-09
 
 **Commit:** `93a8d36`
