@@ -16,20 +16,6 @@ const { User, Home, Clock } = Icons;
 
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const DAY_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const DAY_DATES = [2, 3, 4, 5, 6, 7, 8];
-const TODAY_INDEX = 5;
-
-// minutes per day, split billable / non-billable. Seeded prototype chart for a later story.
-const INITIAL_DAYS = [
-  { b: 390, n: 90 },
-  { b: 330, n: 90 },
-  { b: 330, n: 120 },
-  { b: 0, n: 0 },
-  { b: 210, n: 30 },
-  { b: 0, n: 0 },
-  { b: 0, n: 0 },
-];
-
 const pad = (n) => String(n).padStart(2, "0");
 const fmtH = (min) => (min / 60).toFixed(1);
 const fmtHM = (min) => `${Math.floor(min / 60)}:${pad(Math.round(min % 60))}`;
@@ -53,7 +39,8 @@ export default function Screen() {
     return () => clearInterval(id);
   }, []);
 
-  const [days] = React.useState(INITIAL_DAYS);
+  const [week, setWeek] = React.useState(null);
+  const [weekError, setWeekError] = React.useState(false);
   const [projects, setProjects] = React.useState([]);
   const [entry, setEntry] = React.useState(null);
   const [projectId, setProjectId] = React.useState("");
@@ -82,9 +69,16 @@ export default function Screen() {
     setEndError("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [staleId, tz]);
-  const totalB = days.reduce((s, d) => s + d.b, 0);
-  const totalN = days.reduce((s, d) => s + d.n, 0);
-  const total = totalB + totalN;
+  const days = week
+    ? week.days.map((d) => ({ b: d.billable_minutes, n: d.non_billable_minutes, date: d.date }))
+    : DAY_NAMES.map(() => ({ b: 0, n: 0, date: "" }));
+  const totalB = week ? week.billable_minutes : 0;
+  const totalN = week ? week.non_billable_minutes : 0;
+  const total = week ? week.total_minutes : 0;
+  const todayIso = DateTime.fromMillis(now, { zone: tz }).toISODate();
+  const weekRange = week
+    ? `${DateTime.fromISO(week.week_start).toFormat("ccc d")} to ${DateTime.fromISO(week.week_end).toFormat("ccc d LLL yyyy")}`
+    : "";
   const maxDay = Math.max(600, ...days.map((d) => d.b + d.n));
 
   const say = (kind, text) => setNotice({ kind, text, at: Date.now() });
@@ -95,6 +89,19 @@ export default function Screen() {
     }
     return false;
   };
+
+  const loadWeek = React.useCallback(() => {
+    setWeekError(false);
+    apiFetch("/api/dashboard/week")
+      .then((w) => setWeek(w))
+      .catch((err) => {
+        if (!guard(err)) setWeekError(true);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  React.useEffect(() => {
+    loadWeek();
+  }, [loadWeek]);
 
   React.useEffect(() => {
     let live = true;
@@ -171,6 +178,7 @@ export default function Screen() {
       setEntry(null);
       const day = DateTime.fromISO(r.work_date, { zone: tz }).toFormat("ccc d LLL");
       say("ok", `${fmtHM(r.duration_minutes)} h added to ${day}`);
+      loadWeek();
     } catch (err) {
       if (guard(err)) return;
       say("error", detailOf(err));
@@ -197,6 +205,7 @@ export default function Screen() {
       setEntry(null);
       const day = DateTime.fromISO(r.work_date, { zone: tz }).toFormat("ccc d LLL");
       say("ok", `${fmtHM(r.duration_minutes)} h added to ${day}`);
+      loadWeek();
       try {
         const status = await apiFetch("/api/clock/status");
         setEntry(status.entry);
@@ -321,7 +330,8 @@ export default function Screen() {
             Home
           </h1>
           <p style={{ color: C.muted, margin: "8px 0 0", fontSize: 15 }}>
-            Week of Mon 2 to Sun 8 Nov 2026 · {fmtTime(now)} in {tz}
+            {week ? `Week of ${weekRange} · ` : ""}
+            {fmtTime(now)} in {tz}
           </p>
         </div>
         <div className="col-span-12 sm:col-span-4 flex sm:justify-end items-start">
@@ -411,7 +421,19 @@ export default function Screen() {
           >
             {fmtH(total)} <span style={{ fontSize: 24, color: C.muted, fontWeight: 400 }}>h</span>
           </p>
-          {total === 0 ? (
+          {weekError ? (
+            <div role="alert" style={{ marginTop: 16, fontSize: 14, color: C.muted }}>
+              <p style={{ margin: "0 0 8px" }}>Could not load your weekly hours.</p>
+              <button
+                type="button"
+                className="tt-btn"
+                style={actionBtn(false, false)}
+                onClick={loadWeek}
+              >
+                Try again
+              </button>
+            </div>
+          ) : !week ? null : !week.has_entries ? (
             <div style={{ marginTop: 16, fontSize: 14, color: C.muted, lineHeight: 1.5 }}>
               Nothing recorded yet this week. Clock in below, or{" "}
               <button
@@ -592,9 +614,9 @@ export default function Screen() {
                     }}
                   >
                     <span className="sr-only">
-                      {DAY_FULL[i]} {DAY_DATES[i]} Nov: {fmtH(tot)} hours, {fmtH(d.b)} billable,{" "}
-                      {fmtH(d.n)} non-billable{runningDay ? ", entry still running" : ""}
-                      {i === TODAY_INDEX ? ", today" : ""}
+                      {DAY_FULL[i]} {d.date}: {fmtH(tot)} hours, {fmtH(d.b)} billable, {fmtH(d.n)}{" "}
+                      non-billable{runningDay ? ", entry still running" : ""}
+                      {d.date === todayIso ? ", today" : ""}
                     </span>
                     <div
                       aria-hidden="true"
@@ -658,10 +680,10 @@ export default function Screen() {
                           marginTop: 8,
                           letterSpacing: "0.08em",
                           textTransform: "uppercase",
-                          color: i === TODAY_INDEX ? C.accent : C.muted,
-                          fontWeight: i === TODAY_INDEX ? 600 : 400,
+                          color: d.date === todayIso ? C.accent : C.muted,
+                          fontWeight: d.date === todayIso ? 600 : 400,
                           borderBottom:
-                            i === TODAY_INDEX ? `1px solid ${C.accent}` : "1px solid transparent",
+                            d.date === todayIso ? `1px solid ${C.accent}` : "1px solid transparent",
                         }}
                       >
                         {DAY_NAMES[i]}

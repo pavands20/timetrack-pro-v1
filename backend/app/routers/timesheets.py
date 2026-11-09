@@ -4,9 +4,9 @@ from datetime import UTC, date, datetime, time, timedelta
 from typing import Annotated, Any
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -159,10 +159,27 @@ def _render(db: Session, user: User, monday: date) -> dict[str, Any]:
                 "days": rows[k],
             }
         )
+    listed = [(e.work_date, e.id, e, e.duration_minutes or 0) for e in manual]
+    listed += [(d, e.id, e, m) for e, d, m in clocked]
+    entries = [
+        {
+            "id": e.id,
+            "source": e.source,
+            "date": d.isoformat(),
+            "minutes": m,
+            "project_id": e.project_id,
+            "task_id": e.task_id,
+            "project_name": meta[e.task_id][1].name,
+            "task_name": meta[e.task_id][0].name,
+            "billable": e.billable,
+        }
+        for d, _, e, m in sorted(listed, key=lambda x: (x[0], x[1]))
+    ]
     return {
         "week_start": monday.isoformat(),
         "week_end": (monday + timedelta(days=6)).isoformat(),
         "time_zone": user.time_zone,
+        "entries": entries,
         "rows": out_rows,
         "day_totals_minutes": totals,
         "week_total_minutes": sum(totals),
@@ -335,45 +352,136 @@ def put_cells(body: CellsBody, user: Me, db: Db) -> dict[str, Any]:
     return _render(db, user, monday)
 
 
-class BillableBody(BaseModel):
-    billable: bool
+COLLISION = (
+    "You already have manual hours for this project and task on that day with "
+    "that billable setting. Edit that entry instead."
+)
+_FIELDS = ("work_date", "minutes", "project_id", "task_id", "billable")
 
 
-@entries_router.patch("/{entry_id}")
-def patch_entry(entry_id: int, body: BillableBody, user: Me, db: Db) -> dict[str, Any]:
-    entry = db.scalar(
-        select(TimeEntry).where(TimeEntry.id == entry_id, TimeEntry.user_id == user.id)
-    )
-    if entry is None:
-        raise HTTPException(status_code=404, detail="Time entry not found.")
-    collision = HTTPException(
-        status_code=409,
-        detail="You already have manual hours for this project and task on that day with "
-        "that billable setting. Edit that entry instead.",
-    )
-    if entry.billable != body.billable:
-        if entry.source == "manual" and db.scalar(
-            select(TimeEntry.id).where(
-                TimeEntry.user_id == user.id,
-                TimeEntry.source == "manual",
-                TimeEntry.project_id == entry.project_id,
-                TimeEntry.task_id == entry.task_id,
-                TimeEntry.work_date == entry.work_date,
-                TimeEntry.billable == body.billable,
-                TimeEntry.id != entry.id,
-            )
-        ):
-            raise collision
-        entry.billable = body.billable
-        try:
-            db.commit()
-        except IntegrityError as exc:
-            db.rollback()
-            raise collision from exc
+def _bad(field: str, msg: str) -> HTTPException:
+    return _unprocessable([_err(["body", field], msg)])
+
+
+def _entry_json(db: Session, user: User, entry: TimeEntry) -> dict[str, Any]:
+    if entry.source == "manual":
+        day, minutes = entry.work_date, entry.duration_minutes or 0
+    else:
+        day = _aware(entry.start_at).astimezone(ZoneInfo(user.time_zone)).date()
+        monday = day - timedelta(days=day.weekday())
+        minutes = next((m for e, _, m in _clocked(db, user, monday) if e.id == entry.id), 0)
     return {
         "id": entry.id,
         "project_id": entry.project_id,
         "task_id": entry.task_id,
         "billable": entry.billable,
         "source": entry.source,
+        "work_date": day.isoformat(),
+        "minutes": minutes,
     }
+
+
+def _own_entry(db: Session, user: User, entry_id: int) -> TimeEntry:
+    entry = db.scalar(
+        select(TimeEntry)
+        .where(TimeEntry.id == entry_id, TimeEntry.user_id == user.id)
+        .with_for_update()
+    )
+    if entry is None:
+        raise HTTPException(status_code=404, detail="Time entry not found.")
+    return entry
+
+
+def _minutes(m: Any) -> int:
+    if isinstance(m, bool) or not isinstance(m, int | float) or m != m or abs(m) == float("inf"):
+        raise _bad("minutes", "Hours must be a number.")
+    if m != int(m):
+        raise _bad("minutes", "Hours must be a whole number of minutes.")
+    if m < 0 or m > MAX_MINUTES:
+        raise _bad("minutes", "Minutes must be between 0 and 1440.")
+    return int(m)
+
+
+@entries_router.patch("/{entry_id}")
+def patch_entry(entry_id: int, body: dict[str, Any], user: Me, db: Db) -> dict[str, Any]:
+    entry = _own_entry(db, user, entry_id)
+    ch = {k: body[k] for k in _FIELDS if k in body}
+    if not ch:
+        raise _unprocessable([_err(["body"], "Send at least one field to change.")])
+    if entry.end_at is None and set(ch) != {"billable"}:
+        raise HTTPException(status_code=409, detail="Clock out before editing this entry.")
+    manual = entry.source == "manual"
+    for f in ("work_date", "minutes"):
+        if f in ch and not manual:
+            raise _bad(f, "Clocked times cannot be edited. Change the project, task or billable.")
+    if "billable" in ch and not isinstance(ch["billable"], bool):
+        raise _bad("billable", "Billable must be true or false.")
+    day = entry.work_date
+    if "work_date" in ch:
+        day = _parse_date(ch["work_date"])
+        if day is None:
+            raise _bad("work_date", "Enter a date as YYYY-MM-DD.")
+    minutes = _minutes(ch["minutes"]) if "minutes" in ch else (entry.duration_minutes or 0)
+    for f in ("project_id", "task_id"):
+        if f in ch and (isinstance(ch[f], bool) or not isinstance(ch[f], int)):
+            raise _bad(f, "Choose an existing " + f[:-3] + ".")
+    pid = ch.get("project_id", entry.project_id)
+    tid = ch.get("task_id", entry.task_id)
+    billable = ch.get("billable", entry.billable)
+    if "project_id" in ch or "task_id" in ch:
+        project = db.get(Project, pid)
+        if project is None:
+            raise _bad("project_id", "Choose an existing project.")
+        task = db.get(Task, tid)
+        if task is None or task.project_id != project.id:
+            raise _bad("task_id", "Choose a task that belongs to this project.")
+        if pid != entry.project_id and db.get(Client, project.client_id).is_archived:
+            raise _bad("project_id", "This project's client is archived. Choose another project.")
+        if tid != entry.task_id and task.is_archived:
+            raise _bad("task_id", "This task is archived. Choose an active task.")
+    if manual:
+        if "work_date" in ch or "minutes" in ch:
+            monday = day - timedelta(days=day.weekday())
+            total = minutes + sum(
+                e.duration_minutes or 0
+                for e in _manual(db, user, monday)
+                if e.work_date == day and e.id != entry.id
+            )
+            total += sum(m for _, d, m in _clocked(db, user, monday) if d == day)
+            if total > MAX_MINUTES:
+                raise _bad("minutes", "A day can't have more than 24 hours.")
+        if db.scalar(
+            select(TimeEntry.id).where(
+                TimeEntry.user_id == user.id,
+                TimeEntry.source == "manual",
+                TimeEntry.project_id == pid,
+                TimeEntry.task_id == tid,
+                TimeEntry.work_date == day,
+                TimeEntry.billable == billable,
+                TimeEntry.id != entry.id,
+            )
+        ):
+            raise HTTPException(status_code=409, detail=COLLISION)
+        start = _midnight_utc(day, ZoneInfo(user.time_zone))
+        entry.work_date = day
+        entry.duration_minutes = minutes
+        entry.start_at = start
+        entry.end_at = start + timedelta(minutes=minutes)
+    entry.project_id, entry.task_id, entry.billable = pid, tid, billable
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=COLLISION) from exc
+    return _entry_json(db, user, entry)
+
+
+@entries_router.delete("/{entry_id}", status_code=204)
+def delete_entry(entry_id: int, user: Me, db: Db) -> Response:
+    entry = _own_entry(db, user, entry_id)
+    if entry.end_at is None:
+        raise HTTPException(status_code=409, detail="Clock out before deleting this entry.")
+    db.execute(delete(Break).where(Break.time_entry_id == entry.id))
+    db.delete(entry)
+    db.commit()
+    return Response(status_code=204)

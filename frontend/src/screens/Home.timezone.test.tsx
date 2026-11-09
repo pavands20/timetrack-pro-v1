@@ -43,6 +43,16 @@ function setup(tz: string, entry: ReturnType<typeof entryAt> | null) {
     "GET /api/auth/me": () => json(me),
     "GET /api/projects": () => json(PROJECTS),
     "GET /api/clock/status": () => json({ entry }),
+    "GET /api/dashboard/week": () =>
+      json({
+        days: [],
+        has_entries: false,
+        total_minutes: 0,
+        billable_minutes: 0,
+        non_billable_minutes: 0,
+        week_start: "2026-06-29",
+        week_end: "2026-07-05",
+      }),
     "POST /api/clock/in": () => json(entry, 201),
   };
   vi.stubGlobal(

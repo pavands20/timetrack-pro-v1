@@ -166,6 +166,321 @@ const detailText = (err) => {
   return "";
 };
 
+const GONE = "This entry is no longer available.";
+const FIELD_OF = {
+  work_date: "day",
+  minutes: "hours",
+  project_id: "project",
+  task_id: "task",
+  billable: "billable",
+};
+
+function EntriesSection({ entries, catalog, dates, guard, refresh }) {
+  const [editing, setEditing] = React.useState(null);
+  const [fieldErrs, setFieldErrs] = React.useState({});
+  const [alert, setAlert] = React.useState("");
+  const [confirmId, setConfirmId] = React.useState(null);
+  const [busy, setBusy] = React.useState(false);
+
+  const projectOf = (id) => catalog.find((p) => String(p.id) === String(id));
+  const label = (e) => `${e.project_name} / ${e.task_name}, ${e.date}`;
+
+  const startEdit = (e) => {
+    setConfirmId(null);
+    setAlert("");
+    setFieldErrs({});
+    setEditing({
+      id: e.id,
+      source: e.source,
+      day: e.date,
+      hours: toHours(e.minutes),
+      project: String(e.project_id),
+      task: String(e.task_id),
+      billable: e.billable,
+    });
+  };
+  const set = (patch) => setEditing((f) => ({ ...f, ...patch }));
+
+  const handle = async (err) => {
+    if (guard(err)) return;
+    if (err instanceof ApiError && err.status === 404) {
+      setEditing(null);
+      setConfirmId(null);
+      setAlert(GONE);
+      await refresh();
+      return;
+    }
+    if (err instanceof ApiError && err.status === 422 && Array.isArray(err.body?.detail)) {
+      const out = {};
+      for (const d of err.body.detail) {
+        const k = FIELD_OF[d.loc?.[d.loc.length - 1]] || "form";
+        if (!out[k]) out[k] = d.msg;
+      }
+      setFieldErrs(out);
+      return;
+    }
+    setAlert(detailText(err) || "Could not save the change. Try again.");
+  };
+
+  const save = async (ev) => {
+    ev.preventDefault();
+    setAlert("");
+    setFieldErrs({});
+    const manual = editing.source === "manual";
+    const body = {
+      project_id: Number(editing.project),
+      task_id: Number(editing.task),
+      billable: editing.billable,
+    };
+    if (manual) {
+      const p = parseHours(editing.hours);
+      if (!p.ok) {
+        setFieldErrs({ hours: `Hours: ${p.msg}` });
+        return;
+      }
+      body.work_date = editing.day;
+      body.minutes = toMinutes(editing.hours);
+    }
+    setBusy(true);
+    try {
+      await apiFetch(`/api/time-entries/${editing.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      });
+      setEditing(null);
+      await refresh();
+    } catch (err) {
+      await handle(err);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const remove = async (id) => {
+    setAlert("");
+    setBusy(true);
+    try {
+      await apiFetch(`/api/time-entries/${id}`, { method: "DELETE" });
+      setConfirmId(null);
+      await refresh();
+    } catch (err) {
+      setConfirmId(null);
+      await handle(err);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const err = (k) =>
+    fieldErrs[k] ? (
+      <p className="ts-note" role="alert" style={{ color: "var(--ts-danger)" }}>
+        {fieldErrs[k]}
+      </p>
+    ) : null;
+
+  const proj = editing ? projectOf(editing.project) : null;
+  const cur = editing ? entries.find((x) => x.id === editing.id) : null;
+
+  return (
+    <section className="ts-panel" aria-labelledby="ts-entries-h" style={{ padding: 16 }}>
+      <h2 id="ts-entries-h" className="ts-eyebrow" style={{ fontFamily: "var(--ts-body)" }}>
+        Entries this week
+      </h2>
+      {alert ? (
+        <div className="ts-alert" role="alert">
+          <span>{alert}</span>
+        </div>
+      ) : null}
+      {entries.length === 0 ? (
+        <p className="ts-note">No entries this week.</p>
+      ) : (
+        <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+          {entries.map((e) => (
+            <li
+              key={e.id}
+              style={{ borderTop: "1px solid var(--ts-hair)", padding: "12px 0", minWidth: 0 }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 8,
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ overflowWrap: "anywhere", minWidth: 0 }}>
+                  {e.date} · {e.project_name} / {e.task_name} · {fmt(e.minutes)} h ·{" "}
+                  {e.billable ? "Billable" : "Non-billable"}
+                </span>
+                <span style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    className="ts-btn ts-btn-auto"
+                    aria-label={`Edit ${label(e)}`}
+                    onClick={() => startEdit(e)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="ts-btn ts-btn-danger"
+                    aria-label={`Delete ${label(e)}`}
+                    onClick={() => {
+                      setEditing(null);
+                      setAlert("");
+                      setConfirmId(e.id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </span>
+              </div>
+              {confirmId === e.id ? (
+                <div className="ts-confirm-body" role="alertdialog" aria-label="Confirm delete">
+                  <span>Delete this entry?</span>
+                  <span className="ts-confirm-actions">
+                    <button
+                      type="button"
+                      className="ts-btn ts-btn-danger"
+                      disabled={busy}
+                      onClick={() => remove(e.id)}
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      type="button"
+                      className="ts-btn ts-btn-auto"
+                      onClick={() => setConfirmId(null)}
+                    >
+                      Cancel
+                    </button>
+                  </span>
+                </div>
+              ) : null}
+              {editing && editing.id === e.id ? (
+                <form onSubmit={save} noValidate style={{ display: "grid", gap: 8, marginTop: 12 }}>
+                  {err("form")}
+                  <div>
+                    <label htmlFor="ee-day">Day</label>
+                    {editing.source === "manual" ? (
+                      <select
+                        id="ee-day"
+                        className="ts-field"
+                        value={editing.day}
+                        onChange={(x) => set({ day: x.target.value })}
+                      >
+                        {dates.map((d) => (
+                          <option key={d.toISODate()} value={d.toISODate()}>
+                            {d.toFormat("ccc d LLL")}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <p id="ee-day">{e.date} (clocked, read-only)</p>
+                    )}
+                    {err("day")}
+                  </div>
+                  <div>
+                    <label htmlFor="ee-hours">Hours</label>
+                    {editing.source === "manual" ? (
+                      <input
+                        id="ee-hours"
+                        className="ts-field"
+                        type="text"
+                        inputMode="decimal"
+                        value={editing.hours}
+                        onChange={(x) => set({ hours: x.target.value })}
+                      />
+                    ) : (
+                      <p id="ee-hours">{fmt(e.minutes)} h (clocked, read-only)</p>
+                    )}
+                    {err("hours")}
+                  </div>
+                  <div>
+                    <label htmlFor="ee-project">Project</label>
+                    <select
+                      id="ee-project"
+                      className="ts-field"
+                      value={editing.project}
+                      onChange={(x) => {
+                        const p = projectOf(x.target.value);
+                        set({
+                          project: x.target.value,
+                          task: p && p.tasks[0] ? String(p.tasks[0].id) : "",
+                        });
+                      }}
+                    >
+                      {!proj ? <option value={editing.project}>{cur?.project_name}</option> : null}
+                      {catalog.map((p) => (
+                        <option key={p.id} value={String(p.id)}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                    {err("project")}
+                  </div>
+                  <div>
+                    <label htmlFor="ee-task">Task</label>
+                    <select
+                      id="ee-task"
+                      className="ts-field"
+                      value={editing.task}
+                      onChange={(x) => set({ task: x.target.value })}
+                    >
+                      {!(proj && proj.tasks.some((t) => String(t.id) === editing.task)) &&
+                      editing.task ? (
+                        <option value={editing.task}>{cur?.task_name}</option>
+                      ) : null}
+                      {(proj ? proj.tasks : []).map((t) => (
+                        <option key={t.id} value={String(t.id)}>
+                          {t.name}
+                        </option>
+                      ))}
+                    </select>
+                    {err("task")}
+                  </div>
+                  <div>
+                    <label className="ts-check" htmlFor="ee-billable">
+                      <input
+                        id="ee-billable"
+                        type="checkbox"
+                        checked={editing.billable}
+                        onChange={(x) => set({ billable: x.target.checked })}
+                      />
+                      <span>Billable</span>
+                    </label>
+                    {err("billable")}
+                  </div>
+                  <div className="ts-confirm-actions">
+                    <button
+                      type="submit"
+                      className="ts-btn ts-btn-primary ts-btn-auto"
+                      disabled={busy}
+                    >
+                      Save entry
+                    </button>
+                    <button
+                      type="button"
+                      className="ts-btn ts-btn-auto"
+                      onClick={() => {
+                        setEditing(null);
+                        setFieldErrs({});
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export default function Screen() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -237,6 +552,16 @@ export default function Screen() {
   React.useEffect(() => {
     if (errors.length && alertRef.current) alertRef.current.focus();
   }, [errors]);
+
+  const refreshWeek = async () => {
+    try {
+      const week = await apiFetch(`/api/timesheets/${weekStart}`);
+      setServerWeek(week);
+      setRows((l) => [...rowsFrom(week), ...l.filter((r) => !r.saved)]);
+    } catch (err) {
+      if (!guard(err)) setErrors([{ key: "refresh", msg: "Could not refresh the timesheet." }]);
+    }
+  };
 
   const findProject = (id) => catalog.find((p) => String(p.id) === String(id));
   const rowLabel = (r, ri) =>
@@ -737,6 +1062,14 @@ export default function Screen() {
           </div>
         ) : null}
       </section>
+
+      <EntriesSection
+        entries={serverWeek?.entries || []}
+        catalog={catalog}
+        dates={dates}
+        guard={guard}
+        refresh={refreshWeek}
+      />
 
       <div className="ts-mid">
         <div className="ts-c-sum" data-wf="b-2-0">
