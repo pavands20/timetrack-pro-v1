@@ -3,6 +3,15 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## 3891e62d54b9 — 2026-11-09
+
+**Commit:** `3891e62`
+
+**Delivered:**
+- US-006: Edit and deactivate users
+- US-007: Manage clients
+- US-010: Clock in and out against a project and task
+
 ## 7a76bf8d64bf — 2026-11-08
 
 **Commit:** `7a76bf8`
