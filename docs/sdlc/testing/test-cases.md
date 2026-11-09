@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-243 tests · Passed 213 · Failed 0 · Skipped 12 · Not run 18
+344 tests · Passed 303 · Failed 0 · Skipped 12 · Not run 29
 
-Acceptance criteria covered: 27/51 · passing: 11/51
+Acceptance criteria covered: 40/51 · passing: 17/51
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -270,6 +270,129 @@ Acceptance criteria covered: 27/51 · passing: 11/51
 | — | test_nfr014_deactivating_user_keeps_time_entries | Unit | Passed | `backend/tests/test_clock_us010_qa.py` |
 | AC-025, AC-026, AC-027 | [AC-025] [AC-026] [AC-027] clock in, refused second clock-in, break, clock out nets the break | E2E | Not run yet | `frontend/e2e/clock.spec.ts` |
 | — | [NFR-012] the clock panel has no horizontal scroll at 375px | E2E | Not run yet | `frontend/e2e/clock.spec.ts` |
+
+## Sprint 3
+
+### US-011: Record breaks while clocked in
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-028 | test_ac028_break_does_not_change_entry_start | Unit | Passed | `backend/tests/test_breaks_us011_qa.py` |
+| AC-028 | test_ac028_break_row_has_start_and_end_times | Unit | Passed | `backend/tests/test_breaks_us011_qa.py` |
+| AC-028 | test_ac028_response_reports_break_and_status_reflects_it | Unit | Passed | `backend/tests/test_breaks_us011_qa.py` |
+| AC-028 | test_ac028_several_breaks_are_all_subtracted | Unit | Passed | `backend/tests/test_breaks_us011_qa.py` |
+| AC-029 | test_ac029_after_clock_out_status_is_idle_and_break_calls_refused | Unit | Passed | `backend/tests/test_breaks_us011_qa.py` |
+| AC-029 | test_ac029_clock_out_on_break_ends_break_at_clock_out_time | Unit | Passed | `backend/tests/test_breaks_us011_qa.py` |
+| AC-029 | test_ac029_clock_out_on_second_break_keeps_first_break_untouched | Unit | Passed | `backend/tests/test_breaks_us011_qa.py` |
+| AC-030 | test_ac030_refusal_does_not_stop_break_being_ended_normally | Unit | Passed | `backend/tests/test_breaks_us011_qa.py` |
+| AC-030 | test_ac030_second_start_while_on_break_refused_and_original_kept | Unit | Passed | `backend/tests/test_breaks_us011_qa.py` |
+| AC-030 | test_ac030_start_break_without_running_entry_refused | Unit | Passed | `backend/tests/test_breaks_us011_qa.py` |
+| AC-028 | [AC-028] a break started and ended is recorded and subtracted from the entry | E2E | Not run yet | `frontend/e2e/breaks.spec.ts` |
+| AC-029 | [AC-029] clocking out while on a break closes the break and the entry | E2E | Not run yet | `frontend/e2e/breaks.spec.ts` |
+| AC-030 | [AC-030] break endpoints require a session | E2E | Not run yet | `frontend/e2e/breaks.spec.ts` |
+| AC-030 | [AC-030] starting a second break while on one is refused with 409 | E2E | Not run yet | `frontend/e2e/breaks.spec.ts` |
+
+### US-012: Recover an entry left running
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-031 | test_ac031_already_closed_409_unchanged | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-031 | test_ac031_offset_end_at_is_converted_to_utc | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-031 | test_ac031_open_break_closed_at_end_at | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-031 | test_ac031_second_patch_409 | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-031 | test_ac031_stale_entry_closed_net_of_breaks | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_end_before_last_break_422_nothing_changed | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_end_not_after_start_422_entry_stays_open[delta0] | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_end_not_after_start_422_entry_stays_open[delta1] | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_end_not_after_start_422_entry_stays_open[delta2] | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_future_end_422_entry_stays_open | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_malformed_value_422_field_level[12345] | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_malformed_value_422_field_level[2026-01-13T17:00:00] | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_malformed_value_422_field_level[2026-13-45T10:00:00Z] | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_malformed_value_422_field_level[None] | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_malformed_value_422_field_level[True] | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_malformed_value_422_field_level[] | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_malformed_value_422_field_level[not a date] | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_malformed_value_422_field_level[value6] | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-032 | test_ac032_missing_body_field_422 | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| — | test_nfr007_401_without_session | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| — | test_nfr007_other_users_closed_entry_also_404_not_409 | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| — | test_nfr007_other_users_entry_404_no_data_and_unchanged | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| — | test_nfr007_unknown_entry_404 | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| — | test_nfr009_autumn_change_recovery_work_date_and_duration | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| — | test_nfr009_late_utc_start_gets_next_local_work_date_in_summer | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| — | test_nfr009_spring_forward_recovery_local_times_and_duration | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| — | test_nfr013_messages_are_field_level_english | Unit | Passed | `backend/tests/test_time_entries_end_us012_qa.py` |
+| AC-031 | [AC-031] the alert is shown, the user sets an end time, saves, and the alert goes away | E2E | Not run yet | `frontend/e2e/recover-entry.spec.ts` |
+| AC-032 | [AC-032] an end time before the start shows the message and the entry stays running | E2E | Not run yet | `frontend/e2e/recover-entry.spec.ts` |
+
+### US-013: Enter hours by day in a weekly timesheet
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-033 | test_ac033_put_then_get_returns_hours_and_totals | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-033 | test_ac033_reput_replaces_not_adds | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-034 | test_ac034_bad_minutes_422_field_level_nothing_saved[-1] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-034 | test_ac034_bad_minutes_422_field_level_nothing_saved[1.5] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-034 | test_ac034_bad_minutes_422_field_level_nothing_saved[1441] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-034 | test_ac034_bad_minutes_422_field_level_nothing_saved[60] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-034 | test_ac034_bad_minutes_422_field_level_nothing_saved[99999] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-034 | test_ac034_bad_minutes_422_field_level_nothing_saved[None] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-034 | test_ac034_bad_minutes_422_field_level_nothing_saved[True] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-034 | test_ac034_bad_minutes_422_field_level_nothing_saved[abc] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-034 | test_ac034_bad_minutes_422_field_level_nothing_saved[minutes7] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-034 | test_ac034_boundaries_0_and_1440_accepted | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-034 | test_ac034_day_total_across_two_rows_over_24h_422 | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-034 | test_ac034_day_total_over_24h_with_manual_and_clocked_422 | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-034 | test_ac034_one_bad_cell_saves_none | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-035 | test_ac035_empty_week_has_seven_totals | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-035 | test_ac035_garbage_week_422 | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-035 | test_ac035_get_returns_seven_days_monday_to_sunday | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-035 | test_ac035_non_monday_422_on_get_and_put[2026-01-11] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-035 | test_ac035_non_monday_422_on_get_and_put[2026-01-13] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-035 | test_ac035_non_monday_422_on_get_and_put[2026-01-18] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-036 | test_ac036_clocked_entry_net_of_break_beside_manual | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-036 | test_ac036_other_users_entries_not_in_my_week | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-036 | test_ac036_running_entry_excluded | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-036 | test_ac036_summer_late_utc_entry_lands_on_next_local_day | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-037 | test_ac037_collision_409_nothing_changed | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-037 | test_ac037_non_boolean_billable_422 | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-037 | test_ac037_other_users_entry_404_no_data | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-037 | test_ac037_patch_billable_on_clocked_entry | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-037 | test_ac037_patch_billable_on_manual_entry | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-037 | test_ac037_unknown_entry_404 | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-038 | test_ac038_different_billable_listed_as_separate_rows | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-038 | test_ac038_missing_billable_422_nothing_saved | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| AC-038 | test_ac038_null_billable_422 | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| — | test_nfr007_day_total_limit_ignores_other_users_hours | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| — | test_nfr007_every_route_401_without_session[get-/api/timesheets/2026-01-12] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| — | test_nfr007_every_route_401_without_session[patch-/api/time-entries/1] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| — | test_nfr007_every_route_401_without_session[put-/api/timesheets/cells] | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| — | test_nfr007_users_never_see_or_change_each_others_hours | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| — | test_nfr009_autumn_change_week_attribution_and_duration | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| — | test_nfr009_manual_hours_on_dst_days_keep_minutes | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| — | test_nfr009_spring_forward_week_attribution_and_duration | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| — | test_nfr009_week_boundary_uses_user_time_zone | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+| — | test_nfr013_422_bodies_are_field_level_english | Unit | Passed | `backend/tests/test_timesheets_us013_qa.py` |
+
+### US-017: Times stored in UTC and shown in my time zone
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-045 | test_ac045_clock_out_returns_utc_instants_and_local_work_date | Unit | Passed | `backend/tests/test_timezone_us017_qa.py` |
+| AC-045 | test_ac045_conflict_message_shows_the_start_in_the_users_zone | Unit | Passed | `backend/tests/test_timezone_us017_qa.py` |
+| AC-045 | test_ac045_stored_instant_is_the_same_whatever_the_profile_zone | Unit | Passed | `backend/tests/test_timezone_us017_qa.py` |
+| AC-045 | test_ac045_summer_0900_london_is_stored_as_0800_utc_and_displays_0900 | Unit | Passed | `backend/tests/test_timezone_us017_qa.py` |
+| AC-045 | test_ac045_winter_0900_london_is_stored_as_0900_utc | Unit | Passed | `backend/tests/test_timezone_us017_qa.py` |
+| AC-046 | test_ac046_entry_across_autumn_change_shows_correct_duration_and_local_times | Unit | Passed | `backend/tests/test_timezone_us017_qa.py` |
+| AC-046 | test_ac046_entry_across_spring_forward_shows_correct_duration_and_local_times | Unit | Passed | `backend/tests/test_timezone_us017_qa.py` |
+| AC-046 | test_ac046_entry_starting_after_the_change_lands_on_the_sunday | Unit | Passed | `backend/tests/test_timezone_us017_qa.py` |
+| AC-046 | test_ac046_timesheet_places_a_late_utc_entry_on_the_next_local_day | Unit | Passed | `backend/tests/test_timezone_us017_qa.py` |
+| AC-045 | [AC-045] the API stores and returns UTC instants and the profile carries the IANA zone | E2E | Not run yet | `frontend/e2e/timezone.spec.ts` |
+| AC-045 | [AC-045] the clock screen shows the clock-in time in the profile zone, not UTC | E2E | Not run yet | `frontend/e2e/timezone.spec.ts` |
+| AC-045 | [AC-045] times endpoints refuse a request with no session | E2E | Not run yet | `frontend/e2e/timezone.spec.ts` |
+| AC-046 | [AC-046] a clock-in spanning a real daylight-saving change cannot be driven end to end: the live server clock cannot be set (covered in backend/tests/test_timezone_us017_qa.py) | E2E | Not run yet | `frontend/e2e/timezone.spec.ts` |
+| AC-046 | [AC-046] the weekly timesheet reports its zone and puts a clocked entry on its local day with its elapsed minutes | E2E | Not run yet | `frontend/e2e/timezone.spec.ts` |
 
 ## Project setup
 

@@ -28,7 +28,10 @@
 | POST | /api/clock/in | clock_in | `backend/app/routers/clock.py:129` | — |
 | POST | /api/clock/out | clock_out | `backend/app/routers/clock.py:200` | — |
 | GET | /api/clock/status | clock_status | `backend/app/routers/clock.py:123` | — |
-| GET | /health | health | `backend/app/main.py:81` | Liveness probe. |
+| PATCH | /api/time-entries/{entry_id}/end | end_entry | `backend/app/routers/time_entries.py:38` | — |
+| PUT | /api/timesheets/cells | put_cells | `backend/app/routers/timesheets.py:236` | — |
+| GET | /api/timesheets/{week_start} | get_week | `backend/app/routers/timesheets.py:172` | — |
+| GET | /health | health | `backend/app/main.py:83` | Liveness probe. |
 <!-- sdlc:auto:end endpoints -->
 
 <!-- sdlc:auto:start drift -->
@@ -37,7 +40,6 @@
 - DELETE /api/time-entries/{id}
 - GET /api/dashboard/week
 - GET /api/projects
-- GET /api/timesheets/{week_start}
 - PATCH /api/admin/clients/{id}
 - PATCH /api/admin/projects/{id}
 - PATCH /api/admin/tasks/{id}
@@ -46,7 +48,6 @@
 - PATCH /api/time-entries/{id}/end
 - POST /api/admin/projects/{id}/tasks
 - POST /api/admin/users/{id}/deactivate
-- PUT /api/timesheets/cells
 
 **Code only:**
 
@@ -56,10 +57,11 @@
 - PATCH /api/admin/projects/{project_id}
 - PATCH /api/admin/tasks/{task_id}
 - PATCH /api/admin/users/{user_id}
+- PATCH /api/time-entries/{entry_id}/end
 - POST /api/admin/projects/{project_id}/tasks
 - POST /api/admin/users/{user_id}/deactivate
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `6903b10`
+Generated from commit `c1c419c`
 <!-- sdlc:auto:end source -->

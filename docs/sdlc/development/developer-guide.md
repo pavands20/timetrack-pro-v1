@@ -7,103 +7,100 @@ _Up to date._
 <!-- sdlc:auto:end status -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `6903b10` · model `auto`
+Generated from commit `c1c419c` · model `auto`
 <!-- sdlc:auto:end source -->
 
 <!-- sdlc:auto:start overview -->
-TimeTrack Pro V1 is a time and labour management web app with two applications in one repository. `frontend/` is a Vite + React 19 single-page app written in TypeScript, using React Router 7 and Tailwind CSS v4. `backend/` is a FastAPI 0.115 service using SQLAlchemy 2, Alembic migrations and PostgreSQL 16. The backend implements these features: sign-in with bearer-token sessions, password reset and first-password emails, System Admin user administration, client/project/task administration with a read-only project catalog, and clock in/out with breaks. The root README says the backend has only a health check, but that is out of date. Several frontend screens call the API through `src/lib/api.ts`; the frontend README says screens may still use seeded sample data. A GitHub Actions workflow deploys on every push to `main`: it pushes the backend Docker image to ECR and publishes the built frontend to AWS Amplify.
+TimeTrack Pro V1 is a time and labour management web app with two applications in one repository. `backend/` is a FastAPI service using SQLAlchemy 2.0 models on PostgreSQL 16, with Alembic migrations. It covers session auth (sign-in, sign-out, current user, password reset), System Admin user administration, client/project/task administration, clock in/out with breaks, ending a forgotten entry, and a weekly manual timesheet. `frontend/` is a Vite + React 19 single-page app using React Router 7 and Tailwind 4. Its screens are SignIn, Home, Timesheet, AdminUsers, AdminProjects and Help. It calls the API through `src/lib/api.ts`, which sends a Bearer session token and an `X-Requested-With` header. In local dev, Vite proxies `/api` to `http://localhost:8000`. In deployment, `VITE_API_BASE_URL` is baked into the build. GitHub Actions deploys on pushes to `main`: the backend image goes to ECR and the frontend to AWS Amplify. Parts of the root README are out of date. It says the backend has only a health check, but the backend now has the routers listed above.
 <!-- sdlc:auto:end overview -->
 
 <!-- sdlc:auto:start prerequisites -->
-- Python 3.12 (the backend Dockerfile uses python:3.12-slim)
-- Node.js with npm (the frontend uses Vite 6, React 19 and TypeScript 5)
-- Docker with Docker Compose (for the PostgreSQL 16 database in docker-compose.yml)
+- Python 3.12 (the version in backend/Dockerfile) with pip
+- Node.js with npm
+- Docker with Compose, to run the PostgreSQL 16 service in docker-compose.yml
 - PostgreSQL 16 reachable through DATABASE_URL (there is no SQLite fallback)
 <!-- sdlc:auto:end prerequisites -->
 
 <!-- sdlc:auto:start setup -->
 1. docker compose up -d db
 2. cd backend
-3. python -m venv .venv && source .venv/bin/activate
+3. python -m venv .venv && . .venv/bin/activate
 4. pip install -r requirements.txt
-5. Review .env.example and ENVIRONMENT.md. DATABASE_URL defaults to the docker-compose Postgres service, so set it only if your database is elsewhere.
-6. alembic upgrade head
-7. python -m app.seed
-8. uvicorn app.main:app --reload
-9. In a second terminal: cd frontend && npm install
-10. npm run dev  (Vite proxies /api to http://localhost:8000)
+5. alembic upgrade head
+6. python -m app.seed
+7. uvicorn app.main:app --reload
+8. (in a second terminal) cd frontend
+9. npm install
+10. npm run dev
 <!-- sdlc:auto:end setup -->
 
 <!-- sdlc:auto:start run -->
 | Name | Command | Description |
 |---|---|---|
-| backend dev | `cd backend && uvicorn app.main:app --reload` | Runs the FastAPI service with auto-reload on port 8000. Interactive docs are at /docs unless the environment is production. |
-| migrate | `cd backend && alembic upgrade head` | Applies all pending Alembic migrations. Migrations are the only way the schema changes. |
-| seed | `cd backend && python -m app.seed` | Runs the seed module. The Docker image runs it after migrating. |
-| backend lint | `cd backend && ruff check .` | Lints the Python code with Ruff. |
-| backend format | `cd backend && ruff format .` | Formats the Python code with Ruff. |
-| backend image | `docker build -t timetrack-backend ./backend` | Builds the backend image. On start the container migrates, seeds, then serves on port 8000. It still needs a reachable database. |
-| dev | `cd frontend && npm run dev` | Starts the Vite dev server and proxies /api to the backend on localhost:8000. |
-| build | `cd frontend && npm run build` | Bundles the SPA into dist/. This does not typecheck. |
+| db | `docker compose up -d db` | Starts PostgreSQL 16 (user, password and database all `app`) on port 5432, with a persistent volume. |
+| migrate | `cd backend && alembic upgrade head` | Applies the Alembic migrations in backend/migrations/versions. This is the only way the schema changes. |
+| seed | `cd backend && python -m app.seed` | Runs the seed module. The container runs this after migrating and before serving. |
+| api | `cd backend && uvicorn app.main:app --reload` | Serves the FastAPI app on port 8000 with auto-reload. /health is the liveness probe; /docs and /redoc are available outside production. |
+| dev | `cd frontend && npm run dev` | Starts the Vite dev server and proxies /api to http://localhost:8000. |
+| build | `cd frontend && npm run build` | Bundles the SPA into frontend/dist. Does not typecheck. |
 | preview | `cd frontend && npm run preview` | Serves the production build locally. |
-| typecheck | `cd frontend && npm run typecheck` | Runs tsc --noEmit. |
-| lint | `cd frontend && npm run lint` | Runs ESLint over the app. This is the gate the platform runs during development. |
-| lint:fix | `cd frontend && npm run lint:fix` | Runs ESLint and applies the fixes it can. |
-| format | `cd frontend && npm run format` | Formats the frontend with Prettier. |
-| format:check | `cd frontend && npm run format:check` | Checks Prettier formatting without writing changes. |
+| typecheck | `cd frontend && npm run typecheck` | Runs `tsc --noEmit` over src/. |
+| lint (frontend) | `cd frontend && npm run lint` | Runs ESLint over the app. The platform uses this as a gate during development. `npm run lint:fix` applies the fixes it can. |
+| format (frontend) | `cd frontend && npm run format` | Formats the app with Prettier. `npm run format:check` only checks. |
+| lint (backend) | `cd backend && ruff check .` | Lints Python code with Ruff, configured in backend/ruff.toml. |
+| format (backend) | `cd backend && ruff format .` | Formats Python code with Ruff. |
 <!-- sdlc:auto:end run -->
 
 <!-- sdlc:auto:start structure -->
 | Path | Purpose |
 |---|---|
-| `.devcontainer` | Dev container configuration (devcontainer.json). |
-| `.github/workflows` | deploy.yml: on push to main, builds and pushes the backend image to ECR and publishes the frontend build to AWS Amplify, using OIDC to authenticate. |
-| `.quorq` | Metadata files for the Quorq platform (handoff.json, prepared.json). |
-| `backend` | The FastAPI service: requirements.txt, Dockerfile, alembic.ini, pytest.ini and ruff.toml. |
-| `backend/app` | Application code: main.py (app, CSRF middleware, error handler, /health), config, database, SQLAlchemy models, auth dependencies and security, mailer, password tokens, seed, and routers/ (auth, admin_users, admin_projects, clock). |
-| `backend/migrations` | Alembic environment and numbered versions (0001_users_sessions through 0005_one_open_break). |
-| `backend/scripts` | Utility scripts (check_connections.py). |
-| `backend/tests` | Pytest suite with conftest.py; files are named by feature and user story, for example test_clock_us010_qa.py. |
-| `frontend` | The Vite + React SPA: package.json, vite.config.ts, playwright.config.ts, tsconfig.json, ESLint and Prettier configs. |
-| `frontend/src` | SPA source: main.tsx (router and AuthProvider), App.tsx (navigation shell and route table), screens/ (one module per screen, with tests alongside), lib/ (API client, auth, UI and icon components, brand tokens). |
-| `frontend/e2e` | Playwright acceptance specs (*.spec.ts). |
+| `.devcontainer/` | Dev container definition (devcontainer.json). |
+| `.github/workflows/` | deploy.yml: on push to main, builds and pushes the backend image to ECR, then builds the frontend and deploys it to an AWS Amplify branch. |
+| `.quorq/` | Quorq platform metadata (handoff.json, prepared.json). |
+| `backend/` | FastAPI service: Dockerfile, requirements.txt, alembic.ini, pytest.ini, ruff.toml. |
+| `backend/app/` | Application package. Contains main.py (app, CSRF middleware, validation error handler, CORS, router wiring), config, database (engine and the get_db session dependency), models, auth helpers (auth_deps, security, password_tokens), mailer, access, seed, and routers/ with one module per API area: auth, admin_users, admin_projects, clock, time_entries, timesheets. |
+| `backend/migrations/` | Alembic environment and numbered revisions 0001 to 0006: users and sessions, password tokens, clients, projects and tasks, time entries, one open break per entry, manual entries. |
+| `backend/scripts/` | Utility scripts (check_connections.py). |
+| `backend/tests/` | Pytest suite (conftest.py plus files named by user story, e.g. test_clock_us010_qa.py). |
+| `frontend/` | Vite + React SPA: package.json, vite.config.ts, tsconfig.json, eslint.config.js, .prettierrc, playwright.config.ts. |
+| `frontend/src/` | App code: main.tsx (router and AuthProvider), App.tsx (navigation shell and route table), screens/ (one module per screen, with tests beside them), lib/ (api client, auth context, UI kit, icons, brand tokens). |
+| `frontend/e2e/` | Playwright acceptance specs (auth, clock, breaks, timezone, admin users and projects, and others). |
 <!-- sdlc:auto:end structure -->
 
 <!-- sdlc:auto:start conventions -->
-- All API routes live under /api, with one APIRouter per area (auth, admin-users, admin-projects, catalog, clock). /health is the only exception and is unprefixed.
-- Admin endpoints use the dependency require_role("System Admin"). Other protected endpoints use get_current_user.
-- POST, PUT, PATCH and DELETE requests to /api must send an X-Requested-With header (CSRF defence). apiFetch adds it automatically.
-- Authentication uses server-side sessions. Login returns a token that the frontend stores in localStorage under 'session_token' and sends as 'Authorization: Bearer <token>'. Only a hash of the token is stored in the database.
-- Validation failures return 422 with detail as a list of {loc, msg} objects and plain-language messages. Conflicts such as duplicates, archived clients or already being clocked in return 409.
-- The schema changes only through Alembic migrations, numbered NNNN_description.py. Nothing is created at startup.
-- Timestamps are stored as timestamptz in UTC and returned as ISO-8601 strings with a Z suffix. Local times are derived from each user's time_zone.
-- Emails are stored lowercase. Client, project and task names are unique case-insensitively, enforced by lower() indexes.
-- Partial unique indexes enforce one open time entry per user and one open break per entry. IntegrityError from concurrent requests is mapped to 409.
-- OpenAPI docs (/docs, /redoc, /openapi.json) are disabled when the environment setting is 'production'.
-- In the frontend, the '@' import alias points to src/. Admin-only routes are wrapped in AdminOnly. Styling uses Tailwind with brand CSS variables such as var(--brand-*).
-- Component tests (*.test.tsx) sit beside the components they cover. Playwright specs live only in e2e/.
-- Code is formatted with Prettier and ESLint in the frontend and Ruff in the backend.
+- Each API area has its own APIRouter with an `/api/...` prefix, included in app/main.py. Only /health sits outside /api.
+- Dependencies use Annotated aliases: `Db` (get_db), `Me` (get_current_user), `Admin` (require_role("System Admin")).
+- POST, PUT, PATCH and DELETE requests to /api must send an `X-Requested-With` header, or the CSRF middleware returns 403. apiFetch adds this header automatically.
+- Auth uses a Bearer token. Login returns `token`; the frontend keeps it in localStorage under `session_token`. The server stores only a hash of each session token.
+- Validation errors are 422 responses with `detail` as a list of `{loc, msg}`. Messages are plain user-facing sentences. Conflicts and unique-index races (IntegrityError) return 409.
+- Times are stored as timestamptz in UTC and returned as ISO-8601 strings with a `Z` suffix. Local dates and times are computed from each user's `time_zone` (an IANA zone).
+- Emails are stored lowercase. Client, project and task names are unique case-insensitively through `lower(name)` indexes.
+- The schema changes only through Alembic migrations; nothing creates tables at startup.
+- Roles are fixed: Employee, Manager, Payroll Admin, System Admin. Admin routes and screens are restricted to System Admin.
+- In the frontend, the `@/` import alias maps to `src/`. Styling uses Tailwind with brand CSS variables (`var(--brand-*)`).
+- Test files are named after user stories (`us001`, `us010`, and so on). Vitest component tests sit beside their components; Playwright specs live in e2e/.
+- Python is linted and formatted with Ruff; TypeScript with ESLint and Prettier.
+- /docs, /redoc and /openapi.json are disabled when the configured environment is `production`.
 <!-- sdlc:auto:end conventions -->
 
 <!-- sdlc:auto:start testing -->
 | Name | Command | Description |
 |---|---|---|
-| backend tests | `cd backend && pytest` | Runs the pytest suite in backend/tests. pytest.ini sets pythonpath so the app package can be imported. |
-| backend coverage | `cd backend && pytest --cov=app` | Runs the pytest suite with coverage for the app package (pytest-cov is in requirements.txt). |
-| test | `cd frontend && npm test` | Runs Vitest component tests under src/ in jsdom. |
-| test:e2e:install | `cd frontend && npm run test:e2e:install` | Installs the Chromium browser that Playwright needs. |
-| test:e2e | `cd frontend && npm run test:e2e` | Runs Playwright specs in e2e/. If E2E_BASE_URL is set, tests run against that URL. Otherwise Playwright migrates and boots the backend from backend/.venv on port 8000, then builds and previews the frontend on port 4173. |
+| backend tests | `cd backend && pytest` | Runs backend/tests. pytest.ini sets pythonpath=. so tests can import `app`. |
+| frontend unit tests | `cd frontend && npm test` | Runs Vitest component tests under src/ in jsdom. |
+| e2e browser install | `cd frontend && npm run test:e2e:install` | Installs Chromium for Playwright. |
+| e2e | `cd frontend && npm run test:e2e` | Runs the Playwright specs in e2e/. Without E2E_BASE_URL, it migrates and boots the backend from backend/.venv, then builds and previews the frontend on port 4173. With E2E_BASE_URL set, it tests that URL instead. |
 <!-- sdlc:auto:end testing -->
 
 <!-- sdlc:auto:start troubleshooting -->
 | Problem | Solution |
 |---|---|
-| POST/PATCH requests to /api return 403 'You do not have access to this resource.' when sent with curl or another client. | Add an X-Requested-With header (for example X-Requested-With: XMLHttpRequest). The CSRF middleware rejects state-changing /api requests that lack it. |
-| The backend fails to connect to the database, or tables are missing. | Start Postgres with 'docker compose up -d db', check DATABASE_URL, then run 'alembic upgrade head' from backend/. |
-| 'pytest' reports 'No module named app'. | Run pytest from the backend/ directory so pytest.ini (pythonpath = .) is picked up. |
-| Playwright cannot start the backend webServer. | Create backend/.venv and install requirements.txt into it, make sure Postgres is reachable through DATABASE_URL, and run 'npm run test:e2e:install' first. |
-| Chromium crashes in a container during E2E tests. | The config already passes --disable-dev-shm-usage. Keep workers at 1, since specs share one backend and database. |
-| 'npm run build' succeeds but 'npm run typecheck' fails. | This is expected: the build does not typecheck. Fix the reported tsc errors, which are usually untyped useState({}) values, before relying on typecheck. |
-| A deployed frontend calls localhost or the wrong API. | VITE_API_BASE_URL must be set at build time, because Vite inlines it into the bundle. When it is unset, calls are relative and only work through the dev proxy. |
-| /docs returns 404. | The environment setting is 'production', which disables the OpenAPI docs. Use a non-production environment locally. |
+| The backend fails to start or connect to the database. | Run `docker compose up -d db` and wait for the healthcheck. Make sure DATABASE_URL points at a running PostgreSQL 16; it defaults to the docker-compose service. |
+| API errors because tables are missing. | Run `alembic upgrade head` from backend/. |
+| POST, PUT, PATCH or DELETE requests from curl or another client get 403 "You do not have access to this resource." | Add an `X-Requested-With: XMLHttpRequest` header. For authenticated routes, also send `Authorization: Bearer <token>`. |
+| API calls fail while running `npm run dev`. | Start the backend on port 8000. The Vite dev server proxies /api to http://localhost:8000. |
+| Playwright cannot start the backend. | Create the virtualenv at backend/.venv and install requirements there; the e2e config runs `.venv/bin/alembic` and `.venv/bin/python`. Have PostgreSQL running, then run `npm run test:e2e:install` for Chromium. |
+| `npm run build` succeeds, but the code has type errors. | `build` does not typecheck. Run `npm run typecheck` and fix the reported errors. |
+| /docs returns 404. | API docs are disabled when the configured environment is production. Run with a non-production environment setting. |
+| deploy.yml contains literal values for NEXT_PUBLIC_API_SECRET_KEY and VITE_API_SECRET_KEY. | Anything inlined into the frontend bundle is public. Review whether these values are meant to be secret; if so, move them out of the workflow and the client bundle. |
 <!-- sdlc:auto:end troubleshooting -->

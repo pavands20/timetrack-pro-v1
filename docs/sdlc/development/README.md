@@ -5,187 +5,170 @@
 <!-- sdlc:auto:start narrative -->
 ### DEV-PLAN-V1 · approved · source: plan:v1
 
-The development plan for TimeTrack Pro V1 is approved at version 1. It has 4 sprints of capacity 20 each and a backlog of 8 epics and 19 user stories. Some stories are broken into tasks.
+The development plan for TimeTrack Pro V1 is approved at version 1. It spans 4 sprints of capacity 20 each and covers 8 epics, 19 stories and 6 sub-tasks.
 
-- Plan status: approved, version 1. The input does not state an approver or an approval date.
-- Sprints: Sprint 1 to Sprint 4, capacity 20 each.
-- Epics:
-  - EPIC-001 Sign-in and account access: US-001, US-002, US-003
-  - EPIC-002 User account administration: US-004, US-005, US-006
-  - EPIC-003 Clients, projects, tasks and bill rate: US-007, US-008, US-009
-  - EPIC-004 Clock in and out with breaks: US-010, US-011, US-012
-  - EPIC-005 Weekly timesheet entry: US-013, US-014, US-015
-  - EPIC-006 Employee dashboard: US-016
-  - EPIC-007 Time zone, week start, language and responsive layout: US-017, US-018
-  - EPIC-008 Basic user and project documentation: US-019
+- Plan status: approved, version 1.
+- Approver and approval date: not stated in input.
+- Sprints: Sprint 1, Sprint 2, Sprint 3, Sprint 4. Each has capacity 20.
+- Total story points: 69 (US-001 5, US-002 3, US-003 5, US-004 3, US-005 2, US-006 3, US-007 3, US-008 3, US-009 3, US-010 8, US-011 3, US-012 3, US-013 8, US-014 2, US-015 3, US-016 3, US-017 3, US-018 3, US-019 3).
 - Epics have no points and no assigned role.
-- The epic-to-story grouping follows plan item order. The input does not state parent links explicitly.
-- Total story points: 69.
-- Scope note: the plan backlog does not include these features from the project description:
-  - timesheet approval
-  - time off and leave balances
-  - labour-rule and overtime flags
-  - reports and CSV or payroll export
-  - notifications
-  - audit trail
-  The input gives no reason for leaving them out.
+- Sub-tasks (US-010-T1..T3, US-013-T1..T3) have no points.
+- Scope note: the plan covers sign-in, user admin, clients/projects/tasks, clock in/out, breaks, the weekly timesheet, billable marking, the dashboard, time zone and responsive UI, and documentation.
+- These areas from the project description have no plan items in v1: timesheet submission/approval, time off, labour rules/overtime, reports/CSV/payroll export, notifications, and audit.
 
 **Related:** US-001, US-002, US-003, US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-011, US-012, US-013, US-014, US-015, US-016, US-017, US-018, US-019
 
 ### DEV-SPRINT-1 · approved · source: plan:Sprint 1
 
-Sprint 1 covers secure sign-in, server-enforced roles, password reset by email, and admin creation of users with manager assignment. The input contains no delivery records for this sprint's stories.
+Sprint 1 targets secure sign-in, server-enforced roles, password reset by email, and admin creation of users with manager assignment. No delivered tickets are reported for these stories.
 
-- Goal: Secure sign-in, server-enforced roles, password reset by email, and admin creation of users with manager assignment.
+- Goal (verbatim): Secure sign-in, server-enforced roles, password reset by email, and admin creation of users with manager assignment.
 - Capacity: 20.
-- Related stories, inferred from the goal wording because the input does not assign items to sprints explicitly:
+- Story mapping is inferred from the goal wording; the input gives no explicit sprint-to-item assignment:
   - US-001 Sign in with email and password (5 pts, backend-agent)
   - US-002 Role-restricted access (3 pts, security-agent)
   - US-003 Reset a forgotten password (5 pts, backend-agent)
   - US-004 Create a user account (3 pts, backend-agent)
   - US-005 Assign a manager to an employee (2 pts, backend-agent)
-  - Inferred total: 18 pts.
-- Delivery: the development run lists no ticket for US-001 to US-005. Their implementation status is not recorded in the input.
+- Inferred total: 18 pts.
+- Delivery status: no ticket records in the development run input.
 
-**Related:** US-001, US-002, US-003, US-004, US-005
+**Related:** US-001, US-002, US-003, US-004, US-005, EPIC-001, EPIC-002
 
 ### DEV-SPRINT-2 · approved · source: plan:Sprint 2
 
-Sprint 2 covers completing user administration, setting up clients, projects with bill rates and tasks, and clock in/out. Every story implied by this goal has a ticket marked delivered.
+Sprint 2 targets the rest of user administration, clients, projects with bill rates, tasks, and employee clock in/out. No delivered tickets are reported for these stories.
 
-- Goal: Complete user administration, set up clients, projects with bill rates and tasks, and let employees clock in and out.
+- Goal (verbatim): Complete user administration, set up clients, projects with bill rates and tasks, and let employees clock in and out.
 - Capacity: 20.
-- Related stories, inferred from the goal wording:
-  - US-006 Edit and deactivate users (3 pts)
-  - US-007 Manage clients (3 pts)
-  - US-008 Manage projects with an hourly bill rate (3 pts)
-  - US-009 Manage tasks within a project (3 pts)
-  - US-010 Clock in and out against a project and task (8 pts)
-  - Inferred total: 20 pts, which equals capacity.
-- Delivery: all 5 tickets have status=delivered. See DEV-US-006 to DEV-US-010.
+- Story mapping is inferred from the goal wording:
+  - US-006 Edit and deactivate users (3 pts, backend-agent)
+  - US-007 Manage clients (3 pts, backend-agent)
+  - US-008 Manage projects with an hourly bill rate (3 pts, backend-agent)
+  - US-009 Manage tasks within a project (3 pts, backend-agent)
+  - US-010 Clock in and out against a project and task (8 pts, backend-agent)
+    - US-010-T1 Add time_entries migration (backend-agent)
+    - US-010-T2 Implement clock status, in and out endpoints (backend-agent)
+    - US-010-T3 Build clock page (frontend-agent)
+- Inferred total: 20 pts.
+- Delivery status: no ticket records in the development run input.
+- Dependency gap: US-011 and US-012 (breaks, running-entry recovery) are reported delivered, but US-010 (base clock in/out) has no ticket record.
 
-**Related:** US-006, US-007, US-008, US-009, US-010
+**Related:** US-006, US-007, US-008, US-009, US-010, EPIC-002, EPIC-003, EPIC-004
 
 ### DEV-SPRINT-3 · approved · source: plan:Sprint 3
 
-Sprint 3 covers time-zone handling, breaks, recovery of forgotten clock-outs, the weekly timesheet and billable marking. The input contains no delivery records for this sprint's stories.
+Sprint 3 targets correct time-zone handling, breaks, recovery of forgotten clock-outs, the weekly timesheet and billable marking. All five matching stories are reported delivered in the development run.
 
-- Goal: Correct time-zone handling, breaks, recovery of forgotten clock-outs, the weekly timesheet and billable marking.
+- Goal (verbatim): Correct time-zone handling, breaks, recovery of forgotten clock-outs, the weekly timesheet and billable marking.
 - Capacity: 20.
-- Related stories, inferred from the goal wording:
-  - US-017 Times stored in UTC and shown in my time zone (3 pts, backend-agent)
-  - US-011 Record breaks while clocked in (3 pts, backend-agent)
-  - US-012 Recover an entry left running (3 pts, backend-agent)
-  - US-013 Enter hours by day in a weekly timesheet (8 pts, frontend-agent), with tasks:
-    - US-013-T1 Implement timesheet week and cell endpoints (backend-agent)
-    - US-013-T2 Build weekly timesheet grid (frontend-agent)
-    - US-013-T3 Add timesheet API test suite (qa-agent)
-  - US-014 Mark entries billable or non-billable (2 pts, frontend-agent)
-  - Inferred total: 19 pts.
-- Delivery: the development run lists no ticket for these stories.
+- Story mapping is inferred from the goal wording:
+  - US-017 Times stored in UTC and shown in my time zone (3 pts): delivered
+  - US-011 Record breaks while clocked in (3 pts): delivered
+  - US-012 Recover an entry left running (3 pts): delivered
+  - US-013 Enter hours by day in a weekly timesheet (8 pts): delivered
+    - Sub-tasks US-013-T1, US-013-T2, US-013-T3 have no individual status
+  - US-014 Mark entries billable or non-billable (2 pts): delivered
+- Inferred total: 19 pts.
+- The delivered ticket set matches this sprint exactly.
 
-**Related:** US-011, US-012, US-013, US-014, US-017
+**Related:** US-011, US-012, US-013, US-014, US-017, EPIC-004, EPIC-005, EPIC-007
 
 ### DEV-SPRINT-4 · approved · source: plan:Sprint 4
 
-Sprint 4 covers editing and deleting own entries, the weekly hours dashboard, a responsive English interface, and user/admin/project documentation. The input contains no delivery records for this sprint's stories.
+Sprint 4 targets editing and deleting own entries, a weekly hours dashboard, a responsive English interface, and user/admin/project documentation. No delivered tickets are reported for these stories.
 
-- Goal: Edit and delete own entries, weekly hours dashboard, responsive English interface and user/admin/project documentation.
+- Goal (verbatim): Edit and delete own entries, weekly hours dashboard, responsive English interface and user/admin/project documentation.
 - Capacity: 20.
-- Related stories, inferred from the goal wording:
+- Story mapping is inferred from the goal wording:
   - US-015 Edit and delete my own time entries (3 pts, backend-agent)
   - US-016 See my weekly hours on a dashboard (3 pts, frontend-agent)
   - US-018 English-only, responsive interface (3 pts, frontend-agent)
   - US-019 User and admin guides (3 pts, devops-agent)
-  - Inferred total: 12 pts.
-- Delivery: the development run lists no ticket for these stories.
+- Inferred total: 12 pts.
+- Delivery status: no ticket records in the development run input.
 
-**Related:** US-015, US-016, US-018, US-019
+**Related:** US-015, US-016, US-018, US-019, EPIC-005, EPIC-006, EPIC-007, EPIC-008
 
-### DEV-US-006 · draft · source: dev:US-006
+### DEV-US-011 · draft · source: dev:US-011
 
-The ticket for editing and deactivating user accounts is marked delivered in commit 94104b8.
+The ticket for recording breaks while clocked in is reported delivered at commit 1792ebc. No tests, review or approval are recorded.
 
-- Ticket: US-006 Edit and deactivate users.
+- Ticket: US-011 Record breaks while clocked in.
 - Status: delivered.
-- Commit: 94104b8a0ac8be3016ca7c15902ca9d2e309d9c1.
-- Plan: 3 pts, backend-agent, EPIC-002 User account administration.
-- Not stated in the input: implementation details, review or approval, test results, delivery date.
-- Dependency note: this story extends user creation (US-004). The input has no delivery record for US-004.
+- Commit: 1792ebc6abc34f0968c0175918f6f2a5f7785524.
+- Planned: 3 pts, backend-agent, EPIC-004.
+- Depends on US-010 (clock in/out), which has no ticket record.
+- Test results, reviewer and acceptance: not provided.
 
-**Related:** US-006, US-004, DEV-SPRINT-2
+**Related:** US-011, EPIC-004, US-010
 
-### DEV-US-007 · draft · source: dev:US-007
+### DEV-US-012 · draft · source: dev:US-012
 
-The ticket for managing clients is marked delivered in commit 386ab35. This commit is shared with US-008, US-009 and US-010.
+The ticket for recovering a time entry left running is reported delivered at commit 1b0a79e. No tests, review or approval are recorded.
 
-- Ticket: US-007 Manage clients.
+- Ticket: US-012 Recover an entry left running.
 - Status: delivered.
-- Commit: 386ab355e9434eaa52df0bebc9a8a9060d456873, shared with US-008, US-009 and US-010.
-- Plan: 3 pts, backend-agent, EPIC-003.
-- Not stated in the input: implementation details, review or approval, test results, delivery date.
+- Commit: 1b0a79e33c91d798b4a33b42d060145043651d7d.
+- Planned: 3 pts, backend-agent, EPIC-004.
+- Depends on US-010 (clock in/out), which has no ticket record.
+- Test results, reviewer and acceptance: not provided.
 
-**Related:** US-007, DEV-SPRINT-2
+**Related:** US-012, EPIC-004, US-010
 
-### DEV-US-008 · draft · source: dev:US-008
+### DEV-US-013 · draft · source: dev:US-013
 
-The ticket for managing projects with an hourly bill rate is marked delivered in shared commit 386ab35.
+The weekly timesheet ticket (enter hours by day) is reported delivered at commit ac5fed5. It shares this commit with US-014.
 
-- Ticket: US-008 Manage projects with an hourly bill rate.
+- Ticket: US-013 Enter hours by day in a weekly timesheet.
 - Status: delivered.
-- Commit: 386ab355e9434eaa52df0bebc9a8a9060d456873, shared with US-007, US-009 and US-010.
-- Plan: 3 pts, backend-agent, EPIC-003.
-- Not stated in the input: implementation details, review or approval, test results, delivery date.
+- Commit: ac5fed5172327f2bb9796296aaa23d05441d5363. This is the same commit as US-014.
+- Planned: 8 pts, frontend-agent, EPIC-005.
+- Planned sub-tasks, with no individual status reported:
+  - T1 timesheet week and cell endpoints (backend-agent)
+  - T2 weekly timesheet grid (frontend-agent)
+  - T3 timesheet API test suite (qa-agent)
+- Test suite results: not provided.
 
-**Related:** US-008, US-007, DEV-SPRINT-2
+**Related:** US-013, US-013-T1, US-013-T2, US-013-T3, EPIC-005, US-014
 
-### DEV-US-009 · draft · source: dev:US-009
+### DEV-US-014 · draft · source: dev:US-014
 
-The ticket for managing tasks within a project is marked delivered in shared commit 386ab35.
+The ticket for marking entries billable or non-billable is reported delivered at commit ac5fed5. The commit is shared with the weekly timesheet ticket.
 
-- Ticket: US-009 Manage tasks within a project.
+- Ticket: US-014 Mark entries billable or non-billable.
 - Status: delivered.
-- Commit: 386ab355e9434eaa52df0bebc9a8a9060d456873, shared with US-007, US-008 and US-010.
-- Plan: 3 pts, backend-agent, EPIC-003.
-- Not stated in the input: implementation details, review or approval, test results, delivery date.
+- Commit: ac5fed5172327f2bb9796296aaa23d05441d5363. This is the same commit as US-013.
+- Planned: 2 pts, frontend-agent, EPIC-005.
+- Test results, reviewer and acceptance: not provided.
 
-**Related:** US-009, US-008, DEV-SPRINT-2
+**Related:** US-014, EPIC-005, US-013
 
-### DEV-US-010 · draft · source: dev:US-010
+### DEV-US-017 · draft · source: dev:US-017
 
-The ticket for clocking in and out against a project and task is marked delivered in shared commit 386ab35. The plan breaks this story into 3 tasks, but the run does not report them individually.
+The ticket for storing times in UTC and showing them in the user's time zone is reported delivered at commit 3295f5e. No tests, review or approval are recorded.
 
-- Ticket: US-010 Clock in and out against a project and task.
+- Ticket: US-017 Times stored in UTC and shown in my time zone.
 - Status: delivered.
-- Commit: 386ab355e9434eaa52df0bebc9a8a9060d456873, shared with US-007, US-008 and US-009.
-- Plan: 8 pts, backend-agent, EPIC-004.
-- Planned tasks (no individual status in the run):
-  - US-010-T1 Add time_entries migration (backend-agent)
-  - US-010-T2 Implement clock status, in and out endpoints (backend-agent)
-  - US-010-T3 Build clock page (frontend-agent)
-- Out of scope here: breaks (US-011) and recovery of a running entry (US-012) are separate stories with no delivery record.
-- Not stated in the input: review or approval, test results, delivery date.
+- Commit: 3295f5e1cf51a2f3bb48cf97c5f51ed8e29eb513.
+- Planned: 3 pts, backend-agent, EPIC-007.
+- Test results, reviewer and acceptance: not provided.
 
-**Related:** US-010, US-008, US-009, DEV-SPRINT-2
+**Related:** US-017, EPIC-007
 
 ### DEV-RUN-STATUS · draft · source: dev:run
 
-The development run is reported as "completed", but it lists tickets for only 5 of the 19 planned stories. The other 14 stories have no delivery record in this input. This conflict is recorded here and not resolved.
+The development run is marked completed but reports only 5 of 19 planned stories. The remaining 14 stories have no ticket record, so their state is undocumented.
 
-- Version A (run status): Development run status = completed.
-- Version B (ticket list): only US-006, US-007, US-008, US-009 and US-010 appear, all with status=delivered.
-- Stories with no ticket or status in the run:
-  - US-001, US-002, US-003, US-004, US-005
-  - US-011, US-012, US-013, US-014, US-015, US-016, US-017, US-018, US-019
-- Missing foundations: sign-in (US-001), role enforcement (US-002) and user creation (US-004) are prerequisites for the delivered features. Their status is unknown from this input.
-- Possible explanations, none confirmed by the input:
-  - the run covered only Sprint 2
-  - the ticket list is truncated
-  - the other stories were not built
-- Delivered commits:
-  - 94104b8a0ac8be3016ca7c15902ca9d2e309d9c1 (US-006)
-  - 386ab355e9434eaa52df0bebc9a8a9060d456873 (US-007 to US-010)
-- Action for a human: confirm the true delivery status of the 14 unlisted stories before downstream phases rely on them.
+- Run status: completed.
+- Delivered (5): US-011, US-012, US-013, US-014, US-017.
+- No ticket record (14): US-001, US-002, US-003, US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-015, US-016, US-018, US-019.
+- Discrepancy (both versions kept):
+  - The run says 'completed'.
+  - Ticket coverage shows only the Sprint 3 scope.
+  - The run may cover a single sprint, or other tickets may be missing from the input. This needs human confirmation.
+- Shared commit: US-013 and US-014 share commit ac5fed5.
+- Not provided: dates, approvers, test outcomes and deployment details.
 
-**Related:** US-001, US-002, US-003, US-004, US-005, US-011, US-012, US-013, US-014, US-015, US-016, US-017, US-018, US-019
+**Related:** US-001, US-002, US-003, US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-015, US-016, US-018, US-019
 <!-- sdlc:auto:end narrative -->

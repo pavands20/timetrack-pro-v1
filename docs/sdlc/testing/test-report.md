@@ -56,16 +56,26 @@ Passed: 12 · Failed: 0 · Skipped: 30 · Flaky: 0 · Total: 42
 <!-- sdlc:auto:end e2e -->
 
 <!-- sdlc:auto:start unit -->
-**Coverage:** backend 94.4% · frontend 71.1%
+**Coverage:** —
 
-**Test cases:** 0 / 173 written
+**Test cases:** — / — written
 
-**Lines written:** 0
+**Lines written:** —
 
-**Files deferred:** 0
+**Files deferred:** —
 <!-- sdlc:auto:end unit -->
 
 <!-- sdlc:auto:start dev-checks -->
+### Sprint 3
+
+| Step | Status | Ticket | Finished |
+|---|---|---|---|
+| run_checks | succeeded | — | 2026-11-09 |
+| write_tests | succeeded | US-013 | 2026-11-09 |
+| write_tests | succeeded | US-011 | 2026-11-09 |
+| write_tests | succeeded | US-017 | 2026-11-09 |
+| write_tests | succeeded | US-012 | 2026-11-09 |
+
 ### Sprint 2
 
 | Step | Status | Ticket | Finished |
