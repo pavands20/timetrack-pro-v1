@@ -3,63 +3,74 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### TEST-CHECKS-01 · draft · source: testing:run_checks
+### TEST-CHECKS-1 · draft · source: testing:run_checks
 
-Automated checks ran across the project, not tied to any ticket. Status succeeded, with 6 of 6 checks passing.
+Automated check run succeeded with all 6 checks passing. The run is not tied to a specific ticket.
 
-- Task: run_checks
+- Step: run_checks
 - Ticket: none
 - Status: succeeded
 - Result: 6/6 checks passed
-- Not stated in input: which checks were run, date, who ran them.
+- The input does not name the individual checks.
 
-### TEST-afc68c26 · draft · source: testing:write_tests:afc68c26-0a38-4f86-a51c-4c06770fcfa9
+### TEST-3ffb9b35 · draft · source: testing:write_tests:3ffb9b35-c8cd-42a1-a908-453eb66af245
 
-Three test files were written for acceptance criteria AC-015 and AC-016. The pytest backend suite (26 tests) and the Vitest AdminUsers screen suite (3 tests) pass. The Playwright end-to-end spec was written, but its specs were only listed, not run.
+Added 5 backend QA tests for US-006 covering admin user changes and the preservation of time entries. All 5 pass under backend-tests. They fill gaps for AC-015, AC-016 and NFR-014 that the existing US-006 tests did not cover.
 
-- Task: write_tests; status: succeeded
-- Scope: AC-015 and AC-016 (the input does not map these to US-* keys, so no requirement link is inferred)
-- Files added:
-  1. pytest module: 26 tests, all passing
-  2. Vitest file for the AdminUsers screen: 3 tests, passing
-  3. Playwright spec: specs listed only, NOT executed
-- Backend lint: pass
-- Frontend lint: pass
-- Frontend e2e-specs check: pass. Per the input, this check only lists the specs and does not run them.
-- Open item: there is no execution evidence for this ticket's Playwright spec. The input does not say whether it was part of the sandbox E2E run (TEST-E2E-LATEST).
+- Step: write_tests
+- Ticket: 3ffb9b35-c8cd-42a1-a908-453eb66af245
+- Status: succeeded
+- New file: backend/tests/test_admin_users_time_entries_us006_qa.py
+- Test count: 5, all passing under backend-tests
+- Coverage added:
+  - AC-016 and NFR-014: time entries and breaks are kept unchanged.
+  - AC-015: edits leave time entries and breaks untouched.
+- Not added: Vitest and Playwright tests. The agent states the existing US-006 files already cover both criteria.
 
-**Related:** afc68c26-0a38-4f86-a51c-4c06770fcfa9, AC-015, AC-016
+**Related:** US-006
 
-### TEST-4618e363 · draft · source: testing:write_tests:4618e363-2124-4018-8a57-1c0e33c31967
+### TEST-8297276d · draft · source: testing:write_tests:8297276d-0731-421c-b73b-f7bc6b612864
 
-Tests were written for this ticket, producing 2 test files. The task status is succeeded. No further details were provided.
+Test-writing task succeeded and produced 2 test files. The input does not say which requirement or feature these files cover.
 
-- Task: write_tests; status: succeeded
+- Step: write_tests
+- Ticket: 8297276d-0731-421c-b73b-f7bc6b612864
+- Status: succeeded
 - Output: 2 test file(s)
-- Not stated in input: test names, framework, number of tests, pass/fail results, or which requirements or acceptance criteria they cover.
+- Not stated in the input:
+  - File names
+  - Test counts
+  - Pass/fail results
+  - Linked requirement
 
-**Related:** 4618e363-2124-4018-8a57-1c0e33c31967
+### TEST-9c5fee6d · draft · source: testing:write_tests:9c5fee6d-098c-410d-8ab2-3e9e96f8c22d
 
-### TEST-c5c3a2f5 · draft · source: testing:write_tests:c5c3a2f5-1f26-46c7-b3b4-692d427f9646
+Test-writing task succeeded and produced 3 test files. The input does not say which requirement or feature these files cover.
 
-Tests were written for this ticket, producing 2 test files. The task status is succeeded. No further details were provided.
+- Step: write_tests
+- Ticket: 9c5fee6d-098c-410d-8ab2-3e9e96f8c22d
+- Status: succeeded
+- Output: 3 test file(s)
+- Not stated in the input:
+  - File names
+  - Test counts
+  - Pass/fail results
+  - Linked requirement
 
-- Task: write_tests; status: succeeded
-- Output: 2 test file(s)
-- Not stated in input: test names, framework, number of tests, pass/fail results, or which requirements or acceptance criteria they cover.
+### TEST-E2E-LATEST · draft · source: testing:e2e
 
-**Related:** c5c3a2f5-1f26-46c7-b3b4-692d427f9646
-
-### TEST-E2E-LATEST · draft · source: testing:e2e:latest
-
-The latest E2E run against the sandbox target reports a status of 'passed', but only 9 of 24 tests passed. These two values conflict, so both are recorded here. A human should review this before treating E2E as green.
+The latest end-to-end run against the sandbox target is reported as 'passed', yet only 12 of 42 tests passed. Both values are recorded because they conflict. The 30 tests that did not pass are not identified.
 
 - Target: sandbox
-- Reported status: passed
-- Reported result: 9/24 passed
-- CONFLICT: the 'passed' status disagrees with the 9/24 count. 15 of 24 tests are not reported as passing, and the input does not say whether they failed, were skipped, or errored.
-- Not stated in input: which specs were included, which failed, the run date, or whether the AC-015/AC-016 Playwright spec (TEST-afc68c26) was part of this run.
-- No requirement coverage can be traced from this input.
-
-**Related:** TEST-afc68c26
+- Reported overall status: passed
+- Reported result: 12/42 passed (about 29%)
+- CONFLICT:
+  - The overall status says 'passed'.
+  - The count shows 30 of 42 tests did not pass.
+  - The input does not explain this discrepancy. Possible reasons, such as skipped versus failed tests or a pass threshold, are not stated.
+- Not stated in the input:
+  - Which tests failed or were skipped
+  - Which requirements they cover
+  - Run date
+- Needs human review before treating E2E as green.
 <!-- sdlc:auto:end narrative -->
